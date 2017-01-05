@@ -96,22 +96,14 @@ namespace BerldChess.View
             }
 
             _fieldSize = _boardDimension / (double)_board.Length;
-            _pieceDimension = Round(_fieldSize * 0.85);
+            _pieceDimension = Round(_fieldSize * 1.05);
 
             if (_wasResized)
             {
-                _scaledPieceImages[0] = ResizeImage(Resources.PieceK, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[1] = ResizeImage(Resources.PieceQ, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[2] = ResizeImage(Resources.PieceR, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[3] = ResizeImage(Resources.PieceB, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[4] = ResizeImage(Resources.PieceN, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[5] = ResizeImage(Resources.PieceP, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[6] = ResizeImage(Resources.PieceKs, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[7] = ResizeImage(Resources.PieceQs, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[8] = ResizeImage(Resources.PieceRs, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[9] = ResizeImage(Resources.PieceBs, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[10] = ResizeImage(Resources.PieceNs, _pieceDimension, _pieceDimension);
-                _scaledPieceImages[11] = ResizeImage(Resources.PiecePs, _pieceDimension, _pieceDimension);
+                for (int i = 0; i < _scaledPieceImages.Length; i++)
+                {
+                    _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], _pieceDimension, _pieceDimension);
+                }
 
                 _wasResized = false;
             }
@@ -402,15 +394,17 @@ namespace BerldChess.View
         {
             Point[] index = new Point[2];
 
+            double offSet = 0.49;
+
             if (!IsFlipped)
             {
-                index[0] = new Point(Round(((move[0] - 97) + 0.5) * _fieldSize) + _boardLocation.X, Round((Invert(Game.BoardHeight, int.Parse(move[1].ToString())) + 0.5) * _fieldSize) + _boardLocation.Y);
-                index[1] = new Point(Round(((move[2] - 97) + 0.5) * _fieldSize) + _boardLocation.X, Round((Invert(Game.BoardHeight, int.Parse(move[3].ToString())) + 0.5) * _fieldSize) + _boardLocation.Y);
+                index[0] = new Point(Round(((move[0] - 97) + offSet) * _fieldSize) + _boardLocation.X, Round((Invert(Game.BoardHeight, int.Parse(move[1].ToString())) + offSet) * _fieldSize) + _boardLocation.Y);
+                index[1] = new Point(Round(((move[2] - 97) + offSet) * _fieldSize) + _boardLocation.X, Round((Invert(Game.BoardHeight, int.Parse(move[3].ToString())) + offSet) * _fieldSize) + _boardLocation.Y);
             }
             else
             {
-                index[0] = new Point(Round((Invert(Game.BoardHeight - 1, move[0] - 97) + 0.5) * _fieldSize) + _boardLocation.X, Round((int.Parse(move[1].ToString()) - 1 + 0.5) * _fieldSize) + _boardLocation.Y);
-                index[1] = new Point(Round((Invert(Game.BoardHeight - 1, move[2] - 97) + 0.5) * _fieldSize) + _boardLocation.X, Round((int.Parse(move[3].ToString()) - 1 + 0.5) * _fieldSize) + _boardLocation.Y);
+                index[0] = new Point(Round((Invert(Game.BoardHeight - 1, move[0] - 97) + offSet) * _fieldSize) + _boardLocation.X, Round((int.Parse(move[1].ToString()) - 1 + offSet) * _fieldSize) + _boardLocation.Y);
+                index[1] = new Point(Round((Invert(Game.BoardHeight - 1, move[2] - 97) + offSet) * _fieldSize) + _boardLocation.X, Round((int.Parse(move[3].ToString()) - 1 + offSet) * _fieldSize) + _boardLocation.Y);
             }
 
             return index;
@@ -434,17 +428,17 @@ namespace BerldChess.View
                 case 'q':
                     return 7;
                 case 'R':
-                    return 2;
-                case 'r':
-                    return 8;
-                case 'B':
-                    return 3;
-                case 'b':
-                    return 9;
-                case 'N':
                     return 4;
-                case 'n':
+                case 'r':
                     return 10;
+                case 'B':
+                    return 2;
+                case 'b':
+                    return 8;
+                case 'N':
+                    return 3;
+                case 'n':
+                    return 9;
                 case 'P':
                     return 5;
                 case 'p':

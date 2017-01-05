@@ -89,6 +89,7 @@
     </Compile>
     <Compile Include="Source\EntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\View\PieceImageProvider.cs" />
     <Compile Include="Source\View\PromotionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -139,42 +140,6 @@
     <None Include="Resources\Icons\PawnRush.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceB.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceK.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceN.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceP.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceQ.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceR.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceBs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceKs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceNs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PiecePs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceQs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\PieceRs.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -190,6 +155,9 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Pieces\ChessPiecesSprite.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

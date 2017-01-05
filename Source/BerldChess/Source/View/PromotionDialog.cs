@@ -39,20 +39,20 @@ namespace BerldChess.View
             switch (owner)
             {
                 case ChessPlayer.Black:
-
-                    _buttonQueen.BackgroundImage = Resources.PieceQs;
-                    _buttonRook.BackgroundImage = Resources.PieceRs;
-                    _buttonBishop.BackgroundImage = Resources.PieceBs;
-                    _buttonKnight.BackgroundImage = Resources.PieceNs;
-                    break;
-
-                case ChessPlayer.None:
-                case ChessPlayer.White:
-
-                    _buttonQueen.BackgroundImage = Resources.PieceQ;
-                    _buttonRook.BackgroundImage = Resources.PieceR;
-                    _buttonBishop.BackgroundImage = Resources.PieceB;
-                    _buttonKnight.BackgroundImage = Resources.PieceN;
+                     
+                    _buttonQueen.BackgroundImage =  PieceImageProvider.GetFromFEN('q');
+                    _buttonRook.BackgroundImage =   PieceImageProvider.GetFromFEN('r');
+                    _buttonBishop.BackgroundImage = PieceImageProvider.GetFromFEN('b');
+                    _buttonKnight.BackgroundImage = PieceImageProvider.GetFromFEN('n');
+                    break;                          
+                                                    
+                case ChessPlayer.None:              
+                case ChessPlayer.White:             
+                                                    
+                    _buttonQueen.BackgroundImage =  PieceImageProvider.GetFromFEN('Q');
+                    _buttonRook.BackgroundImage =   PieceImageProvider.GetFromFEN('R');
+                    _buttonBishop.BackgroundImage = PieceImageProvider.GetFromFEN('B');
+                    _buttonKnight.BackgroundImage = PieceImageProvider.GetFromFEN('N');
                     break;
             }
         }

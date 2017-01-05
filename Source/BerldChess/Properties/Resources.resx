@@ -118,43 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ChessPiecesSprite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Images\Pieces\ChessPiecesSprite.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="PawnRush" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons\PawnRush.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceB" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceB.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceBs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceBs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceK" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceK.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceKs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceKs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceN" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceN.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceNs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceNs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceP" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PiecePs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PiecePs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceQ" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceQ.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceQs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceQs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceR" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceR.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PieceRs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\PieceRs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

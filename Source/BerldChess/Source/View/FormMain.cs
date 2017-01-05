@@ -250,7 +250,7 @@ namespace BerldChess.View
 
                         if (_chessPanel.Arrows.Count < multiPV)
                         {
-                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 2, GetReferenceColor(centipawn, _multiPV1Reference)));
+                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 1.6, GetReferenceColor(centipawn, _multiPV1Reference)));
                         }
                         else
                         {
