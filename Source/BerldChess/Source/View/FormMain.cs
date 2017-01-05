@@ -355,8 +355,7 @@ namespace BerldChess.View
             _chessPanel.HighlighedSquares.Clear();
             _vm.NavIndex = 0;
             _chessPanel.Invalidate();
-            _vm.Engine.Query("ucinewgame");
-            _vm.Engine.RequestStop();
+            OnEngineStopped();
         }
 
         private void OnButtonBackClick(object sender, EventArgs e)
@@ -461,7 +460,7 @@ namespace BerldChess.View
             _vm.NavIndex = 0;
             _chessPanel.Invalidate();
             _vm.Engine.Query("ucinewgame");
-            _vm.Engine.RequestStop();
+            OnEngineStopped();
         }
 
         #endregion
