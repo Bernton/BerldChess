@@ -337,6 +337,8 @@ namespace BerldChess.View
 
         private void OnButtonLoadFenClick(object sender, EventArgs e)
         {
+            bool wasFinished = IsFinishedPosition();
+
             try
             {
                 _vm.Game = new ChessGame(_textBoxFen.Text);
@@ -354,8 +356,18 @@ namespace BerldChess.View
             _vm.PositionHistory.Add(new ChessPosition(_textBoxFen.Text));
             _chessPanel.HighlighedSquares.Clear();
             _vm.NavIndex = 0;
+
+            if (wasFinished)
+            {
+                OnEngineStopped();
+            }
+            else
+            {
+                _vm.Engine.RequestStop();
+            }
+
             _chessPanel.Invalidate();
-            OnEngineStopped();
+
         }
 
         private void OnButtonBackClick(object sender, EventArgs e)
@@ -451,6 +463,8 @@ namespace BerldChess.View
 
         private void OnButtonNewClick(object sender, EventArgs e)
         {
+            bool wasFinished = IsFinishedPosition();
+
             _vm.Game = new ChessGame();
 
             _chessPanel.Game = _vm.Game;
@@ -458,9 +472,19 @@ namespace BerldChess.View
             _chessPanel.HighlighedSquares.Clear();
             _vm.PositionHistory.Add(new ChessPosition(_textBoxFen.Text));
             _vm.NavIndex = 0;
-            _chessPanel.Invalidate();
             _vm.Engine.Query("ucinewgame");
-            OnEngineStopped();
+
+            if (wasFinished)
+            {
+                OnEngineStopped();
+            }
+            else
+            {
+                _vm.Engine.RequestStop();
+            }
+
+            _chessPanel.Invalidate();
+
         }
 
         #endregion
