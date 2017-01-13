@@ -92,6 +92,7 @@ namespace BerldChess.View
 
         private void OnEngineStopped()
         {
+            EmptyDataGrid();
             _chessPanel.Arrows.Clear();
             _chessPanel.Invalidate();
 
@@ -206,7 +207,7 @@ namespace BerldChess.View
                     {
                         if (isMate)
                         {
-                            if (mateNumber > 0)
+                            if (mateNumber > 0 || _vm.Game.WhoseTurn == ChessPlayer.Black)
                             {
                                 _labelCPStatus.Text = $"Mate in {mateNumber}";
                                 _labelCPStatus.ForeColor = Color.Green;
@@ -219,20 +220,19 @@ namespace BerldChess.View
                         }
                         else
                         {
-                            if (centipawn > 100)
+                            double eval;
+
+                            if (_vm.Game.WhoseTurn == ChessPlayer.Black)
                             {
-                                _labelCPStatus.ForeColor = Color.Green;
-                            }
-                            else if (centipawn < -100)
-                            {
-                                _labelCPStatus.ForeColor = Color.Red;
+                                eval = (-(double)centipawn / 100.0);
                             }
                             else
                             {
-                                _labelCPStatus.ForeColor = Color.Black;
+                                eval = ((double)centipawn / 100.0);
                             }
 
-                            _labelCPStatus.Text = ((double)centipawn / 100).ToString("0.##");
+                            _labelCPStatus.Text = eval.ToString("+0.##;-0.##");
+                            _labelCPStatus.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
                         }
                     }
 
@@ -278,6 +278,25 @@ namespace BerldChess.View
             }
         }
 
+        private Color CalculateEvaluationColor(double evaluation)
+        {
+            double range = 3;
+
+            if (evaluation > range)
+            {
+                evaluation = range;
+            }
+            else if (evaluation < -range)
+            {
+                evaluation = -range;
+            }
+
+            double fraction = evaluation / range * 0.5;
+            double x = 0.5 + fraction;
+
+            return Color.FromArgb((int)(x * 255), (int)((1 - x) * 255), 0);
+        }
+
         private void OnPieceMoved(object sender, FigureMovedEventArgs e)
         {
             BoardPosition startPosition = new BoardPosition((ChessFile)e.Position.X, Invert(e.Position.Y - 1, 7));
@@ -321,11 +340,11 @@ namespace BerldChess.View
 
                 _vm.NavIndex++;
 
-                if(_vm.Game.IsCheckmated(ChessPlayer.Black) || _vm.Game.IsCheckmated(ChessPlayer.White))
+                if (_vm.Game.IsCheckmated(ChessPlayer.Black) || _vm.Game.IsCheckmated(ChessPlayer.White))
                 {
                     _labelCPStatus.Text = "Checkmate";
                 }
-                else if(_vm.Game.IsStalemated(ChessPlayer.Black) || _vm.Game.IsStalemated(ChessPlayer.White))
+                else if (_vm.Game.IsStalemated(ChessPlayer.Black) || _vm.Game.IsStalemated(ChessPlayer.White))
                 {
                     _labelCPStatus.Text = "Stalemate";
                 }
@@ -346,16 +365,27 @@ namespace BerldChess.View
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.Message, "Berld Chess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
                 Debug.WriteLine(ex.ToString());
                 return;
             }
 
             _chessPanel.Game = _vm.Game;
             _vm.PositionHistory.Clear();
-           
+
             _vm.PositionHistory.Add(new ChessPosition(_textBoxFen.Text));
             _chessPanel.HighlighedSquares.Clear();
             _vm.NavIndex = 0;
+
+            if (_checkBoxLocalMode.Checked)
+            {
+                _chessPanel.IsFlipped = !(_vm.Game.WhoseTurn == ChessPlayer.White);
+            }
+            else
+            {
+                _chessPanel.IsFlipped = _checkBoxFlipped.Checked;
+            }
 
             if (wasFinished)
             {
@@ -451,7 +481,7 @@ namespace BerldChess.View
 
             if (_checkBoxLocalMode.Checked)
             {
-                _chessPanel.IsFlipped = _vm.NavIndex % 2 != 0;
+                _chessPanel.IsFlipped = !(_vm.Game.WhoseTurn == ChessPlayer.White);
             }
             else
             {
@@ -473,6 +503,15 @@ namespace BerldChess.View
             _vm.PositionHistory.Add(new ChessPosition(_textBoxFen.Text));
             _vm.NavIndex = 0;
             _vm.Engine.Query("ucinewgame");
+
+            if (_checkBoxLocalMode.Checked)
+            {
+                _chessPanel.IsFlipped = !(_vm.Game.WhoseTurn == ChessPlayer.White);
+            }
+            else
+            {
+                _chessPanel.IsFlipped = _checkBoxFlipped.Checked;
+            }
 
             if (wasFinished)
             {

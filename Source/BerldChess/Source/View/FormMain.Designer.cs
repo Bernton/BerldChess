@@ -111,7 +111,7 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 405);
-            this._splitContainerInner.SplitterDistance = 632;
+            this._splitContainerInner.SplitterDistance = 596;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
@@ -119,7 +119,7 @@
             // _buttonNew
             // 
             this._buttonNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonNew.Location = new System.Drawing.Point(118, 66);
+            this._buttonNew.Location = new System.Drawing.Point(156, 66);
             this._buttonNew.Name = "_buttonNew";
             this._buttonNew.Size = new System.Drawing.Size(75, 23);
             this._buttonNew.TabIndex = 2;
@@ -141,7 +141,7 @@
             this._checkBoxLocalMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxLocalMode.AutoSize = true;
             this._checkBoxLocalMode.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxLocalMode.Location = new System.Drawing.Point(97, 326);
+            this._checkBoxLocalMode.Location = new System.Drawing.Point(135, 326);
             this._checkBoxLocalMode.Name = "_checkBoxLocalMode";
             this._checkBoxLocalMode.Size = new System.Drawing.Size(81, 17);
             this._checkBoxLocalMode.TabIndex = 9;
@@ -164,7 +164,7 @@
             this._checkBoxHideOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxHideOutput.AutoSize = true;
             this._checkBoxHideOutput.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideOutput.Location = new System.Drawing.Point(97, 280);
+            this._checkBoxHideOutput.Location = new System.Drawing.Point(135, 280);
             this._checkBoxHideOutput.Name = "_checkBoxHideOutput";
             this._checkBoxHideOutput.Size = new System.Drawing.Size(83, 17);
             this._checkBoxHideOutput.TabIndex = 7;
@@ -177,7 +177,7 @@
             this._checkBoxHideArrows.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxHideArrows.AutoSize = true;
             this._checkBoxHideArrows.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideArrows.Location = new System.Drawing.Point(97, 303);
+            this._checkBoxHideArrows.Location = new System.Drawing.Point(135, 303);
             this._checkBoxHideArrows.Name = "_checkBoxHideArrows";
             this._checkBoxHideArrows.Size = new System.Drawing.Size(83, 17);
             this._checkBoxHideArrows.TabIndex = 8;
@@ -190,7 +190,7 @@
             this._checkBoxFlipped.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxFlipped.AutoSize = true;
             this._checkBoxFlipped.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxFlipped.Location = new System.Drawing.Point(97, 349);
+            this._checkBoxFlipped.Location = new System.Drawing.Point(135, 349);
             this._checkBoxFlipped.Name = "_checkBoxFlipped";
             this._checkBoxFlipped.Size = new System.Drawing.Size(100, 17);
             this._checkBoxFlipped.TabIndex = 10;
@@ -203,7 +203,7 @@
             this._checkBoxGridBorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxGridBorder.AutoSize = true;
             this._checkBoxGridBorder.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxGridBorder.Location = new System.Drawing.Point(97, 372);
+            this._checkBoxGridBorder.Location = new System.Drawing.Point(135, 372);
             this._checkBoxGridBorder.Name = "_checkBoxGridBorder";
             this._checkBoxGridBorder.Size = new System.Drawing.Size(79, 17);
             this._checkBoxGridBorder.TabIndex = 11;
@@ -254,7 +254,7 @@
             // _buttonLoadFen
             // 
             this._buttonLoadFen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonLoadFen.Location = new System.Drawing.Point(118, 37);
+            this._buttonLoadFen.Location = new System.Drawing.Point(156, 37);
             this._buttonLoadFen.Name = "_buttonLoadFen";
             this._buttonLoadFen.Size = new System.Drawing.Size(75, 23);
             this._buttonLoadFen.TabIndex = 1;
@@ -277,7 +277,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this._textBoxFen.Location = new System.Drawing.Point(38, 11);
             this._textBoxFen.Name = "_textBoxFen";
-            this._textBoxFen.Size = new System.Drawing.Size(153, 20);
+            this._textBoxFen.Size = new System.Drawing.Size(191, 20);
             this._textBoxFen.TabIndex = 0;
             this._textBoxFen.WordWrap = false;
             // 

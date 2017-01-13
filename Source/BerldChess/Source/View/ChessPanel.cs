@@ -127,16 +127,8 @@ namespace BerldChess.View
             Color evenSquare;
             Color oddSquare;
 
-            if (!IsFlipped)
-            {
-                evenSquare = Color.FromArgb(220, 220, 220);
-                oddSquare = Color.FromArgb(171, 171, 171);
-            }
-            else
-            {
-                evenSquare = Color.FromArgb(171, 171, 171);
-                oddSquare = Color.FromArgb(220, 220, 220);
-            }
+            evenSquare = Color.FromArgb(220, 220, 220);
+            oddSquare = Color.FromArgb(171, 171, 171);
 
             for (int y = 0; y < Game.BoardHeight; y++)
             {
@@ -300,7 +292,7 @@ namespace BerldChess.View
 
             Point pieceIndex;
 
-            if(!IsFlipped)
+            if (!IsFlipped)
             {
                 pieceIndex = new Point(relativeBoardX, relativeBoardY);
             }
@@ -333,7 +325,7 @@ namespace BerldChess.View
                 int relativeBoardX;
                 int relativeBoardY;
 
-                if(!IsFlipped)
+                if (!IsFlipped)
                 {
                     relativeBoardX = absoluteBoardX / (int)_fieldSize;
                     relativeBoardY = absoluteBoardY / (int)_fieldSize;
