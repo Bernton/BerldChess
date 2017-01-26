@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
@@ -21,7 +22,7 @@ namespace BerldChess.View
         private Point _boardLocation;
         private Point _movingPieceIndex = new Point(-1, -1);
         private Point _movingPoint = new Point(-1, -1);
-        private Point _movingOffset = new Point(-1, -1);
+        //private Point _movingOffset = new Point(-1, -1);
         private List<Arrow> _arrows = new List<Arrow>();
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
@@ -81,8 +82,7 @@ namespace BerldChess.View
 
 
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+
 
             if (Width > Height)
             {
@@ -127,32 +127,15 @@ namespace BerldChess.View
             Color evenSquare;
             Color oddSquare;
 
-            evenSquare = Color.FromArgb(220, 220, 220);
-            oddSquare = Color.FromArgb(171, 171, 171);
+            evenSquare = Color.FromArgb(222, 227, 230);
+            oddSquare = Color.FromArgb(140, 162, 173);
+
+            g.SmoothingMode = SmoothingMode.Default;
 
             for (int y = 0; y < Game.BoardHeight; y++)
             {
                 for (int x = 0; x < Game.BoardHeight; x++)
                 {
-                    bool isHighlighted = false;
-
-                    for (int i = 0; i < HighlighedSquares.Count; i++)
-                    {
-                        if (HighlighedSquares[i].X == x && HighlighedSquares[i].Y == y && !IsFlipped ||
-                            (HighlighedSquares[i].X == Invert(Game.BoardHeight - 1, x) && (HighlighedSquares[i].Y == Invert(Game.BoardHeight - 1, y) && IsFlipped)))
-                        {
-                            g.FillRectangle(new SolidBrush(Color.Yellow), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
-                            g.DrawRectangle(Pens.Black, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x], xLinePositions[y + 1] - xLinePositions[y]);
-
-                            isHighlighted = true;
-                            continue;
-                        }
-                    }
-
-                    if (isHighlighted)
-                    {
-                        continue;
-                    }
 
                     if (y % 2 == 1)
                     {
@@ -172,6 +155,28 @@ namespace BerldChess.View
                     }
 
                     g.FillRectangle(new SolidBrush(oddSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
+                }
+            }
+
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            for (int y = 0; y < Game.BoardHeight; y++)
+            {
+                for (int x = 0; x < Game.BoardHeight; x++)
+                {
+                    for (int i = 0; i < HighlighedSquares.Count; i++)
+                    {
+                        if (HighlighedSquares[i].X == x && HighlighedSquares[i].Y == y && !IsFlipped ||
+                            (HighlighedSquares[i].X == Invert(Game.BoardHeight - 1, x) && (HighlighedSquares[i].Y == Invert(Game.BoardHeight - 1, y) && IsFlipped)))
+                        {
+                            g.FillRectangle(new SolidBrush(Color.Yellow), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x], xLinePositions[y + 1] - xLinePositions[y]);
+
+                            if (!DisplayGridBorders)
+                            {
+                                g.DrawRectangle(Pens.Black, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x], xLinePositions[y + 1] - xLinePositions[y]);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -221,17 +226,31 @@ namespace BerldChess.View
             {
                 bool moving = _movingPieceIndex.X != -1 && _board[_movingPieceIndex.Y][_movingPieceIndex.X] != null;
 
-                for (int i = _arrows.Count - 1; i >= 0; i--)
+
+                ArrowDrawInfo[] drawInfo = new ArrowDrawInfo[_arrows.Count];
+
+                Point[][] arrowPositions = new Point[_arrows.Count][];
+                int[] arrowDistances = new int[_arrows.Count];
+
+                for (int i = 0; i < _arrows.Count; i++)
                 {
-                    Pen arrowPen = new Pen(Color.Black, Round(_arrows[i].ThicknessPercent / 100.0 * _boardDimension));
-                    arrowPen.Brush = new SolidBrush(_arrows[i].Color);
+                    drawInfo[i] = new ArrowDrawInfo();
+                    drawInfo[i].Arrow = _arrows[i];
+                    drawInfo[i].Positions = GetAbsPositionsFromMoveString(_arrows[i].Move);
+                }
+
+                drawInfo = drawInfo.OrderBy(c => c.Length).ToArray();
+
+                for (int i = drawInfo.Length - 1; i >= 0; i--)
+                {
+                    Pen arrowPen = new Pen(Color.Black, Round(drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension));
+                    arrowPen.Brush = new SolidBrush(drawInfo[i].Arrow.Color);
                     arrowPen.EndCap = LineCap.ArrowAnchor;
                     arrowPen.StartCap = LineCap.RoundAnchor;
-                    Point[] absPositions = GetAbsPositionsFromMoveString(_arrows[i].Move);
 
                     if (moving)
                     {
-                        Point relArrowStartPos = GetRelPositionsFromMoveString(_arrows[i].Move)[0];
+                        Point relArrowStartPos = GetRelPositionsFromMoveString(drawInfo[i].Arrow.Move)[0];
 
                         if (relArrowStartPos.X != _movingPieceIndex.X || relArrowStartPos.Y != _movingPieceIndex.Y)
                         {
@@ -239,7 +258,7 @@ namespace BerldChess.View
                         }
                     }
 
-                    g.DrawLine(arrowPen, absPositions[0], absPositions[1]);
+                    g.DrawLine(arrowPen, drawInfo[i].Positions[0], drawInfo[i].Positions[1]);
                 }
             }
 
@@ -306,8 +325,9 @@ namespace BerldChess.View
                 return;
             }
 
-            _movingPoint = new Point(Round(relativeBoardX * _fieldSize + _boardLocation.X + _fieldSize / 2.0 + (_fieldSize - _pieceDimension) / 2.0), Round(relativeBoardY * _fieldSize + _boardLocation.Y + _fieldSize / 2.0 + (_fieldSize - _pieceDimension) / 2.0));
-            _movingOffset = new Point(_movingPoint.X - e.X, _movingPoint.Y - e.Y);
+            //_movingPoint = new Point(Round(relativeBoardX * _fieldSize + _boardLocation.X + _fieldSize / 2.0 + (_fieldSize - _pieceDimension) / 2.0), Round(relativeBoardY * _fieldSize + _boardLocation.Y + _fieldSize / 2.0 + (_fieldSize - _pieceDimension) / 2.0));
+            _movingPoint = new Point(e.X, e.Y);
+            //_movingOffset = new Point(_movingPoint.X - e.X, _movingPoint.Y - e.Y);
             _movingPieceIndex = pieceIndex;
 
             Invalidate();
@@ -319,8 +339,8 @@ namespace BerldChess.View
 
             if (_movingPieceIndex.X != -1)
             {
-                int absoluteBoardX = e.X - _boardLocation.X + _movingOffset.X;
-                int absoluteBoardY = e.Y - _boardLocation.Y + _movingOffset.Y;
+                int absoluteBoardX = e.X - _boardLocation.X; //+ _movingOffset.X;
+                int absoluteBoardY = e.Y - _boardLocation.Y; //+ _movingOffset.Y;
 
                 int relativeBoardX;
                 int relativeBoardY;
@@ -343,7 +363,12 @@ namespace BerldChess.View
                     return;
                 }
 
-                PieceMoved?.Invoke(this, new FigureMovedEventArgs(_movingPieceIndex, new Point(relativeBoardX, relativeBoardY)));
+                Point destination = new Point(relativeBoardX, relativeBoardY);
+
+                if (!_movingPieceIndex.Equals(destination))
+                {
+                    PieceMoved?.Invoke(this, new FigureMovedEventArgs(_movingPieceIndex, destination));
+                }
 
                 _movingPieceIndex = new Point(-1, -1);
                 Invalidate();
@@ -356,7 +381,7 @@ namespace BerldChess.View
 
             if (_movingPieceIndex.X != -1)
             {
-                _movingPoint = new Point(e.X + _movingOffset.X, e.Y + _movingOffset.Y);
+                _movingPoint = new Point(e.X /*+ _movingOffset.X*/, e.Y /*+ _movingOffset.Y*/);
                 Invalidate();
             }
         }
@@ -382,7 +407,7 @@ namespace BerldChess.View
             return index;
         }
 
-        private Point[] GetAbsPositionsFromMoveString(string move)
+        public Point[] GetAbsPositionsFromMoveString(string move)
         {
             Point[] index = new Point[2];
 

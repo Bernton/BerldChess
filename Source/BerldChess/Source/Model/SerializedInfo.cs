@@ -31,8 +31,61 @@ namespace BerldChess.Model
         private bool _boardFlipped;
         private bool _displayGridBorder;
         private bool _isMaximized;
+        private bool _cheatMode;
+        private bool _sound;
+        private int _engineTime;
         private Rectangle _bounds;
+        private int _multiPV = 250;
 
+        public bool Sound
+        {
+            get
+            {
+                return _sound;
+            }
+            set
+            {
+                _sound = value;
+            }
+        }
+
+        public int MultiPV
+        {
+            get
+            {
+                return _multiPV;
+            }
+            set
+            {
+                _multiPV = value;
+            }
+        }
+
+        public bool CheatMode
+        {
+            get
+            {
+                return _cheatMode;
+            }
+
+            set
+            {
+                _cheatMode = value;
+            }
+        }
+
+        public int EngineTime
+        {
+            get
+            {
+                return _engineTime;
+            }
+
+            set
+            {
+                _engineTime = value;
+            }
+        }
 
         public bool LocalMode
         {

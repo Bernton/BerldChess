@@ -10,7 +10,6 @@ namespace BerldChess.ViewModel
     {
         #region Fields
 
-        public const int MultiPV = 200;
         public const string EngineArgsFN = "engineArgs.txt";
         public const string ConfigFileName = "config.txt";
 
@@ -36,7 +35,6 @@ namespace BerldChess.ViewModel
             NavIndex = 0;
             PositionHistory = new List<ChessPosition>();
             Engine = new Engine("engine.exe");
-            Engine.Query($"setoption name MultiPV value {MultiPV}");
 
             if (File.Exists(EngineArgsFN))
             {

@@ -31,6 +31,14 @@
             this.components = new System.ComponentModel.Container();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
             this._splitContainerInner = new System.Windows.Forms.SplitContainer();
+            this._buttonAutoPlay = new System.Windows.Forms.Button();
+            this._buttonApply = new System.Windows.Forms.Button();
+            this._labelMultiPV = new System.Windows.Forms.Label();
+            this._textBoxMultiPV = new System.Windows.Forms.TextBox();
+            this._labelComputerTime = new System.Windows.Forms.Label();
+            this._textBoxEngineTime = new System.Windows.Forms.TextBox();
+            this._checkBoxCheatMode = new System.Windows.Forms.CheckBox();
+            this._buttonComputerMove = new System.Windows.Forms.Button();
             this._buttonNew = new System.Windows.Forms.Button();
             this._labelEvaluation = new System.Windows.Forms.Label();
             this._checkBoxLocalMode = new System.Windows.Forms.CheckBox();
@@ -47,7 +55,9 @@
             this._labelFEN = new System.Windows.Forms.Label();
             this._textBoxFen = new System.Windows.Forms.TextBox();
             this._dataGridView = new System.Windows.Forms.DataGridView();
-            this._arrowInvalidateTimer = new System.Windows.Forms.Timer(this.components);
+            this._slowTimer = new System.Windows.Forms.Timer(this.components);
+            this._engineTimer = new System.Windows.Forms.Timer(this.components);
+            this._checkBoxSound = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
@@ -94,6 +104,15 @@
             // 
             // _splitContainerInner.Panel2
             // 
+            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxSound);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonAutoPlay);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonApply);
+            this._splitContainerInner.Panel2.Controls.Add(this._labelMultiPV);
+            this._splitContainerInner.Panel2.Controls.Add(this._textBoxMultiPV);
+            this._splitContainerInner.Panel2.Controls.Add(this._labelComputerTime);
+            this._splitContainerInner.Panel2.Controls.Add(this._textBoxEngineTime);
+            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxCheatMode);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonComputerMove);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonNew);
             this._splitContainerInner.Panel2.Controls.Add(this._labelEvaluation);
             this._splitContainerInner.Panel2.Controls.Add(this._checkBoxLocalMode);
@@ -111,15 +130,102 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 405);
-            this._splitContainerInner.SplitterDistance = 596;
+            this._splitContainerInner.SplitterDistance = 603;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
             // 
+            // _buttonAutoPlay
+            // 
+            this._buttonAutoPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonAutoPlay.Location = new System.Drawing.Point(106, 95);
+            this._buttonAutoPlay.Name = "_buttonAutoPlay";
+            this._buttonAutoPlay.Size = new System.Drawing.Size(20, 23);
+            this._buttonAutoPlay.TabIndex = 21;
+            this._buttonAutoPlay.Text = "A";
+            this._buttonAutoPlay.UseVisualStyleBackColor = true;
+            this._buttonAutoPlay.Click += new System.EventHandler(this.OnButtonAutoPlayClick);
+            // 
+            // _buttonApply
+            // 
+            this._buttonApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonApply.Location = new System.Drawing.Point(159, 220);
+            this._buttonApply.Name = "_buttonApply";
+            this._buttonApply.Size = new System.Drawing.Size(59, 23);
+            this._buttonApply.TabIndex = 20;
+            this._buttonApply.Text = "Apply";
+            this._buttonApply.UseVisualStyleBackColor = true;
+            this._buttonApply.Click += new System.EventHandler(this.OnButtonApplyClick);
+            // 
+            // _labelMultiPV
+            // 
+            this._labelMultiPV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._labelMultiPV.AutoSize = true;
+            this._labelMultiPV.Location = new System.Drawing.Point(167, 180);
+            this._labelMultiPV.Name = "_labelMultiPV";
+            this._labelMultiPV.Size = new System.Drawing.Size(46, 13);
+            this._labelMultiPV.TabIndex = 19;
+            this._labelMultiPV.Text = "Multi PV";
+            // 
+            // _textBoxMultiPV
+            // 
+            this._textBoxMultiPV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._textBoxMultiPV.Location = new System.Drawing.Point(158, 196);
+            this._textBoxMultiPV.Name = "_textBoxMultiPV";
+            this._textBoxMultiPV.Size = new System.Drawing.Size(59, 20);
+            this._textBoxMultiPV.TabIndex = 18;
+            this._textBoxMultiPV.Text = "250";
+            this._textBoxMultiPV.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // _labelComputerTime
+            // 
+            this._labelComputerTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._labelComputerTime.AutoSize = true;
+            this._labelComputerTime.Location = new System.Drawing.Point(139, 134);
+            this._labelComputerTime.Name = "_labelComputerTime";
+            this._labelComputerTime.Size = new System.Drawing.Size(74, 13);
+            this._labelComputerTime.TabIndex = 17;
+            this._labelComputerTime.Text = "Computer time";
+            // 
+            // _textBoxEngineTime
+            // 
+            this._textBoxEngineTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._textBoxEngineTime.Location = new System.Drawing.Point(142, 150);
+            this._textBoxEngineTime.Name = "_textBoxEngineTime";
+            this._textBoxEngineTime.Size = new System.Drawing.Size(75, 20);
+            this._textBoxEngineTime.TabIndex = 16;
+            this._textBoxEngineTime.Text = "300";
+            this._textBoxEngineTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this._textBoxEngineTime.TextChanged += new System.EventHandler(this.OnTextBoxEngineTimeTextChanged);
+            // 
+            // _checkBoxCheatMode
+            // 
+            this._checkBoxCheatMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this._checkBoxCheatMode.AutoSize = true;
+            this._checkBoxCheatMode.BackColor = System.Drawing.SystemColors.Control;
+            this._checkBoxCheatMode.Location = new System.Drawing.Point(126, 278);
+            this._checkBoxCheatMode.Name = "_checkBoxCheatMode";
+            this._checkBoxCheatMode.Size = new System.Drawing.Size(84, 17);
+            this._checkBoxCheatMode.TabIndex = 15;
+            this._checkBoxCheatMode.Text = "Cheat Mode";
+            this._checkBoxCheatMode.UseVisualStyleBackColor = false;
+            this._checkBoxCheatMode.CheckedChanged += new System.EventHandler(this.OnCheckBoxCheatModeCheckedChanged);
+            // 
+            // _buttonComputerMove
+            // 
+            this._buttonComputerMove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonComputerMove.Location = new System.Drawing.Point(128, 95);
+            this._buttonComputerMove.Name = "_buttonComputerMove";
+            this._buttonComputerMove.Size = new System.Drawing.Size(96, 23);
+            this._buttonComputerMove.TabIndex = 14;
+            this._buttonComputerMove.Text = "Computer Move";
+            this._buttonComputerMove.UseVisualStyleBackColor = true;
+            this._buttonComputerMove.Click += new System.EventHandler(this.OnButtonComputerMoveClick);
+            // 
             // _buttonNew
             // 
             this._buttonNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonNew.Location = new System.Drawing.Point(156, 66);
+            this._buttonNew.Location = new System.Drawing.Point(149, 66);
             this._buttonNew.Name = "_buttonNew";
             this._buttonNew.Size = new System.Drawing.Size(75, 23);
             this._buttonNew.TabIndex = 2;
@@ -141,7 +247,7 @@
             this._checkBoxLocalMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxLocalMode.AutoSize = true;
             this._checkBoxLocalMode.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxLocalMode.Location = new System.Drawing.Point(135, 326);
+            this._checkBoxLocalMode.Location = new System.Drawing.Point(126, 346);
             this._checkBoxLocalMode.Name = "_checkBoxLocalMode";
             this._checkBoxLocalMode.Size = new System.Drawing.Size(81, 17);
             this._checkBoxLocalMode.TabIndex = 9;
@@ -164,7 +270,7 @@
             this._checkBoxHideOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxHideOutput.AutoSize = true;
             this._checkBoxHideOutput.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideOutput.Location = new System.Drawing.Point(135, 280);
+            this._checkBoxHideOutput.Location = new System.Drawing.Point(126, 300);
             this._checkBoxHideOutput.Name = "_checkBoxHideOutput";
             this._checkBoxHideOutput.Size = new System.Drawing.Size(83, 17);
             this._checkBoxHideOutput.TabIndex = 7;
@@ -177,7 +283,7 @@
             this._checkBoxHideArrows.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxHideArrows.AutoSize = true;
             this._checkBoxHideArrows.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideArrows.Location = new System.Drawing.Point(135, 303);
+            this._checkBoxHideArrows.Location = new System.Drawing.Point(126, 323);
             this._checkBoxHideArrows.Name = "_checkBoxHideArrows";
             this._checkBoxHideArrows.Size = new System.Drawing.Size(83, 17);
             this._checkBoxHideArrows.TabIndex = 8;
@@ -190,7 +296,7 @@
             this._checkBoxFlipped.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxFlipped.AutoSize = true;
             this._checkBoxFlipped.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxFlipped.Location = new System.Drawing.Point(135, 349);
+            this._checkBoxFlipped.Location = new System.Drawing.Point(126, 369);
             this._checkBoxFlipped.Name = "_checkBoxFlipped";
             this._checkBoxFlipped.Size = new System.Drawing.Size(100, 17);
             this._checkBoxFlipped.TabIndex = 10;
@@ -203,7 +309,7 @@
             this._checkBoxGridBorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxGridBorder.AutoSize = true;
             this._checkBoxGridBorder.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxGridBorder.Location = new System.Drawing.Point(135, 372);
+            this._checkBoxGridBorder.Location = new System.Drawing.Point(43, 346);
             this._checkBoxGridBorder.Name = "_checkBoxGridBorder";
             this._checkBoxGridBorder.Size = new System.Drawing.Size(79, 17);
             this._checkBoxGridBorder.TabIndex = 11;
@@ -254,7 +360,7 @@
             // _buttonLoadFen
             // 
             this._buttonLoadFen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonLoadFen.Location = new System.Drawing.Point(156, 37);
+            this._buttonLoadFen.Location = new System.Drawing.Point(149, 37);
             this._buttonLoadFen.Name = "_buttonLoadFen";
             this._buttonLoadFen.Size = new System.Drawing.Size(75, 23);
             this._buttonLoadFen.TabIndex = 1;
@@ -275,7 +381,7 @@
             // 
             this._textBoxFen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._textBoxFen.Location = new System.Drawing.Point(38, 11);
+            this._textBoxFen.Location = new System.Drawing.Point(34, 11);
             this._textBoxFen.Name = "_textBoxFen";
             this._textBoxFen.Size = new System.Drawing.Size(191, 20);
             this._textBoxFen.TabIndex = 0;
@@ -299,10 +405,29 @@
             this._dataGridView.Size = new System.Drawing.Size(834, 119);
             this._dataGridView.TabIndex = 0;
             // 
-            // _arrowInvalidateTimer
+            // _slowTimer
             // 
-            this._arrowInvalidateTimer.Enabled = true;
-            this._arrowInvalidateTimer.Tick += new System.EventHandler(this.OnArrowInvalidateTimerTick);
+            this._slowTimer.Enabled = true;
+            this._slowTimer.Tick += new System.EventHandler(this.OnSlowTimerTick);
+            // 
+            // _engineTimer
+            // 
+            this._engineTimer.Interval = 10;
+            this._engineTimer.Tick += new System.EventHandler(this.OnTimerTick);
+            // 
+            // _checkBoxSound
+            // 
+            this._checkBoxSound.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this._checkBoxSound.AutoSize = true;
+            this._checkBoxSound.BackColor = System.Drawing.SystemColors.Control;
+            this._checkBoxSound.Checked = true;
+            this._checkBoxSound.CheckState = System.Windows.Forms.CheckState.Checked;
+            this._checkBoxSound.Location = new System.Drawing.Point(43, 369);
+            this._checkBoxSound.Name = "_checkBoxSound";
+            this._checkBoxSound.Size = new System.Drawing.Size(57, 17);
+            this._checkBoxSound.TabIndex = 22;
+            this._checkBoxSound.Text = "Sound";
+            this._checkBoxSound.UseVisualStyleBackColor = false;
             // 
             // FormMain
             // 
@@ -345,11 +470,21 @@
         private System.Windows.Forms.CheckBox _checkBoxFlipped;
         private System.Windows.Forms.CheckBox _checkBoxHideArrows;
         private System.Windows.Forms.CheckBox _checkBoxHideOutput;
-        private System.Windows.Forms.Timer _arrowInvalidateTimer;
+        private System.Windows.Forms.Timer _slowTimer;
         private System.Windows.Forms.Label _labelCPStatus;
         private System.Windows.Forms.CheckBox _checkBoxLocalMode;
         private System.Windows.Forms.Label _labelEvaluation;
         private System.Windows.Forms.Button _buttonNew;
+        private System.Windows.Forms.Button _buttonComputerMove;
+        private System.Windows.Forms.Timer _engineTimer;
+        private System.Windows.Forms.CheckBox _checkBoxCheatMode;
+        private System.Windows.Forms.TextBox _textBoxEngineTime;
+        private System.Windows.Forms.Label _labelComputerTime;
+        private System.Windows.Forms.Label _labelMultiPV;
+        private System.Windows.Forms.TextBox _textBoxMultiPV;
+        private System.Windows.Forms.Button _buttonApply;
+        private System.Windows.Forms.Button _buttonAutoPlay;
+        private System.Windows.Forms.CheckBox _checkBoxSound;
     }
 }
 

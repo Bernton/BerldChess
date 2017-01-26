@@ -8,9 +8,12 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Media;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using WindowsInput;
 
 namespace BerldChess.View
 {
@@ -18,6 +21,16 @@ namespace BerldChess.View
     {
         #region Fields
 
+        private SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
+        private SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
+        private SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
+        private SoundPlayer _illegalPlayer = new SoundPlayer(Resources.Ilegal);
+
+        private bool _isAutoPlay = false;
+        private int _engineTime = 300;
+        private InputSimulator _inputSimulator = new InputSimulator();
+        private Stopwatch _timeSinceLastMove = new Stopwatch();
+        private ChessPlayer _computerPlayer = ChessPlayer.None;
         private int _multiPV1Reference;
         private ChessPanel _chessPanel;
         private FormMainViewModel _vm;
@@ -33,6 +46,7 @@ namespace BerldChess.View
             InitializeWindow();
             InitializeViewModel();
             InitializeChessBoard();
+            LoadXMLConfiguration();
 
             _textBoxFen.Text = _vm.Game.GetFen();
             _columnOrder = new InfoType[]
@@ -47,9 +61,12 @@ namespace BerldChess.View
             };
 
             ResetDataGridColumn(_columnOrder);
-            ResetDataGridRows(FormMainViewModel.MultiPV);
+            ResetDataGridRows(SerializedInfo.Instance.MultiPV);
 
-            LoadXMLConfiguration();
+            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
+            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
+
+            OnButtonApplyClick(null, null);
         }
 
         #endregion
@@ -61,6 +78,10 @@ namespace BerldChess.View
             Icon = Resources.PawnRush;
             Text = string.Format("BerldChess Version {0}", Assembly.GetEntryAssembly().GetName().Version.ToString(3));
             _splitContainerInner.SplitterWidth = 3;
+
+            _movePlayer.Load();
+            _capturePlayer.Load();
+            _castlingPlayer.Load();
         }
 
         private void InitializeViewModel()
@@ -145,7 +166,7 @@ namespace BerldChess.View
                     if (_columnOrder.Length != _dataGridView.Columns.Count)
                     {
                         ResetDataGridColumn(_columnOrder);
-                        ResetDataGridRows(FormMainViewModel.MultiPV);
+                        ResetDataGridRows(SerializedInfo.Instance.MultiPV);
                     }
 
                     int columnIndex;
@@ -165,7 +186,10 @@ namespace BerldChess.View
 
                         if (columnIndex != -1)
                         {
-                            _dataGridView.Rows[multiPV - 1].Cells[columnIndex].Value = FormatEngineInfo(evaluation.Types[iEval], evaluation[iEval]);
+                            if (_dataGridView.Rows.Count >= multiPV)
+                            {
+                                _dataGridView.Rows[multiPV - 1].Cells[columnIndex].Value = FormatEngineInfo(evaluation.Types[iEval], evaluation[iEval]);
+                            }
                         }
                     }
 
@@ -195,11 +219,11 @@ namespace BerldChess.View
 
                         if (centipawn > 0)
                         {
-                            centipawn += 12000 + Math.Abs(multiPV - FormMainViewModel.MultiPV) * 10;
+                            centipawn += 12000 + Math.Abs(multiPV - SerializedInfo.Instance.MultiPV) * 10;
                         }
                         else
                         {
-                            centipawn -= 12000 - Math.Abs(multiPV - FormMainViewModel.MultiPV) * 10;
+                            centipawn -= 12000 - Math.Abs(multiPV - SerializedInfo.Instance.MultiPV) * 10;
                         }
                     }
 
@@ -207,7 +231,7 @@ namespace BerldChess.View
                     {
                         if (isMate)
                         {
-                            if (mateNumber > 0 || _vm.Game.WhoseTurn == ChessPlayer.Black)
+                            if (mateNumber > 0 && _vm.Game.WhoseTurn == ChessPlayer.White)
                             {
                                 _labelCPStatus.Text = $"Mate in {mateNumber}";
                                 _labelCPStatus.ForeColor = Color.Green;
@@ -231,7 +255,15 @@ namespace BerldChess.View
                                 eval = ((double)centipawn / 100.0);
                             }
 
-                            _labelCPStatus.Text = eval.ToString("+0.##;-0.##");
+                            if (eval == 0)
+                            {
+                                _labelCPStatus.Text = "Even";
+                            }
+                            else
+                            {
+                                _labelCPStatus.Text = eval.ToString("+0.00;-0.00");
+                            }
+
                             _labelCPStatus.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
                         }
                     }
@@ -297,6 +329,42 @@ namespace BerldChess.View
             return Color.FromArgb((int)(x * 255), (int)((1 - x) * 255), 0);
         }
 
+        private void OnTimerTick(object sender, EventArgs e)
+        {
+            if (!IsFinishedPosition())
+            {
+                if (_computerPlayer != ChessPlayer.None)
+                {
+                    if (_vm.Game.WhoseTurn == _computerPlayer)
+                    {
+                        if (_timeSinceLastMove.ElapsedMilliseconds > _engineTime)
+                        {
+                            string move = ((string)_dataGridView.Rows[0].Cells[6].Value).Substring(0, 5);
+
+                            Point[] positions = _chessPanel.GetRelPositionsFromMoveString((move));
+                            Point[] absPos = _chessPanel.GetAbsPositionsFromMoveString(move);
+
+                            FigureMovedEventArgs args = new FigureMovedEventArgs(positions[0], positions[1]);
+
+                            OnPieceMoved(null, args);
+
+                            if (_checkBoxCheatMode.Checked)
+                            {
+                                Point currCurPos = Cursor.Position;
+
+                                _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)absPos[0].X / (double)Screen.PrimaryScreen.WorkingArea.Width) + 65535, (int)(65535.0 * (double)(absPos[0].Y + (Screen.PrimaryScreen.WorkingArea.Height / 5)) / (double)Screen.PrimaryScreen.WorkingArea.Height));
+                                _inputSimulator.Mouse.LeftButtonClick();
+                                Thread.Sleep(50);
+                                _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)absPos[1].X / (double)Screen.PrimaryScreen.WorkingArea.Width) + 65535, (int)(65535.0 * (double)(absPos[1].Y + (Screen.PrimaryScreen.WorkingArea.Height / 5)) / (double)Screen.PrimaryScreen.WorkingArea.Height));
+                                _inputSimulator.Mouse.LeftButtonClick();
+                                _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)currCurPos.X / (double)Screen.PrimaryScreen.WorkingArea.Width), (int)Math.Round((65535.0 * (double)currCurPos.Y / (double)Screen.PrimaryScreen.WorkingArea.Height * 0.97), 0));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private void OnPieceMoved(object sender, FigureMovedEventArgs e)
         {
             BoardPosition startPosition = new BoardPosition((ChessFile)e.Position.X, Invert(e.Position.Y - 1, 7));
@@ -305,12 +373,20 @@ namespace BerldChess.View
 
             char promotion = 'q';
 
-            if (movingPiece is Pawn && startPosition.Rank == (movingPiece.Owner == ChessPlayer.White ? 7 : 2) && endPosition.Rank == (movingPiece.Owner == ChessPlayer.White ? 8 : 1))
+            if (_vm.Game.WhoseTurn != _computerPlayer)
             {
-                PromotionDialog dialog = new PromotionDialog(movingPiece.Owner);
-                dialog.ShowDialog();
+                if (movingPiece is Pawn && startPosition.Rank == (movingPiece.Owner == ChessPlayer.White ? 7 : 2) && endPosition.Rank == (movingPiece.Owner == ChessPlayer.White ? 8 : 1))
+                {
+                    PromotionDialog dialog = new PromotionDialog(movingPiece.Owner);
+                    dialog.ShowDialog();
 
-                promotion = dialog.PromotionCharacter;
+                    promotion = dialog.PromotionCharacter;
+                }
+            }
+
+            if (movingPiece == null)
+            {
+                return;
             }
 
             Move move = new Move(startPosition, endPosition, movingPiece.Owner, promotion);
@@ -318,8 +394,23 @@ namespace BerldChess.View
 
             if (_vm.Game.IsValidMove(move))
             {
-
                 moveType = _vm.Game.ApplyMove(move, false);
+
+                if (_checkBoxSound.Checked)
+                {
+                    if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].IsCapture)
+                    {
+                        _capturePlayer.Play();
+                    }
+                    else if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].Castling != CastlingType.None)
+                    {
+                        _castlingPlayer.Play();
+                    }
+                    else
+                    {
+                        _movePlayer.Play();
+                    }
+                }
 
                 _chessPanel.HighlighedSquares.Clear();
                 _chessPanel.HighlighedSquares.Add(e.Position);
@@ -349,13 +440,24 @@ namespace BerldChess.View
                     _labelCPStatus.Text = "Stalemate";
                 }
 
+                _timeSinceLastMove.Restart();
+
                 _vm.Engine.RequestStop();
                 _chessPanel.Invalidate();
+            }
+            else
+            {
+                _illegalPlayer.Play();
             }
         }
 
         private void OnButtonLoadFenClick(object sender, EventArgs e)
         {
+            _isAutoPlay = false;
+            _timeSinceLastMove.Reset();
+            _computerPlayer = ChessPlayer.None;
+            _engineTimer.Enabled = false;
+
             bool wasFinished = IsFinishedPosition();
 
             try
@@ -449,29 +551,41 @@ namespace BerldChess.View
 
         private void OnCheckBoxHideArrowsCheckedChanged(object sender, EventArgs e)
         {
-            _arrowInvalidateTimer.Enabled = !_checkBoxHideArrows.Checked;
-
-            if (_checkBoxHideArrows.Checked)
+            if (_checkBoxHideArrows.Checked && _chessPanel != null && _chessPanel.Arrows != null)
             {
                 _chessPanel.Arrows.Clear();
+                _chessPanel.Invalidate();
             }
 
-            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
-            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
-            _chessPanel.Invalidate();
+            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
+            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
         }
 
         private void OnCheckBoxHideOutputCheckedChanged(object sender, EventArgs e)
         {
             _splitContainerOuter.Panel2Collapsed = _checkBoxHideOutput.Checked;
-            _labelCPStatus.Visible = !_checkBoxHideOutput.Checked;
 
-            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
-            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
+            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
+            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
         }
 
-        private void OnArrowInvalidateTimerTick(object sender, EventArgs e)
+        private void OnSlowTimerTick(object sender, EventArgs e)
         {
+            if (IsFinishedPosition())
+            {
+                _isAutoPlay = false;
+            }
+
+            if (_isAutoPlay)
+            {
+                _computerPlayer = _vm.Game.WhoseTurn;
+                if(!_timeSinceLastMove.IsRunning)
+                {
+                    _timeSinceLastMove.Restart();
+                }
+                _engineTimer.Enabled = true;
+            }
+
             _chessPanel.Invalidate();
         }
 
@@ -493,6 +607,11 @@ namespace BerldChess.View
 
         private void OnButtonNewClick(object sender, EventArgs e)
         {
+            _isAutoPlay = false;
+            _timeSinceLastMove.Reset();
+            _computerPlayer = ChessPlayer.None;
+            _engineTimer.Enabled = false;
+
             bool wasFinished = IsFinishedPosition();
 
             _vm.Game = new ChessGame();
@@ -526,6 +645,71 @@ namespace BerldChess.View
 
         }
 
+        private void OnButtonComputerMoveClick(object sender, EventArgs e)
+        {
+            _computerPlayer = _vm.Game.WhoseTurn;
+            _timeSinceLastMove.Restart();
+            _engineTimer.Enabled = true;
+        }
+
+        private void OnTextBoxEngineTimeTextChanged(object sender, EventArgs e)
+        {
+            int number;
+
+            if (int.TryParse(_textBoxEngineTime.Text, out number))
+            {
+                if (number > 80)
+                {
+                    _engineTime = number;
+                }
+                else
+                {
+                    _engineTime = 80;
+                }
+            }
+        }
+
+        private void OnButtonApplyClick(object sender, EventArgs e)
+        {
+            int multiPV;
+
+            if (int.TryParse(_textBoxMultiPV.Text, out multiPV))
+            {
+                if (multiPV > 0 && multiPV <= 250)
+                {
+                    SerializedInfo.Instance.MultiPV = multiPV;
+
+                    _vm.Engine.Query($"setoption name MultiPV value {SerializedInfo.Instance.MultiPV}");
+                    _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
+
+                    _chessPanel.Arrows.Clear();
+                    _chessPanel.Invalidate();
+
+                    ResetDataGridRows(multiPV);
+                }
+            }
+        }
+
+        private void OnCheckBoxCheatModeCheckedChanged(object sender, EventArgs e)
+        {
+            if (_checkBoxCheatMode.Checked)
+            {
+                _labelCPStatus.Visible = true;
+                _labelEvaluation.Visible = true;
+            }
+            else
+            {
+                _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
+                _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
+            }
+        }
+
+        private void OnButtonAutoPlayClick(object sender, EventArgs e)
+        {
+            _checkBoxCheatMode.Checked = false;
+            _isAutoPlay = !_isAutoPlay;
+        }
+
         #endregion
 
         #region Other Methods
@@ -550,10 +734,13 @@ namespace BerldChess.View
 
                     _checkBoxHideOutput.Checked = SerializedInfo.Instance.HideOutput;
                     _checkBoxHideArrows.Checked = SerializedInfo.Instance.HideArrows;
-                    _arrowInvalidateTimer.Enabled = !SerializedInfo.Instance.HideArrows;
                     _checkBoxGridBorder.Checked = SerializedInfo.Instance.DisplayGridBorder;
                     _checkBoxFlipped.Checked = SerializedInfo.Instance.BoardFlipped;
                     _checkBoxLocalMode.Checked = SerializedInfo.Instance.LocalMode;
+                    _checkBoxCheatMode.Checked = SerializedInfo.Instance.CheatMode;
+                    _textBoxEngineTime.Text = SerializedInfo.Instance.EngineTime.ToString();
+                    _textBoxMultiPV.Text = SerializedInfo.Instance.MultiPV.ToString();
+                    _checkBoxSound.Checked = SerializedInfo.Instance.Sound;
 
                     _chessPanel.Invalidate();
                 }
@@ -582,6 +769,9 @@ namespace BerldChess.View
             SerializedInfo.Instance.HideArrows = _checkBoxHideArrows.Checked;
             SerializedInfo.Instance.HideOutput = _checkBoxHideOutput.Checked;
             SerializedInfo.Instance.LocalMode = _checkBoxLocalMode.Checked;
+            SerializedInfo.Instance.CheatMode = _checkBoxCheatMode.Checked;
+            SerializedInfo.Instance.EngineTime = _engineTime;
+            SerializedInfo.Instance.Sound = _checkBoxSound.Checked;
 
             XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
             FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
@@ -636,6 +826,11 @@ namespace BerldChess.View
         {
             if (navIndex != _vm.NavIndex)
             {
+                _isAutoPlay = false;
+                _timeSinceLastMove.Reset();
+                _computerPlayer = ChessPlayer.None;
+                _engineTimer.Enabled = false;
+
                 bool wasFinished = IsFinishedPosition();
 
                 _chessPanel.HighlighedSquares.Clear();
