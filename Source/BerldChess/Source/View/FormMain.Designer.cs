@@ -31,6 +31,9 @@
             this.components = new System.ComponentModel.Container();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
             this._splitContainerInner = new System.Windows.Forms.SplitContainer();
+            this._buttonUpdateRec = new System.Windows.Forms.Button();
+            this._buttonMoveRec = new System.Windows.Forms.Button();
+            this._checkBoxSound = new System.Windows.Forms.CheckBox();
             this._buttonAutoPlay = new System.Windows.Forms.Button();
             this._buttonApply = new System.Windows.Forms.Button();
             this._labelMultiPV = new System.Windows.Forms.Label();
@@ -57,7 +60,7 @@
             this._dataGridView = new System.Windows.Forms.DataGridView();
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
             this._engineTimer = new System.Windows.Forms.Timer(this.components);
-            this._checkBoxSound = new System.Windows.Forms.CheckBox();
+            this._buttonMovRec = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
@@ -104,6 +107,9 @@
             // 
             // _splitContainerInner.Panel2
             // 
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonMovRec);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonUpdateRec);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonMoveRec);
             this._splitContainerInner.Panel2.Controls.Add(this._checkBoxSound);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonAutoPlay);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonApply);
@@ -130,10 +136,46 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 405);
-            this._splitContainerInner.SplitterDistance = 603;
+            this._splitContainerInner.SplitterDistance = 606;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
+            // 
+            // _buttonUpdateRec
+            // 
+            this._buttonUpdateRec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonUpdateRec.Location = new System.Drawing.Point(18, 278);
+            this._buttonUpdateRec.Name = "_buttonUpdateRec";
+            this._buttonUpdateRec.Size = new System.Drawing.Size(82, 23);
+            this._buttonUpdateRec.TabIndex = 24;
+            this._buttonUpdateRec.Text = "Update Rec";
+            this._buttonUpdateRec.UseVisualStyleBackColor = true;
+            this._buttonUpdateRec.Click += new System.EventHandler(this.OnButtonUpdateRecClick);
+            // 
+            // _buttonMoveRec
+            // 
+            this._buttonMoveRec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonMoveRec.Location = new System.Drawing.Point(18, 307);
+            this._buttonMoveRec.Name = "_buttonMoveRec";
+            this._buttonMoveRec.Size = new System.Drawing.Size(82, 23);
+            this._buttonMoveRec.TabIndex = 23;
+            this._buttonMoveRec.Text = "Move Rec";
+            this._buttonMoveRec.UseVisualStyleBackColor = true;
+            this._buttonMoveRec.Click += new System.EventHandler(this.OnButtonMoveRecClick);
+            // 
+            // _checkBoxSound
+            // 
+            this._checkBoxSound.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this._checkBoxSound.AutoSize = true;
+            this._checkBoxSound.BackColor = System.Drawing.SystemColors.Control;
+            this._checkBoxSound.Checked = true;
+            this._checkBoxSound.CheckState = System.Windows.Forms.CheckState.Checked;
+            this._checkBoxSound.Location = new System.Drawing.Point(43, 369);
+            this._checkBoxSound.Name = "_checkBoxSound";
+            this._checkBoxSound.Size = new System.Drawing.Size(57, 17);
+            this._checkBoxSound.TabIndex = 22;
+            this._checkBoxSound.Text = "Sound";
+            this._checkBoxSound.UseVisualStyleBackColor = false;
             // 
             // _buttonAutoPlay
             // 
@@ -415,19 +457,16 @@
             this._engineTimer.Interval = 10;
             this._engineTimer.Tick += new System.EventHandler(this.OnTimerTick);
             // 
-            // _checkBoxSound
+            // _buttonMovRec
             // 
-            this._checkBoxSound.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxSound.AutoSize = true;
-            this._checkBoxSound.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxSound.Checked = true;
-            this._checkBoxSound.CheckState = System.Windows.Forms.CheckState.Checked;
-            this._checkBoxSound.Location = new System.Drawing.Point(43, 369);
-            this._checkBoxSound.Name = "_checkBoxSound";
-            this._checkBoxSound.Size = new System.Drawing.Size(57, 17);
-            this._checkBoxSound.TabIndex = 22;
-            this._checkBoxSound.Text = "Sound";
-            this._checkBoxSound.UseVisualStyleBackColor = false;
+            this._buttonMovRec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonMovRec.Location = new System.Drawing.Point(18, 336);
+            this._buttonMovRec.Name = "_buttonMovRec";
+            this._buttonMovRec.Size = new System.Drawing.Size(82, 23);
+            this._buttonMovRec.TabIndex = 25;
+            this._buttonMovRec.Text = "Move And Update Rec";
+            this._buttonMovRec.UseVisualStyleBackColor = true;
+            this._buttonMovRec.Click += new System.EventHandler(this._buttonMovRec_Click);
             // 
             // FormMain
             // 
@@ -485,6 +524,9 @@
         private System.Windows.Forms.Button _buttonApply;
         private System.Windows.Forms.Button _buttonAutoPlay;
         private System.Windows.Forms.CheckBox _checkBoxSound;
+        private System.Windows.Forms.Button _buttonMoveRec;
+        private System.Windows.Forms.Button _buttonUpdateRec;
+        private System.Windows.Forms.Button _buttonMovRec;
     }
 }
 

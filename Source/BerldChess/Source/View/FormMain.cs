@@ -358,6 +358,9 @@ namespace BerldChess.View
                                 _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)absPos[1].X / (double)Screen.PrimaryScreen.WorkingArea.Width) + 65535, (int)(65535.0 * (double)(absPos[1].Y + (Screen.PrimaryScreen.WorkingArea.Height / 5)) / (double)Screen.PrimaryScreen.WorkingArea.Height));
                                 _inputSimulator.Mouse.LeftButtonClick();
                                 _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)currCurPos.X / (double)Screen.PrimaryScreen.WorkingArea.Width), (int)Math.Round((65535.0 * (double)currCurPos.Y / (double)Screen.PrimaryScreen.WorkingArea.Height * 0.97), 0));
+
+                                Thread.Sleep(300);
+                                Recognizer.UpdateBoardImage();
                             }
                         }
                     }
@@ -579,7 +582,7 @@ namespace BerldChess.View
             if (_isAutoPlay)
             {
                 _computerPlayer = _vm.Game.WhoseTurn;
-                if(!_timeSinceLastMove.IsRunning)
+                if (!_timeSinceLastMove.IsRunning)
                 {
                     _timeSinceLastMove.Restart();
                 }
@@ -678,11 +681,10 @@ namespace BerldChess.View
                 if (multiPV > 0 && multiPV <= 250)
                 {
                     SerializedInfo.Instance.MultiPV = multiPV;
-
                     _vm.Engine.Query($"setoption name MultiPV value {SerializedInfo.Instance.MultiPV}");
+                    _vm.Engine.Query("stop");
                     _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
 
-                    _chessPanel.Arrows.Clear();
                     _chessPanel.Invalidate();
 
                     ResetDataGridRows(multiPV);
@@ -708,6 +710,77 @@ namespace BerldChess.View
         {
             _checkBoxCheatMode.Checked = false;
             _isAutoPlay = !_isAutoPlay;
+        }
+
+        private void OnButtonMoveRecClick(object sender, EventArgs e)
+        {
+            Point[] changedSquares = Recognizer.GetChangedSquares();
+
+            Point source = Point.Empty;
+            Point destination = Point.Empty;
+
+            if (changedSquares.Length == 4)
+            {
+                if (changedSquares[0].X == 4)
+                {
+                    source = changedSquares[0];
+                    destination = changedSquares[2];
+
+                }
+                else
+                {
+                    source = changedSquares[3];
+                    destination = changedSquares[1];
+                }
+            }
+            else if (changedSquares.Length == 2)
+            {
+                ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
+
+                if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
+                {
+                    source = changedSquares[0];
+                    destination = changedSquares[1];
+                }
+                else
+                {
+                    source = changedSquares[1];
+                    destination = changedSquares[0];
+                }
+            }
+
+            FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
+            OnPieceMoved(null, args);
+
+            Recognizer.UpdateBoardImage();
+
+            Debug.WriteLine("\n\n\n\n");
+
+            for (int i = 0; i < changedSquares.Length; i++)
+            {
+                Debug.WriteLine(changedSquares[i].ToString());
+            }
+        }
+
+        private void OnButtonUpdateRecClick(object sender, EventArgs e)
+        {
+            if (!Recognizer.BoardFound)
+            {
+                Color darkSquareColor = Color.FromArgb(186, 85, 70);
+                Color lightSquareColor = Color.FromArgb(240, 216, 191);
+
+                Recognizer.SearchBoard(lightSquareColor, darkSquareColor);
+            }
+            else
+            {
+                Recognizer.UpdateBoardImage();
+            }
+        }
+
+        private void _buttonMovRec_Click(object sender, EventArgs e)
+        {
+            OnButtonMoveRecClick(null, null);
+            OnButtonUpdateRecClick(null, null);
         }
 
         #endregion

@@ -40,6 +40,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -51,6 +52,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Resources\Icons\PawnRush.ico</ApplicationIcon>
@@ -77,31 +79,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\Model\ChessPosition.cs" />
+    <Compile Include="Source\Model\Recognizer.cs" />
     <Compile Include="Source\Model\SerializedInfo.cs" />
     <Compile Include="Source\ViewModel\FormMainViewModel.cs" />
-    <Compile Include="Source\Model\View\Arrow.cs" />
-    <Compile Include="Source\Model\View\ArrowDrawInfo.cs" />
-    <Compile Include="Source\Model\View\ChessPanel.cs">
+    <Compile Include="Source\View\Arrow.cs" />
+    <Compile Include="Source\View\ArrowDrawInfo.cs" />
+    <Compile Include="Source\View\ChessPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Source\Model\View\FigureMovedEventArgs.cs" />
-    <Compile Include="Source\Model\View\FigureMovedEventHandler.cs" />
-    <Compile Include="Source\Model\View\FormMain.cs">
+    <Compile Include="Source\View\FigureMovedEventArgs.cs" />
+    <Compile Include="Source\View\FigureMovedEventHandler.cs" />
+    <Compile Include="Source\View\FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Source\Model\View\FormMain.Designer.cs">
+    <Compile Include="Source\View\FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Source\EntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\Model\View\PieceImageProvider.cs" />
-    <Compile Include="Source\Model\View\PromotionDialog.cs">
+    <Compile Include="Source\View\PieceImageProvider.cs" />
+    <Compile Include="Source\View\PromotionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Source\Model\View\PromotionDialog.Designer.cs">
+    <Compile Include="Source\View\PromotionDialog.Designer.cs">
       <DependentUpon>PromotionDialog.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Source\Model\View\FormMain.resx">
+    <EmbeddedResource Include="Source\View\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -115,7 +118,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Source\Model\View\PromotionDialog.resx">
+    <EmbeddedResource Include="Source\View\PromotionDialog.resx">
       <DependentUpon>PromotionDialog.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />

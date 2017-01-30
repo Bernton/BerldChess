@@ -36,6 +36,14 @@ namespace BerldChess.View
         public ChessGame Game { get; set; } = null;
         public List<Point> HighlighedSquares { get; set; } = new List<Point>();
 
+        public ChessPiece[][] Board
+        {
+            get
+            {
+                return _board;
+            }
+        }
+
         public List<Arrow> Arrows
         {
             get
