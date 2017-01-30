@@ -31,6 +31,9 @@
             this.components = new System.ComponentModel.Container();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
             this._splitContainerInner = new System.Windows.Forms.SplitContainer();
+            this._checkBoxCheckAuto = new System.Windows.Forms.CheckBox();
+            this._buttonReset = new System.Windows.Forms.Button();
+            this._buttonColorDialog = new System.Windows.Forms.Button();
             this._buttonUpdateRec = new System.Windows.Forms.Button();
             this._buttonMoveRec = new System.Windows.Forms.Button();
             this._checkBoxSound = new System.Windows.Forms.CheckBox();
@@ -60,7 +63,7 @@
             this._dataGridView = new System.Windows.Forms.DataGridView();
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
             this._engineTimer = new System.Windows.Forms.Timer(this.components);
-            this._buttonMovRec = new System.Windows.Forms.Button();
+            this._timerAutoCheck = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
@@ -107,7 +110,9 @@
             // 
             // _splitContainerInner.Panel2
             // 
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonMovRec);
+            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxCheckAuto);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonReset);
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonColorDialog);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonUpdateRec);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonMoveRec);
             this._splitContainerInner.Panel2.Controls.Add(this._checkBoxSound);
@@ -136,30 +141,64 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 405);
-            this._splitContainerInner.SplitterDistance = 606;
+            this._splitContainerInner.SplitterDistance = 611;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
             // 
+            // _checkBoxCheckAuto
+            // 
+            this._checkBoxCheckAuto.AutoSize = true;
+            this._checkBoxCheckAuto.BackColor = System.Drawing.SystemColors.Control;
+            this._checkBoxCheckAuto.Location = new System.Drawing.Point(20, 365);
+            this._checkBoxCheckAuto.Name = "_checkBoxCheckAuto";
+            this._checkBoxCheckAuto.Size = new System.Drawing.Size(82, 17);
+            this._checkBoxCheckAuto.TabIndex = 27;
+            this._checkBoxCheckAuto.Text = "Check Auto";
+            this._checkBoxCheckAuto.UseVisualStyleBackColor = false;
+            this._checkBoxCheckAuto.CheckedChanged += new System.EventHandler(this._checkBoxCheckAuto_CheckedChanged);
+            // 
+            // _buttonReset
+            // 
+            this._buttonReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonReset.Location = new System.Drawing.Point(18, 278);
+            this._buttonReset.Name = "_buttonReset";
+            this._buttonReset.Size = new System.Drawing.Size(54, 23);
+            this._buttonReset.TabIndex = 26;
+            this._buttonReset.Text = "Reset";
+            this._buttonReset.UseVisualStyleBackColor = true;
+            this._buttonReset.Click += new System.EventHandler(this.OnButtonResetClick);
+            // 
+            // _buttonColorDialog
+            // 
+            this._buttonColorDialog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonColorDialog.Location = new System.Drawing.Point(78, 278);
+            this._buttonColorDialog.Name = "_buttonColorDialog";
+            this._buttonColorDialog.Size = new System.Drawing.Size(22, 23);
+            this._buttonColorDialog.TabIndex = 25;
+            this._buttonColorDialog.Text = "..";
+            this._buttonColorDialog.UseVisualStyleBackColor = true;
+            this._buttonColorDialog.Click += new System.EventHandler(this.OnButtonColorDialogClick);
+            // 
             // _buttonUpdateRec
             // 
             this._buttonUpdateRec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonUpdateRec.Location = new System.Drawing.Point(18, 278);
+            this._buttonUpdateRec.Location = new System.Drawing.Point(18, 307);
             this._buttonUpdateRec.Name = "_buttonUpdateRec";
             this._buttonUpdateRec.Size = new System.Drawing.Size(82, 23);
             this._buttonUpdateRec.TabIndex = 24;
-            this._buttonUpdateRec.Text = "Update Rec";
+            this._buttonUpdateRec.Text = "Update";
             this._buttonUpdateRec.UseVisualStyleBackColor = true;
             this._buttonUpdateRec.Click += new System.EventHandler(this.OnButtonUpdateRecClick);
             // 
             // _buttonMoveRec
             // 
             this._buttonMoveRec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonMoveRec.Location = new System.Drawing.Point(18, 307);
+            this._buttonMoveRec.Location = new System.Drawing.Point(18, 336);
             this._buttonMoveRec.Name = "_buttonMoveRec";
             this._buttonMoveRec.Size = new System.Drawing.Size(82, 23);
             this._buttonMoveRec.TabIndex = 23;
-            this._buttonMoveRec.Text = "Move Rec";
+            this._buttonMoveRec.Text = "Auto Move";
             this._buttonMoveRec.UseVisualStyleBackColor = true;
             this._buttonMoveRec.Click += new System.EventHandler(this.OnButtonMoveRecClick);
             // 
@@ -180,7 +219,7 @@
             // _buttonAutoPlay
             // 
             this._buttonAutoPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonAutoPlay.Location = new System.Drawing.Point(106, 95);
+            this._buttonAutoPlay.Location = new System.Drawing.Point(95, 94);
             this._buttonAutoPlay.Name = "_buttonAutoPlay";
             this._buttonAutoPlay.Size = new System.Drawing.Size(20, 23);
             this._buttonAutoPlay.TabIndex = 21;
@@ -256,7 +295,7 @@
             // _buttonComputerMove
             // 
             this._buttonComputerMove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonComputerMove.Location = new System.Drawing.Point(128, 95);
+            this._buttonComputerMove.Location = new System.Drawing.Point(121, 94);
             this._buttonComputerMove.Name = "_buttonComputerMove";
             this._buttonComputerMove.Size = new System.Drawing.Size(96, 23);
             this._buttonComputerMove.TabIndex = 14;
@@ -267,7 +306,7 @@
             // _buttonNew
             // 
             this._buttonNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonNew.Location = new System.Drawing.Point(149, 66);
+            this._buttonNew.Location = new System.Drawing.Point(142, 65);
             this._buttonNew.Name = "_buttonNew";
             this._buttonNew.Size = new System.Drawing.Size(75, 23);
             this._buttonNew.TabIndex = 2;
@@ -402,7 +441,7 @@
             // _buttonLoadFen
             // 
             this._buttonLoadFen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonLoadFen.Location = new System.Drawing.Point(149, 37);
+            this._buttonLoadFen.Location = new System.Drawing.Point(142, 36);
             this._buttonLoadFen.Name = "_buttonLoadFen";
             this._buttonLoadFen.Size = new System.Drawing.Size(75, 23);
             this._buttonLoadFen.TabIndex = 1;
@@ -457,16 +496,11 @@
             this._engineTimer.Interval = 10;
             this._engineTimer.Tick += new System.EventHandler(this.OnTimerTick);
             // 
-            // _buttonMovRec
+            // _timerAutoCheck
             // 
-            this._buttonMovRec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonMovRec.Location = new System.Drawing.Point(18, 336);
-            this._buttonMovRec.Name = "_buttonMovRec";
-            this._buttonMovRec.Size = new System.Drawing.Size(82, 23);
-            this._buttonMovRec.TabIndex = 25;
-            this._buttonMovRec.Text = "Move And Update Rec";
-            this._buttonMovRec.UseVisualStyleBackColor = true;
-            this._buttonMovRec.Click += new System.EventHandler(this._buttonMovRec_Click);
+            this._timerAutoCheck.Enabled = true;
+            this._timerAutoCheck.Interval = 400;
+            this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
             // 
             // FormMain
             // 
@@ -526,7 +560,10 @@
         private System.Windows.Forms.CheckBox _checkBoxSound;
         private System.Windows.Forms.Button _buttonMoveRec;
         private System.Windows.Forms.Button _buttonUpdateRec;
-        private System.Windows.Forms.Button _buttonMovRec;
+        private System.Windows.Forms.Button _buttonColorDialog;
+        private System.Windows.Forms.Button _buttonReset;
+        private System.Windows.Forms.CheckBox _checkBoxCheckAuto;
+        private System.Windows.Forms.Timer _timerAutoCheck;
     }
 }
 

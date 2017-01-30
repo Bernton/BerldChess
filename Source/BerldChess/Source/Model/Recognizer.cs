@@ -81,13 +81,17 @@ namespace BerldChess.Model
             {
                 if (SearchBoard(GetScreenshot(Screen.AllScreens[i]), lightSquareColor, darkSquareColor))
                 {
+                    if(BoardSize.Width < 24 || BoardSize.Height < 24)
+                    {
+                        return false;
+                    }
+
                     _lightColor = lightSquareColor;
                     _darkColor = darkSquareColor;
 
                     ScreenIndex = i;
                     BoardFound = true;
                     _lastBoardSnap = GetBoardSnap();
-                    Pieces = GetPieceImages(_lastBoardSnap);
                     return true;
                 }
             }
@@ -292,7 +296,7 @@ namespace BerldChess.Model
             return tolerance >= Math.Abs(color1.R - color2.R) + Math.Abs(color1.G - color2.G) + Math.Abs(color1.B - color2.B);
         }
 
-        private static Bitmap GetScreenshot(Screen screen)
+        public static Bitmap GetScreenshot(Screen screen)
         {
             Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height, PixelFormat.Format24bppRgb);
             Graphics g = Graphics.FromImage(screenshot);

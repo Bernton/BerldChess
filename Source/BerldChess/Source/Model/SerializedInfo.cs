@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Xml.Serialization;
 
 namespace BerldChess.Model
 {
@@ -36,6 +37,25 @@ namespace BerldChess.Model
         private int _engineTime;
         private Rectangle _bounds;
         private int _multiPV = 250;
+
+        [XmlIgnore]
+        public Color DarkSquare { get; set; }
+        [XmlIgnore]
+        public Color LightSquare { get; set; }
+
+        [XmlElement("DarkSquare")]
+        public int DarkSquareAsArgb
+        {
+            get { return DarkSquare.ToArgb(); }
+            set { DarkSquare = Color.FromArgb(value); }
+        }
+
+        [XmlElement("LightSquare")]
+        public int LightSquareAsArgb
+        {
+            get { return LightSquare.ToArgb(); }
+            set { LightSquare = Color.FromArgb(value); }
+        }
 
         public bool Sound
         {

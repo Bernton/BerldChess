@@ -21,6 +21,7 @@ namespace BerldChess.View
     {
         #region Fields
 
+        private bool _moveTry = false;
         private SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
         private SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
         private SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
@@ -67,6 +68,8 @@ namespace BerldChess.View
             _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
 
             OnButtonApplyClick(null, null);
+
+            Recognizer.SearchBoard(SerializedInfo.Instance.LightSquare, SerializedInfo.Instance.DarkSquare);
         }
 
         #endregion
@@ -143,10 +146,13 @@ namespace BerldChess.View
             {
                 _vm.Engine.Query("go infinite");
 
-                Invoke((MethodInvoker)delegate
+                if (IsHandleCreated)
                 {
-                    _textBoxFen.Text = _vm.Game.GetFen();
-                });
+                    Invoke((MethodInvoker)delegate
+                    {
+                        _textBoxFen.Text = _vm.Game.GetFen();
+                    });
+                }
             }
         }
 
@@ -342,25 +348,31 @@ namespace BerldChess.View
                             string move = ((string)_dataGridView.Rows[0].Cells[6].Value).Substring(0, 5);
 
                             Point[] positions = _chessPanel.GetRelPositionsFromMoveString((move));
-                            Point[] absPos = _chessPanel.GetAbsPositionsFromMoveString(move);
-
                             FigureMovedEventArgs args = new FigureMovedEventArgs(positions[0], positions[1]);
 
                             OnPieceMoved(null, args);
 
                             if (_checkBoxCheatMode.Checked)
                             {
-                                Point currCurPos = Cursor.Position;
+                                if (Recognizer.BoardFound)
+                                {
+                                    double pW = Screen.PrimaryScreen.WorkingArea.Width;
+                                    double pH = Screen.PrimaryScreen.WorkingArea.Height;
+                                    double fW = Recognizer.BoardSize.Width / 8.0;
+                                    double fH = Recognizer.BoardSize.Height / 8.0;
+                                    double max = ushort.MaxValue;
+                                    Point currCurPos = Cursor.Position;
 
-                                _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)absPos[0].X / (double)Screen.PrimaryScreen.WorkingArea.Width) + 65535, (int)(65535.0 * (double)(absPos[0].Y + (Screen.PrimaryScreen.WorkingArea.Height / 5)) / (double)Screen.PrimaryScreen.WorkingArea.Height));
-                                _inputSimulator.Mouse.LeftButtonClick();
-                                Thread.Sleep(50);
-                                _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)absPos[1].X / (double)Screen.PrimaryScreen.WorkingArea.Width) + 65535, (int)(65535.0 * (double)(absPos[1].Y + (Screen.PrimaryScreen.WorkingArea.Height / 5)) / (double)Screen.PrimaryScreen.WorkingArea.Height));
-                                _inputSimulator.Mouse.LeftButtonClick();
-                                _inputSimulator.Mouse.MoveMouseTo((int)(65535.0 * (double)currCurPos.X / (double)Screen.PrimaryScreen.WorkingArea.Width), (int)Math.Round((65535.0 * (double)currCurPos.Y / (double)Screen.PrimaryScreen.WorkingArea.Height * 0.97), 0));
+                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * positions[0].Y) / pH));
+                                    _inputSimulator.Mouse.LeftButtonClick();
+                                    Thread.Sleep(50);
+                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * positions[1].Y) / pH));
+                                    _inputSimulator.Mouse.LeftButtonClick();
+                                    _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
 
-                                Thread.Sleep(300);
-                                Recognizer.UpdateBoardImage();
+                                    Thread.Sleep(300);
+                                    Recognizer.UpdateBoardImage();
+                                }
                             }
                         }
                     }
@@ -397,6 +409,12 @@ namespace BerldChess.View
 
             if (_vm.Game.IsValidMove(move))
             {
+                if(_moveTry)
+                {
+                    Recognizer.UpdateBoardImage();
+                    _moveTry = false;
+                }
+
                 moveType = _vm.Game.ApplyMove(move, false);
 
                 if (_checkBoxSound.Checked)
@@ -450,7 +468,10 @@ namespace BerldChess.View
             }
             else
             {
-                _illegalPlayer.Play();
+                if (!_moveTry)
+                {
+                    _illegalPlayer.Play();
+                }
             }
         }
 
@@ -574,6 +595,7 @@ namespace BerldChess.View
 
         private void OnSlowTimerTick(object sender, EventArgs e)
         {
+
             if (IsFinishedPosition())
             {
                 _isAutoPlay = false;
@@ -753,23 +775,16 @@ namespace BerldChess.View
             OnPieceMoved(null, args);
 
             Recognizer.UpdateBoardImage();
-
-            Debug.WriteLine("\n\n\n\n");
-
-            for (int i = 0; i < changedSquares.Length; i++)
-            {
-                Debug.WriteLine(changedSquares[i].ToString());
-            }
         }
 
         private void OnButtonUpdateRecClick(object sender, EventArgs e)
         {
             if (!Recognizer.BoardFound)
             {
-                Color darkSquareColor = Color.FromArgb(186, 85, 70);
-                Color lightSquareColor = Color.FromArgb(240, 216, 191);
-
-                Recognizer.SearchBoard(lightSquareColor, darkSquareColor);
+                if (!Recognizer.SearchBoard(SerializedInfo.Instance.LightSquare, SerializedInfo.Instance.DarkSquare))
+                {
+                    MessageBox.Show("No board found!", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             else
             {
@@ -777,10 +792,86 @@ namespace BerldChess.View
             }
         }
 
-        private void _buttonMovRec_Click(object sender, EventArgs e)
+        private void OnButtonColorDialogClick(object sender, EventArgs e)
         {
-            OnButtonMoveRecClick(null, null);
-            OnButtonUpdateRecClick(null, null);
+            Bitmap[] images = new Bitmap[Screen.AllScreens.Length];
+
+            for (int i = 0; i < images.Length; i++)
+            {
+                images[i] = Recognizer.GetScreenshot(Screen.AllScreens[i]);
+            }
+
+            FormSquareColorDialog squareColorDialog = new FormSquareColorDialog(images);
+            squareColorDialog.ShowDialog();
+
+            if (squareColorDialog.DarkSquareColor != null)
+            {
+                SerializedInfo.Instance.DarkSquare = (Color)squareColorDialog.DarkSquareColor;
+            }
+
+            if (squareColorDialog.LightSquareColor != null)
+            {
+                SerializedInfo.Instance.LightSquare = (Color)squareColorDialog.LightSquareColor;
+            }
+        }
+
+        private void OnButtonResetClick(object sender, EventArgs e)
+        {
+            if (!Recognizer.SearchBoard(SerializedInfo.Instance.LightSquare, SerializedInfo.Instance.DarkSquare))
+            {
+                MessageBox.Show("No board found!", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void OnTimerAutoCheckTick(object sender, EventArgs e)
+        {
+            if (_checkBoxCheckAuto.Checked && _vm.Game.WhoseTurn != _computerPlayer)
+            {
+                Point[] changedSquares = Recognizer.GetChangedSquares();
+
+                if(changedSquares.Length == 0)
+                {
+                    return;
+                }
+
+                Point source = Point.Empty;
+                Point destination = Point.Empty;
+
+                if (changedSquares.Length == 4)
+                {
+                    if (changedSquares[0].X == 4)
+                    {
+                        source = changedSquares[0];
+                        destination = changedSquares[2];
+
+                    }
+                    else
+                    {
+                        source = changedSquares[3];
+                        destination = changedSquares[1];
+                    }
+                }
+                else if (changedSquares.Length == 2)
+                {
+                    ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
+
+                    if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
+                    {
+                        source = changedSquares[0];
+                        destination = changedSquares[1];
+                    }
+                    else
+                    {
+                        source = changedSquares[1];
+                        destination = changedSquares[0];
+                    }
+                }
+
+                _moveTry = true;
+
+                FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
+                OnPieceMoved(null, args);
+            }
         }
 
         #endregion
@@ -1030,5 +1121,10 @@ namespace BerldChess.View
         }
 
         #endregion
+
+        private void _checkBoxCheckAuto_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
