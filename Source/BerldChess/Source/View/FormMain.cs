@@ -825,7 +825,7 @@ namespace BerldChess.View
 
         private void OnTimerAutoCheckTick(object sender, EventArgs e)
         {
-            if (_checkBoxCheckAuto.Checked && _vm.Game.WhoseTurn != _computerPlayer)
+            if (_checkBoxCheckAuto.Checked)
             {
                 Point[] changedSquares = Recognizer.GetChangedSquares();
 
