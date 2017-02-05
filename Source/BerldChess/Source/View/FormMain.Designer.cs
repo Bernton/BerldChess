@@ -64,6 +64,8 @@
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
             this._engineTimer = new System.Windows.Forms.Timer(this.components);
             this._timerAutoCheck = new System.Windows.Forms.Timer(this.components);
+            this._labelAnimTime = new System.Windows.Forms.Label();
+            this._textBoxAnimTime = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
@@ -90,8 +92,8 @@
             // _splitContainerOuter.Panel2
             // 
             this._splitContainerOuter.Panel2.Controls.Add(this._dataGridView);
-            this._splitContainerOuter.Size = new System.Drawing.Size(836, 529);
-            this._splitContainerOuter.SplitterDistance = 405;
+            this._splitContainerOuter.Size = new System.Drawing.Size(836, 647);
+            this._splitContainerOuter.SplitterDistance = 495;
             this._splitContainerOuter.SplitterWidth = 3;
             this._splitContainerOuter.TabIndex = 0;
             this._splitContainerOuter.TabStop = false;
@@ -110,6 +112,8 @@
             // 
             // _splitContainerInner.Panel2
             // 
+            this._splitContainerInner.Panel2.Controls.Add(this._labelAnimTime);
+            this._splitContainerInner.Panel2.Controls.Add(this._textBoxAnimTime);
             this._splitContainerInner.Panel2.Controls.Add(this._checkBoxCheckAuto);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonReset);
             this._splitContainerInner.Panel2.Controls.Add(this._buttonColorDialog);
@@ -140,8 +144,8 @@
             this._splitContainerInner.Panel2.Controls.Add(this._labelFEN);
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
-            this._splitContainerInner.Size = new System.Drawing.Size(836, 405);
-            this._splitContainerInner.SplitterDistance = 611;
+            this._splitContainerInner.Size = new System.Drawing.Size(836, 495);
+            this._splitContainerInner.SplitterDistance = 612;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
@@ -156,7 +160,6 @@
             this._checkBoxCheckAuto.TabIndex = 27;
             this._checkBoxCheckAuto.Text = "Check Auto";
             this._checkBoxCheckAuto.UseVisualStyleBackColor = false;
-            this._checkBoxCheckAuto.CheckedChanged += new System.EventHandler(this._checkBoxCheckAuto_CheckedChanged);
             // 
             // _buttonReset
             // 
@@ -209,7 +212,7 @@
             this._checkBoxSound.BackColor = System.Drawing.SystemColors.Control;
             this._checkBoxSound.Checked = true;
             this._checkBoxSound.CheckState = System.Windows.Forms.CheckState.Checked;
-            this._checkBoxSound.Location = new System.Drawing.Point(43, 369);
+            this._checkBoxSound.Location = new System.Drawing.Point(43, 459);
             this._checkBoxSound.Name = "_checkBoxSound";
             this._checkBoxSound.Size = new System.Drawing.Size(57, 17);
             this._checkBoxSound.TabIndex = 22;
@@ -284,7 +287,7 @@
             this._checkBoxCheatMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxCheatMode.AutoSize = true;
             this._checkBoxCheatMode.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxCheatMode.Location = new System.Drawing.Point(126, 278);
+            this._checkBoxCheatMode.Location = new System.Drawing.Point(126, 368);
             this._checkBoxCheatMode.Name = "_checkBoxCheatMode";
             this._checkBoxCheatMode.Size = new System.Drawing.Size(84, 17);
             this._checkBoxCheatMode.TabIndex = 15;
@@ -328,7 +331,7 @@
             this._checkBoxLocalMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxLocalMode.AutoSize = true;
             this._checkBoxLocalMode.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxLocalMode.Location = new System.Drawing.Point(126, 346);
+            this._checkBoxLocalMode.Location = new System.Drawing.Point(126, 436);
             this._checkBoxLocalMode.Name = "_checkBoxLocalMode";
             this._checkBoxLocalMode.Size = new System.Drawing.Size(81, 17);
             this._checkBoxLocalMode.TabIndex = 9;
@@ -351,7 +354,7 @@
             this._checkBoxHideOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxHideOutput.AutoSize = true;
             this._checkBoxHideOutput.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideOutput.Location = new System.Drawing.Point(126, 300);
+            this._checkBoxHideOutput.Location = new System.Drawing.Point(126, 390);
             this._checkBoxHideOutput.Name = "_checkBoxHideOutput";
             this._checkBoxHideOutput.Size = new System.Drawing.Size(83, 17);
             this._checkBoxHideOutput.TabIndex = 7;
@@ -364,7 +367,7 @@
             this._checkBoxHideArrows.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxHideArrows.AutoSize = true;
             this._checkBoxHideArrows.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideArrows.Location = new System.Drawing.Point(126, 323);
+            this._checkBoxHideArrows.Location = new System.Drawing.Point(126, 413);
             this._checkBoxHideArrows.Name = "_checkBoxHideArrows";
             this._checkBoxHideArrows.Size = new System.Drawing.Size(83, 17);
             this._checkBoxHideArrows.TabIndex = 8;
@@ -377,7 +380,7 @@
             this._checkBoxFlipped.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxFlipped.AutoSize = true;
             this._checkBoxFlipped.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxFlipped.Location = new System.Drawing.Point(126, 369);
+            this._checkBoxFlipped.Location = new System.Drawing.Point(126, 459);
             this._checkBoxFlipped.Name = "_checkBoxFlipped";
             this._checkBoxFlipped.Size = new System.Drawing.Size(100, 17);
             this._checkBoxFlipped.TabIndex = 10;
@@ -390,7 +393,7 @@
             this._checkBoxGridBorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._checkBoxGridBorder.AutoSize = true;
             this._checkBoxGridBorder.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxGridBorder.Location = new System.Drawing.Point(43, 346);
+            this._checkBoxGridBorder.Location = new System.Drawing.Point(43, 436);
             this._checkBoxGridBorder.Name = "_checkBoxGridBorder";
             this._checkBoxGridBorder.Size = new System.Drawing.Size(79, 17);
             this._checkBoxGridBorder.TabIndex = 11;
@@ -483,7 +486,7 @@
             this._dataGridView.ShowCellErrors = false;
             this._dataGridView.ShowEditingIcon = false;
             this._dataGridView.ShowRowErrors = false;
-            this._dataGridView.Size = new System.Drawing.Size(834, 119);
+            this._dataGridView.Size = new System.Drawing.Size(834, 147);
             this._dataGridView.TabIndex = 0;
             // 
             // _slowTimer
@@ -502,14 +505,33 @@
             this._timerAutoCheck.Interval = 400;
             this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
             // 
+            // _labelAnimTime
+            // 
+            this._labelAnimTime.AutoSize = true;
+            this._labelAnimTime.Location = new System.Drawing.Point(17, 390);
+            this._labelAnimTime.Name = "_labelAnimTime";
+            this._labelAnimTime.Size = new System.Drawing.Size(75, 13);
+            this._labelAnimTime.TabIndex = 29;
+            this._labelAnimTime.Text = "Animation time";
+            // 
+            // _textBoxAnimTime
+            // 
+            this._textBoxAnimTime.Location = new System.Drawing.Point(20, 406);
+            this._textBoxAnimTime.Name = "_textBoxAnimTime";
+            this._textBoxAnimTime.Size = new System.Drawing.Size(75, 20);
+            this._textBoxAnimTime.TabIndex = 28;
+            this._textBoxAnimTime.Text = "300";
+            this._textBoxAnimTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this._textBoxAnimTime.TextChanged += new System.EventHandler(this.OnTextBoxAnimTimeTextChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(836, 529);
+            this.ClientSize = new System.Drawing.Size(836, 647);
             this.Controls.Add(this._splitContainerOuter);
             this.DoubleBuffered = true;
-            this.MinimumSize = new System.Drawing.Size(650, 450);
+            this.MinimumSize = new System.Drawing.Size(850, 450);
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BerldChess Version X";
@@ -564,6 +586,8 @@
         private System.Windows.Forms.Button _buttonReset;
         private System.Windows.Forms.CheckBox _checkBoxCheckAuto;
         private System.Windows.Forms.Timer _timerAutoCheck;
+        private System.Windows.Forms.Label _labelAnimTime;
+        private System.Windows.Forms.TextBox _textBoxAnimTime;
     }
 }
 

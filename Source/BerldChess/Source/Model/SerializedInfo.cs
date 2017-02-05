@@ -37,6 +37,20 @@ namespace BerldChess.Model
         private int _engineTime;
         private Rectangle _bounds;
         private int _multiPV = 250;
+        private int _animTime = 300;
+
+        public int AnimationTime
+        {
+            get
+            {
+                return _animTime;
+            }
+            set
+            {
+                _animTime = value;
+            }
+        }
+
 
         [XmlIgnore]
         public Color DarkSquare { get; set; }

@@ -33,6 +33,7 @@ namespace BerldChess.View
         private Stopwatch _timeSinceLastMove = new Stopwatch();
         private ChessPlayer _computerPlayer = ChessPlayer.None;
         private int _multiPV1Reference;
+        private int _animTime = 300;
         private ChessPanel _chessPanel;
         private FormMainViewModel _vm;
         private InfoType[] _columnOrder;
@@ -363,14 +364,14 @@ namespace BerldChess.View
                                     double max = ushort.MaxValue;
                                     Point currCurPos = Cursor.Position;
 
-                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * positions[0].Y) / pH));
+                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[0].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     Thread.Sleep(50);
-                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * positions[1].Y) / pH));
+                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[1].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
 
-                                    Thread.Sleep(300);
+                                    Thread.Sleep(_animTime);
                                     Recognizer.UpdateBoardImage();
                                 }
                             }
@@ -873,6 +874,23 @@ namespace BerldChess.View
                 OnPieceMoved(null, args);
             }
         }
+       
+        private void OnTextBoxAnimTimeTextChanged(object sender, EventArgs e)
+        {
+            int number;
+
+            if (int.TryParse(_textBoxAnimTime.Text, out number))
+            {
+                if (number > 20)
+                {
+                    _animTime = number;
+                }
+                else
+                {
+                    _animTime = 20;
+                }
+            }
+        }
 
         #endregion
 
@@ -905,6 +923,7 @@ namespace BerldChess.View
                     _textBoxEngineTime.Text = SerializedInfo.Instance.EngineTime.ToString();
                     _textBoxMultiPV.Text = SerializedInfo.Instance.MultiPV.ToString();
                     _checkBoxSound.Checked = SerializedInfo.Instance.Sound;
+                    _animTime = SerializedInfo.Instance.AnimationTime;
 
                     _chessPanel.Invalidate();
                 }
@@ -936,6 +955,7 @@ namespace BerldChess.View
             SerializedInfo.Instance.CheatMode = _checkBoxCheatMode.Checked;
             SerializedInfo.Instance.EngineTime = _engineTime;
             SerializedInfo.Instance.Sound = _checkBoxSound.Checked;
+            SerializedInfo.Instance.AnimationTime = _animTime;
 
             XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
             FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
@@ -1121,10 +1141,5 @@ namespace BerldChess.View
         }
 
         #endregion
-
-        private void _checkBoxCheckAuto_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }
