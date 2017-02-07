@@ -53,9 +53,9 @@ namespace BerldChess.Model
 
 
         [XmlIgnore]
-        public Color DarkSquare { get; set; }
+        public Color DarkSquare { get; set; } = Color.FromArgb(186, 85, 70);
         [XmlIgnore]
-        public Color LightSquare { get; set; }
+        public Color LightSquare { get; set; } = Color.FromArgb(240, 216, 191);
 
         [XmlElement("DarkSquare")]
         public int DarkSquareAsArgb
