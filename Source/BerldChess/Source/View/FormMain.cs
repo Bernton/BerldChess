@@ -802,18 +802,18 @@ namespace BerldChess.View
                 images[i] = Recognizer.GetScreenshot(Screen.AllScreens[i]);
             }
 
-            FormSquareColorDialog squareColorDialog = new FormSquareColorDialog(images);
-            squareColorDialog.ShowDialog();
+            //FormSquareColorDialog squareColorDialog = new FormSquareColorDialog(images);
+            //squareColorDialog.ShowDialog();
 
-            if (squareColorDialog.DarkSquareColor != null)
-            {
-                SerializedInfo.Instance.DarkSquare = (Color)squareColorDialog.DarkSquareColor;
-            }
+            //if (squareColorDialog.DarkSquareColor != null)
+            //{
+            //    SerializedInfo.Instance.DarkSquare = (Color)squareColorDialog.DarkSquareColor;
+            //}
 
-            if (squareColorDialog.LightSquareColor != null)
-            {
-                SerializedInfo.Instance.LightSquare = (Color)squareColorDialog.LightSquareColor;
-            }
+            //if (squareColorDialog.LightSquareColor != null)
+            //{
+            //    SerializedInfo.Instance.LightSquare = (Color)squareColorDialog.LightSquareColor;
+            //}
         }
 
         private void OnButtonResetClick(object sender, EventArgs e)
@@ -937,30 +937,40 @@ namespace BerldChess.View
 
         private void SaveXMLConfiguration()
         {
-            if (WindowState == FormWindowState.Maximized)
+            if (File.Exists(FormMainViewModel.ConfigFileName))
             {
-                SerializedInfo.Instance.Bounds = RestoreBounds;
-            }
-            else
-            {
-                SerializedInfo.Instance.Bounds = Bounds;
-            }
+                try
+                {
+                    SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
+                    SerializedInfo.Instance.DisplayGridBorder = _checkBoxGridBorder.Checked;
+                    SerializedInfo.Instance.BoardFlipped = _checkBoxFlipped.Checked;
+                    SerializedInfo.Instance.HideArrows = _checkBoxHideArrows.Checked;
+                    SerializedInfo.Instance.HideOutput = _checkBoxHideOutput.Checked;
+                    SerializedInfo.Instance.LocalMode = _checkBoxLocalMode.Checked;
+                    SerializedInfo.Instance.CheatMode = _checkBoxCheatMode.Checked;
+                    SerializedInfo.Instance.EngineTime = _engineTime;
+                    SerializedInfo.Instance.Sound = _checkBoxSound.Checked;
+                    SerializedInfo.Instance.AnimationTime = _animTime;
 
-            SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
-            SerializedInfo.Instance.DisplayGridBorder = _checkBoxGridBorder.Checked;
-            SerializedInfo.Instance.BoardFlipped = _checkBoxFlipped.Checked;
-            SerializedInfo.Instance.HideArrows = _checkBoxHideArrows.Checked;
-            SerializedInfo.Instance.HideOutput = _checkBoxHideOutput.Checked;
-            SerializedInfo.Instance.LocalMode = _checkBoxLocalMode.Checked;
-            SerializedInfo.Instance.CheatMode = _checkBoxCheatMode.Checked;
-            SerializedInfo.Instance.EngineTime = _engineTime;
-            SerializedInfo.Instance.Sound = _checkBoxSound.Checked;
-            SerializedInfo.Instance.AnimationTime = _animTime;
+                    XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
+                    FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
+                    serializer.Serialize(fileStream, SerializedInfo.Instance);
+                    fileStream.Dispose();
 
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
-            FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
-            serializer.Serialize(fileStream, SerializedInfo.Instance);
-            fileStream.Dispose();
+                    if (WindowState == FormWindowState.Maximized)
+                    {
+                        SerializedInfo.Instance.Bounds = RestoreBounds;
+                    }
+                    else
+                    {
+                        SerializedInfo.Instance.Bounds = Bounds;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+            }
         }
 
         private void ResetDataGridRows(int newRowCount)

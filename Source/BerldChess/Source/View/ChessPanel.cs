@@ -27,9 +27,28 @@ namespace BerldChess.View
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
 
+        // CORRECT CODE
+        //private string _pieceFontFamily = string.Empty;
+
+        //TESTING 
+        private string _pieceFontFamily = "Arial Unicode MS";
+
         #endregion
 
         #region Properties
+
+        public string PieceFontFamily
+        {
+            get
+            {
+                return _pieceFontFamily;
+            }
+            set
+            {
+                _pieceFontFamily = value;
+                _scaledPieceImages = GetPiecesFromFontFamily(value, _fieldSize);
+            }
+        }
 
         public bool IsFlipped { get; set; } = false;
         public bool DisplayGridBorders { get; set; } = false;
@@ -108,9 +127,16 @@ namespace BerldChess.View
 
             if (_wasResized)
             {
-                for (int i = 0; i < _scaledPieceImages.Length; i++)
+                if (PieceFontFamily != string.Empty)
                 {
-                    _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], _pieceDimension, _pieceDimension);
+                    _scaledPieceImages = GetPiecesFromFontFamily(_pieceFontFamily, _fieldSize);
+                }
+                else
+                {
+                    for (int i = 0; i < _scaledPieceImages.Length; i++)
+                    {
+                        _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], _pieceDimension, _pieceDimension);
+                    }
                 }
 
                 _wasResized = false;
@@ -405,6 +431,57 @@ namespace BerldChess.View
         #endregion
 
         #region Other Methods
+
+        private Bitmap[] GetPiecesFromFontFamily(string fontFamily, double fieldSize)
+        {
+            Bitmap[] pieceImages = new Bitmap[12];
+            int whiteKing = 0x2654;
+
+            int[] imagePositions = new int[] { 0, 1, 3, 4, 2, 5, 6, 7, 9, 10, 8, 11 };
+
+            int fontSize = int.MaxValue;
+            SizeF currentDimension = new SizeF(-1, -1);
+
+            Bitmap measureImage = new Bitmap(100, 100);
+            Graphics measureG = Graphics.FromImage(measureImage);
+
+            int fontSizeCounter = 1;
+
+            while (currentDimension.Height < fieldSize && currentDimension.Width < fieldSize)
+            {
+                Font font = new Font(fontFamily, fontSizeCounter);
+                currentDimension = measureG.MeasureString(((char)whiteKing).ToString(), font);
+                fontSizeCounter++;
+            }
+
+            if (fontSizeCounter < fontSize)
+            {
+                fontSize = fontSizeCounter;
+            }
+
+            currentDimension = new SizeF(-1, -1);
+
+            for (int i = 0; i < pieceImages.Length; i++)
+            {
+                pieceImages[i] = GetCharacterImage(fontFamily, fontSize, (char)(whiteKing + imagePositions[i]));
+            }
+
+            return pieceImages;
+        }
+
+        private Bitmap GetCharacterImage(string fontFamily, int fontSize, char character)
+        {
+            Bitmap charImage = new Bitmap(100, 100);
+            Font font = new Font(fontFamily, fontSize);
+            Graphics preG = Graphics.FromImage(charImage);
+            SizeF drawSize = preG.MeasureString(character.ToString(), font);
+            charImage = new Bitmap((int)drawSize.Width, (int)drawSize.Height);
+            Graphics g = Graphics.FromImage(charImage);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            g.DrawString(character.ToString(), font, Brushes.Black, 0, 0);
+            return charImage;
+        }
 
         public Point[] GetRelPositionsFromMoveString(string move)
         {

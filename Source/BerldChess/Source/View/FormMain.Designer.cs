@@ -31,6 +31,8 @@
             this.components = new System.ComponentModel.Container();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
             this._splitContainerInner = new System.Windows.Forms.SplitContainer();
+            this._labelAnimTime = new System.Windows.Forms.Label();
+            this._textBoxAnimTime = new System.Windows.Forms.TextBox();
             this._checkBoxCheckAuto = new System.Windows.Forms.CheckBox();
             this._buttonReset = new System.Windows.Forms.Button();
             this._buttonColorDialog = new System.Windows.Forms.Button();
@@ -64,8 +66,7 @@
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
             this._engineTimer = new System.Windows.Forms.Timer(this.components);
             this._timerAutoCheck = new System.Windows.Forms.Timer(this.components);
-            this._labelAnimTime = new System.Windows.Forms.Label();
-            this._textBoxAnimTime = new System.Windows.Forms.TextBox();
+            this._buttonAlterPieces = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
@@ -112,6 +113,7 @@
             // 
             // _splitContainerInner.Panel2
             // 
+            this._splitContainerInner.Panel2.Controls.Add(this._buttonAlterPieces);
             this._splitContainerInner.Panel2.Controls.Add(this._labelAnimTime);
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxAnimTime);
             this._splitContainerInner.Panel2.Controls.Add(this._checkBoxCheckAuto);
@@ -145,10 +147,29 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 495);
-            this._splitContainerInner.SplitterDistance = 612;
+            this._splitContainerInner.SplitterDistance = 613;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
+            // 
+            // _labelAnimTime
+            // 
+            this._labelAnimTime.AutoSize = true;
+            this._labelAnimTime.Location = new System.Drawing.Point(17, 390);
+            this._labelAnimTime.Name = "_labelAnimTime";
+            this._labelAnimTime.Size = new System.Drawing.Size(75, 13);
+            this._labelAnimTime.TabIndex = 29;
+            this._labelAnimTime.Text = "Animation time";
+            // 
+            // _textBoxAnimTime
+            // 
+            this._textBoxAnimTime.Location = new System.Drawing.Point(20, 406);
+            this._textBoxAnimTime.Name = "_textBoxAnimTime";
+            this._textBoxAnimTime.Size = new System.Drawing.Size(75, 20);
+            this._textBoxAnimTime.TabIndex = 28;
+            this._textBoxAnimTime.Text = "300";
+            this._textBoxAnimTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this._textBoxAnimTime.TextChanged += new System.EventHandler(this.OnTextBoxAnimTimeTextChanged);
             // 
             // _checkBoxCheckAuto
             // 
@@ -505,24 +526,15 @@
             this._timerAutoCheck.Interval = 400;
             this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
             // 
-            // _labelAnimTime
+            // _buttonAlterPieces
             // 
-            this._labelAnimTime.AutoSize = true;
-            this._labelAnimTime.Location = new System.Drawing.Point(17, 390);
-            this._labelAnimTime.Name = "_labelAnimTime";
-            this._labelAnimTime.Size = new System.Drawing.Size(75, 13);
-            this._labelAnimTime.TabIndex = 29;
-            this._labelAnimTime.Text = "Animation time";
-            // 
-            // _textBoxAnimTime
-            // 
-            this._textBoxAnimTime.Location = new System.Drawing.Point(20, 406);
-            this._textBoxAnimTime.Name = "_textBoxAnimTime";
-            this._textBoxAnimTime.Size = new System.Drawing.Size(75, 20);
-            this._textBoxAnimTime.TabIndex = 28;
-            this._textBoxAnimTime.Text = "300";
-            this._textBoxAnimTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this._textBoxAnimTime.TextChanged += new System.EventHandler(this.OnTextBoxAnimTimeTextChanged);
+            this._buttonAlterPieces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonAlterPieces.Location = new System.Drawing.Point(126, 339);
+            this._buttonAlterPieces.Name = "_buttonAlterPieces";
+            this._buttonAlterPieces.Size = new System.Drawing.Size(81, 23);
+            this._buttonAlterPieces.TabIndex = 30;
+            this._buttonAlterPieces.Text = "Alter Pieces";
+            this._buttonAlterPieces.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
@@ -588,6 +600,7 @@
         private System.Windows.Forms.Timer _timerAutoCheck;
         private System.Windows.Forms.Label _labelAnimTime;
         private System.Windows.Forms.TextBox _textBoxAnimTime;
+        private System.Windows.Forms.Button _buttonAlterPieces;
     }
 }
 
