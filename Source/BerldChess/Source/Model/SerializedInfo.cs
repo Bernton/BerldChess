@@ -39,17 +39,17 @@ namespace BerldChess.Model
         private int _multiPV = 250;
         private int _animTime = 300;
 
-        private Font _pieceFont = null;
+        private string _pieceFontFamily = null;
 
-        public Font PieceFont
+        public string PieceFontFamily
         {
             get
             {
-                return _pieceFont;
+                return _pieceFontFamily;
             }
             set
             {
-                _pieceFont = value;
+                _pieceFontFamily = value;
             }
         }
 

@@ -8,12 +8,17 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Drawing.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Drawing.Imaging;
+using BerldChess.Model;
 
 namespace BerldChess.View
 {
     public class ChessPanel : Panel
     {
         #region Fields
+
+        private double _fontSizeFactor = -1;
 
         private bool _wasResized = true;
         private int _pieceDimension;
@@ -27,11 +32,7 @@ namespace BerldChess.View
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
 
-        // CORRECT CODE
-        //private string _pieceFontFamily = string.Empty;
-
-        //TESTING 
-        private string _pieceFontFamily = "Arial Unicode MS";
+        private string _pieceFontFamily = string.Empty;
 
         #endregion
 
@@ -45,8 +46,24 @@ namespace BerldChess.View
             }
             set
             {
+                if (value.ToLowerInvariant() == _pieceFontFamily.ToLowerInvariant())
+                {
+                    return;
+                }
+
+                _fontSizeFactor = -1;
                 _pieceFontFamily = value;
-                _scaledPieceImages = GetPiecesFromFontFamily(value, _fieldSize);
+
+                if (_pieceFontFamily != "")
+                {
+                    _scaledPieceImages = GetPiecesFromFontFamily(value, _fieldSize);
+                }
+                else
+                {
+                    _wasResized = true;
+                }
+
+                Invalidate();
             }
         }
 
@@ -123,13 +140,26 @@ namespace BerldChess.View
             }
 
             _fieldSize = _boardDimension / (double)_board.Length;
-            _pieceDimension = Round(_fieldSize * 1.05);
+
+            if (PieceFontFamily != "")
+            {
+                _pieceDimension = Round(_fieldSize);
+            }
+            else
+            {
+                _pieceDimension = Round(_fieldSize * 1.05);
+            }
 
             if (_wasResized)
             {
-                if (PieceFontFamily != string.Empty)
+                if (PieceFontFamily != "")
                 {
                     _scaledPieceImages = GetPiecesFromFontFamily(_pieceFontFamily, _fieldSize);
+
+                    if (_scaledPieceImages == null)
+                    {
+                        return;
+                    }
                 }
                 else
                 {
@@ -252,6 +282,12 @@ namespace BerldChess.View
                         absY = Round(Invert(Game.BoardHeight - 1, y) * _fieldSize + _boardLocation.Y + (_fieldSize - _pieceDimension) / 2.0);
                     }
 
+                    if (PieceFontFamily != "")
+                    {
+                        absX += Round((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Width) / 2);
+                        absY += (int)Math.Ceiling((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Height) / 2);
+                    }
+
                     g.DrawImageUnscaled(_scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())], absX, absY);
                 }
             }
@@ -328,6 +364,12 @@ namespace BerldChess.View
 
                 absX = _movingPoint.X - Round(_fieldSize / 2.0);
                 absY = _movingPoint.Y - Round(_fieldSize / 2.0);
+
+                if (PieceFontFamily != "")
+                {
+                    absX += Round((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Width) / 2);
+                    absY += Round((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Height) / 2);
+                }
 
                 g.DrawImageUnscaled(_scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())], absX, absY);
             }
@@ -434,48 +476,208 @@ namespace BerldChess.View
 
         private Bitmap[] GetPiecesFromFontFamily(string fontFamily, double fieldSize)
         {
+            if (fieldSize == 0)
+            {
+                return null;
+            }
+
             Bitmap[] pieceImages = new Bitmap[12];
             int whiteKing = 0x2654;
-
             int[] imagePositions = new int[] { 0, 1, 3, 4, 2, 5, 6, 7, 9, 10, 8, 11 };
 
-            int fontSize = int.MaxValue;
+            if (_fontSizeFactor == -1)
+            {
+                _fontSizeFactor = double.MaxValue;
+
+                for (int i = 0; i < 6; i++)
+                {
+                    Bitmap image = GetCharacterImage(fontFamily, (int)fieldSize, (char)(whiteKing + i));
+                    Bitmap croppedImage = CropTransparentBorders(image);
+
+                    double widthOffset = (double)image.Width / croppedImage.Width - 1;
+                    double heightOffset = (double)image.Height / croppedImage.Height - 1;
+
+                    if (widthOffset < _fontSizeFactor)
+                    {
+                        _fontSizeFactor = widthOffset;
+                    }
+
+                    if (heightOffset < _fontSizeFactor)
+                    {
+                        _fontSizeFactor = heightOffset;
+                    }
+                }
+            }
+
+            int fontSize = -1;
             SizeF currentDimension = new SizeF(-1, -1);
 
-            Bitmap measureImage = new Bitmap(100, 100);
-            Graphics measureG = Graphics.FromImage(measureImage);
-
-            int fontSizeCounter = 1;
+            int fontSizeCounter = 0;
 
             while (currentDimension.Height < fieldSize && currentDimension.Width < fieldSize)
             {
-                Font font = new Font(fontFamily, fontSizeCounter);
-                currentDimension = measureG.MeasureString(((char)whiteKing).ToString(), font);
                 fontSizeCounter++;
+
+                Font font = new Font(fontFamily, fontSizeCounter);
+                currentDimension = TextRenderer.MeasureText(((char)whiteKing).ToString(), font);
             }
 
-            if (fontSizeCounter < fontSize)
-            {
-                fontSize = fontSizeCounter;
-            }
-
-            currentDimension = new SizeF(-1, -1);
+            fontSize = (int)(fontSizeCounter * (1 + _fontSizeFactor));
 
             for (int i = 0; i < pieceImages.Length; i++)
             {
-                pieceImages[i] = GetCharacterImage(fontFamily, fontSize, (char)(whiteKing + imagePositions[i]));
+                pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, (char)(whiteKing + imagePositions[i])));
+                pieceImages[i] = FillTransparentSectors(pieceImages[i]);
             }
 
             return pieceImages;
         }
 
+        private Bitmap FillTransparentSectors(Bitmap image)
+        {
+            Bitmap filledImage;
+
+            filledImage = Transparent2Color(image, Color.White);
+
+            BitmapData imageData = filledImage.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            FloodFiller filler = new FloodFiller();
+            //filler.FillColor = Color.White;
+
+            unsafe
+            {
+                //int pixelLength = 4;
+                //int height = image.Height;
+                //int width = imageData.Width;
+                //int stride = imageData.Stride;
+
+                //byte* sourcePointer = (byte*)(void*)imageData.Scan0;
+                //byte* currentPointer;
+
+                //for (int y = 0; y < height; y++)
+                //{
+                //    for (int x = 0; x < width; x++)
+                //    {
+                //        currentPointer = sourcePointer + y * stride + x * pixelLength;
+
+                //        if (currentPointer[3] == 0)
+                //        {
+                //            filler.FloodFill(imageData, new Point(x, y));
+                //        }
+                //    }
+                //}
+
+
+                byte[] tolerance = new byte[4];
+
+                for (int i = 0; i < tolerance.Length; i++)
+                {
+                    tolerance[i] = 65;
+                }
+
+                filler.Tolerance = tolerance;
+
+                filler.FillColor = Color.FromArgb(0);
+                filler.FloodFill(imageData, new Point(0, 0));
+                filledImage.UnlockBits(imageData);
+            }
+
+            return filledImage;
+        }
+
+        private Bitmap Transparent2Color(Bitmap bmp1, Color target)
+        {
+            Bitmap bmp2 = new Bitmap(bmp1.Width, bmp1.Height);
+            Rectangle rect = new Rectangle(Point.Empty, bmp1.Size);
+            using (Graphics G = Graphics.FromImage(bmp2))
+            {
+                G.Clear(target);
+                G.DrawImageUnscaledAndClipped(bmp1, rect);
+            }
+            return bmp2;
+        }
+
+        public Bitmap CropTransparentBorders(Bitmap image)
+        {
+            int width = image.Width;
+            int height = image.Height;
+
+            Func<int, bool> allTransparentRow = (row) =>
+            {
+                for (int i = 0; i < width; ++i)
+                    if (image.GetPixel(i, row).A != 0)
+                        return false;
+                return true;
+            };
+
+            Func<int, bool> allTransparentColumn = (column) =>
+            {
+                for (int i = 0; i < height; ++i)
+                    if (image.GetPixel(column, i).A != 0)
+                        return false;
+                return true;
+            };
+
+            int topmost = 0;
+            for (int row = 0; row < height; ++row)
+            {
+                if (allTransparentRow(row))
+                    topmost = row;
+                else break;
+            }
+
+            int bottommost = 0;
+            for (int row = height - 1; row >= 0; --row)
+            {
+                if (allTransparentRow(row))
+                    bottommost = row;
+                else break;
+            }
+
+            int leftmost = 0;
+            int rightmost = 0;
+
+            for (int column = 0; column < width; ++column)
+            {
+                if (allTransparentColumn(column))
+                    leftmost = column;
+                else
+                    break;
+            }
+
+            for (int column = width - 1; column >= 0; --column)
+            {
+                if (allTransparentColumn(column))
+                    rightmost = column;
+                else
+                    break;
+            }
+
+            int croppedWidth = rightmost + 1 - leftmost;
+            int croppedHeight = bottommost + 1 - topmost;
+
+            try
+            {
+                Bitmap target = new Bitmap(croppedWidth, croppedHeight);
+
+                using (Graphics g = Graphics.FromImage(target))
+                {
+                    g.DrawImage(image, new RectangleF(0, 0, croppedWidth, croppedHeight), new RectangleF(leftmost, topmost, croppedWidth, croppedHeight), GraphicsUnit.Pixel);
+                }
+
+                return target;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return image;
+            }
+        }
+
         private Bitmap GetCharacterImage(string fontFamily, int fontSize, char character)
         {
-            Bitmap charImage = new Bitmap(100, 100);
             Font font = new Font(fontFamily, fontSize);
-            Graphics preG = Graphics.FromImage(charImage);
-            SizeF drawSize = preG.MeasureString(character.ToString(), font);
-            charImage = new Bitmap((int)drawSize.Width, (int)drawSize.Height);
+            SizeF drawSize = TextRenderer.MeasureText(character.ToString(), font);
+            Bitmap charImage = new Bitmap((int)drawSize.Width, (int)drawSize.Height);
             Graphics g = Graphics.FromImage(charImage);
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;

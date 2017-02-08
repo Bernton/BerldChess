@@ -4,6 +4,7 @@ using BerldChess.ViewModel;
 using ChessDotNet;
 using ChessDotNet.Pieces;
 using ChessEngineInterface;
+using Microsoft.VisualBasic;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -410,7 +411,7 @@ namespace BerldChess.View
 
             if (_vm.Game.IsValidMove(move))
             {
-                if(_moveTry)
+                if (_moveTry)
                 {
                     Recognizer.UpdateBoardImage();
                     _moveTry = false;
@@ -830,7 +831,7 @@ namespace BerldChess.View
             {
                 Point[] changedSquares = Recognizer.GetChangedSquares();
 
-                if(changedSquares.Length == 0)
+                if (changedSquares.Length == 0)
                 {
                     return;
                 }
@@ -874,7 +875,7 @@ namespace BerldChess.View
                 OnPieceMoved(null, args);
             }
         }
-       
+
         private void OnTextBoxAnimTimeTextChanged(object sender, EventArgs e)
         {
             int number;
@@ -890,6 +891,35 @@ namespace BerldChess.View
                     _animTime = 20;
                 }
             }
+        }
+
+        private void OnButtonAlterPiecesClick(object sender, EventArgs e)
+        {
+            string input = Interaction.InputBox("Type Font Family for pieces, leave empty for default.");
+
+            if (DoesFontExist(input, FontStyle.Regular) || input == "")
+            {
+                SerializedInfo.Instance.PieceFontFamily = input;
+                _chessPanel.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
+                _chessPanel.Invalidate();
+            }
+        }
+
+        private bool DoesFontExist(string fontFamilyName, FontStyle fontStyle)
+        {
+            bool result;
+
+            try
+            {
+                using (FontFamily family = new FontFamily(fontFamilyName))
+                    result = family.IsStyleAvailable(fontStyle);
+            }
+            catch (ArgumentException)
+            {
+                result = false;
+            }
+
+            return result;
         }
 
         #endregion
@@ -914,6 +944,7 @@ namespace BerldChess.View
                         WindowState = FormWindowState.Maximized;
                     }
 
+                    _chessPanel.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
                     _checkBoxHideOutput.Checked = SerializedInfo.Instance.HideOutput;
                     _checkBoxHideArrows.Checked = SerializedInfo.Instance.HideArrows;
                     _checkBoxGridBorder.Checked = SerializedInfo.Instance.DisplayGridBorder;
@@ -924,8 +955,6 @@ namespace BerldChess.View
                     _textBoxMultiPV.Text = SerializedInfo.Instance.MultiPV.ToString();
                     _checkBoxSound.Checked = SerializedInfo.Instance.Sound;
                     _animTime = SerializedInfo.Instance.AnimationTime;
-
-                    _chessPanel.Invalidate();
                 }
             }
             catch (Exception ex)
@@ -933,43 +962,42 @@ namespace BerldChess.View
                 File.Delete(FormMainViewModel.ConfigFileName);
                 Debug.WriteLine(ex.ToString());
             }
+
+            _chessPanel.Invalidate();
         }
 
         private void SaveXMLConfiguration()
         {
-            if (File.Exists(FormMainViewModel.ConfigFileName))
+            try
             {
-                try
-                {
-                    SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
-                    SerializedInfo.Instance.DisplayGridBorder = _checkBoxGridBorder.Checked;
-                    SerializedInfo.Instance.BoardFlipped = _checkBoxFlipped.Checked;
-                    SerializedInfo.Instance.HideArrows = _checkBoxHideArrows.Checked;
-                    SerializedInfo.Instance.HideOutput = _checkBoxHideOutput.Checked;
-                    SerializedInfo.Instance.LocalMode = _checkBoxLocalMode.Checked;
-                    SerializedInfo.Instance.CheatMode = _checkBoxCheatMode.Checked;
-                    SerializedInfo.Instance.EngineTime = _engineTime;
-                    SerializedInfo.Instance.Sound = _checkBoxSound.Checked;
-                    SerializedInfo.Instance.AnimationTime = _animTime;
+                SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
+                SerializedInfo.Instance.DisplayGridBorder = _checkBoxGridBorder.Checked;
+                SerializedInfo.Instance.BoardFlipped = _checkBoxFlipped.Checked;
+                SerializedInfo.Instance.HideArrows = _checkBoxHideArrows.Checked;
+                SerializedInfo.Instance.HideOutput = _checkBoxHideOutput.Checked;
+                SerializedInfo.Instance.LocalMode = _checkBoxLocalMode.Checked;
+                SerializedInfo.Instance.CheatMode = _checkBoxCheatMode.Checked;
+                SerializedInfo.Instance.EngineTime = _engineTime;
+                SerializedInfo.Instance.Sound = _checkBoxSound.Checked;
+                SerializedInfo.Instance.AnimationTime = _animTime;
 
-                    XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
-                    FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
-                    serializer.Serialize(fileStream, SerializedInfo.Instance);
-                    fileStream.Dispose();
+                XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
+                FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
+                serializer.Serialize(fileStream, SerializedInfo.Instance);
+                fileStream.Dispose();
 
-                    if (WindowState == FormWindowState.Maximized)
-                    {
-                        SerializedInfo.Instance.Bounds = RestoreBounds;
-                    }
-                    else
-                    {
-                        SerializedInfo.Instance.Bounds = Bounds;
-                    }
-                }
-                catch (Exception ex)
+                if (WindowState == FormWindowState.Maximized)
                 {
-                    Debug.WriteLine(ex);
+                    SerializedInfo.Instance.Bounds = RestoreBounds;
                 }
+                else
+                {
+                    SerializedInfo.Instance.Bounds = Bounds;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
             }
         }
 

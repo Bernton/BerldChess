@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
             this._splitContainerInner = new System.Windows.Forms.SplitContainer();
+            this._buttonAlterPieces = new System.Windows.Forms.Button();
             this._labelAnimTime = new System.Windows.Forms.Label();
             this._textBoxAnimTime = new System.Windows.Forms.TextBox();
             this._checkBoxCheckAuto = new System.Windows.Forms.CheckBox();
@@ -66,7 +67,6 @@
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
             this._engineTimer = new System.Windows.Forms.Timer(this.components);
             this._timerAutoCheck = new System.Windows.Forms.Timer(this.components);
-            this._buttonAlterPieces = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
@@ -147,10 +147,21 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 495);
-            this._splitContainerInner.SplitterDistance = 613;
+            this._splitContainerInner.SplitterDistance = 614;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
+            // 
+            // _buttonAlterPieces
+            // 
+            this._buttonAlterPieces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this._buttonAlterPieces.Location = new System.Drawing.Point(126, 339);
+            this._buttonAlterPieces.Name = "_buttonAlterPieces";
+            this._buttonAlterPieces.Size = new System.Drawing.Size(81, 23);
+            this._buttonAlterPieces.TabIndex = 30;
+            this._buttonAlterPieces.Text = "Alter Pieces";
+            this._buttonAlterPieces.UseVisualStyleBackColor = true;
+            this._buttonAlterPieces.Click += new System.EventHandler(this.OnButtonAlterPiecesClick);
             // 
             // _labelAnimTime
             // 
@@ -525,16 +536,6 @@
             this._timerAutoCheck.Enabled = true;
             this._timerAutoCheck.Interval = 400;
             this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
-            // 
-            // _buttonAlterPieces
-            // 
-            this._buttonAlterPieces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonAlterPieces.Location = new System.Drawing.Point(126, 339);
-            this._buttonAlterPieces.Name = "_buttonAlterPieces";
-            this._buttonAlterPieces.Size = new System.Drawing.Size(81, 23);
-            this._buttonAlterPieces.TabIndex = 30;
-            this._buttonAlterPieces.Text = "Alter Pieces";
-            this._buttonAlterPieces.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
