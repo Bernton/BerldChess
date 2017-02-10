@@ -822,18 +822,18 @@ namespace BerldChess.View
                 images[i] = Recognizer.GetScreenshot(Screen.AllScreens[i]);
             }
 
-            //FormSquareColorDialog squareColorDialog = new FormSquareColorDialog(images);
-            //squareColorDialog.ShowDialog();
+            FormSquareColorDialog squareColorDialog = new FormSquareColorDialog(images);
+            squareColorDialog.ShowDialog();
 
-            //if (squareColorDialog.DarkSquareColor != null)
-            //{
-            //    SerializedInfo.Instance.DarkSquare = (Color)squareColorDialog.DarkSquareColor;
-            //}
+            if (squareColorDialog.DarkSquareColor != null)
+            {
+                SerializedInfo.Instance.DarkSquare = (Color)squareColorDialog.DarkSquareColor;
+            }
 
-            //if (squareColorDialog.LightSquareColor != null)
-            //{
-            //    SerializedInfo.Instance.LightSquare = (Color)squareColorDialog.LightSquareColor;
-            //}
+            if (squareColorDialog.LightSquareColor != null)
+            {
+                SerializedInfo.Instance.LightSquare = (Color)squareColorDialog.LightSquareColor;
+            }
         }
 
         private void OnButtonResetClick(object sender, EventArgs e)
