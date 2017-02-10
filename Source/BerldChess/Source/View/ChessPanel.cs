@@ -38,6 +38,12 @@ namespace BerldChess.View
 
         #region Properties
 
+        public double PieceSizeFactor { get; set; }
+
+        public bool IsUnicodeFont { get; set; }
+
+        public string ChessFontChars { get; set; }
+
         public string PieceFontFamily
         {
             get
@@ -46,11 +52,6 @@ namespace BerldChess.View
             }
             set
             {
-                if (value.ToLowerInvariant() == _pieceFontFamily.ToLowerInvariant())
-                {
-                    return;
-                }
-
                 _fontSizeFactor = -1;
                 _pieceFontFamily = value;
 
@@ -482,8 +483,23 @@ namespace BerldChess.View
             }
 
             Bitmap[] pieceImages = new Bitmap[12];
+
             int whiteKing = 0x2654;
-            int[] imagePositions = new int[] { 0, 1, 3, 4, 2, 5, 6, 7, 9, 10, 8, 11 };
+
+            char[] characters;
+
+            if (IsUnicodeFont || ChessFontChars == null || ChessFontChars.Length != 12)
+            {
+                characters = new char[]
+                {
+                    '♔', '♕', '♗', '♘', '♖', '♙',
+                    '♚', '♛', '♝', '♞', '♜', '♟'
+                };
+            }
+            else
+            {
+                characters = ChessFontChars.ToCharArray();
+            }
 
             if (_fontSizeFactor == -1)
             {
@@ -491,7 +507,7 @@ namespace BerldChess.View
 
                 for (int i = 0; i < 6; i++)
                 {
-                    Bitmap image = GetCharacterImage(fontFamily, (int)fieldSize, (char)(whiteKing + i));
+                    Bitmap image = GetCharacterImage(fontFamily, (int)fieldSize, characters[i]);
                     Bitmap croppedImage = CropTransparentBorders(image);
 
                     double widthOffset = (double)image.Width / croppedImage.Width - 1;
@@ -522,11 +538,16 @@ namespace BerldChess.View
                 currentDimension = TextRenderer.MeasureText(((char)whiteKing).ToString(), font);
             }
 
-            fontSize = (int)(fontSizeCounter * (1 + _fontSizeFactor));
+            fontSize = (int)((fontSizeCounter * (1 + _fontSizeFactor)) * PieceSizeFactor);
+
+            if (fontSize > (int)_fieldSize + 1)
+            {
+                fontSize = (int)_fieldSize;
+            }
 
             for (int i = 0; i < pieceImages.Length; i++)
             {
-                pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, (char)(whiteKing + imagePositions[i])));
+                pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
                 pieceImages[i] = FillTransparentSectors(pieceImages[i]);
             }
 

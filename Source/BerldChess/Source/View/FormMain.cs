@@ -22,6 +22,7 @@ namespace BerldChess.View
     {
         #region Fields
 
+        PieceSelectionDialog _pieceDialog = new PieceSelectionDialog();
         private bool _moveTry = false;
         private SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
         private SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
@@ -50,6 +51,8 @@ namespace BerldChess.View
             InitializeViewModel();
             InitializeChessBoard();
             LoadXMLConfiguration();
+
+            _pieceDialog.FontSelected += OnDialogFontSelected;
 
             _textBoxFen.Text = _vm.Game.GetFen();
             _columnOrder = new InfoType[]
@@ -143,6 +146,19 @@ namespace BerldChess.View
                 });
 
                 EmptyDataGrid();
+            }
+            else if (_vm.Game.IsDraw())
+            {
+                if (IsHandleCreated)
+                {
+                    Invoke((MethodInvoker)delegate
+                    {
+                        _labelCPStatus.Text = "Draw";
+                        _labelCPStatus.ForeColor = Color.Black;
+                    });
+
+                    EmptyDataGrid();
+                }
             }
             else
             {
@@ -339,11 +355,11 @@ namespace BerldChess.View
 
         private void OnTimerTick(object sender, EventArgs e)
         {
-            if (!IsFinishedPosition())
+            if (_computerPlayer != ChessPlayer.None)
             {
-                if (_computerPlayer != ChessPlayer.None)
+                if (_vm.Game.WhoseTurn == _computerPlayer)
                 {
-                    if (_vm.Game.WhoseTurn == _computerPlayer)
+                    if (!IsFinishedPosition())
                     {
                         if (_timeSinceLastMove.ElapsedMilliseconds > _engineTime)
                         {
@@ -462,6 +478,10 @@ namespace BerldChess.View
                 {
                     _labelCPStatus.Text = "Stalemate";
                 }
+                else if (_vm.Game.IsDraw())
+                {
+                    _labelCPStatus.Text = "Draw";
+                }
 
                 _timeSinceLastMove.Restart();
 
@@ -470,7 +490,7 @@ namespace BerldChess.View
             }
             else
             {
-                if (!_moveTry)
+                if (!_moveTry && _checkBoxSound.Checked)
                 {
                     _illegalPlayer.Play();
                 }
@@ -597,8 +617,7 @@ namespace BerldChess.View
 
         private void OnSlowTimerTick(object sender, EventArgs e)
         {
-
-            if (IsFinishedPosition())
+            if (_isAutoPlay && IsFinishedPosition())
             {
                 _isAutoPlay = false;
             }
@@ -895,31 +914,36 @@ namespace BerldChess.View
 
         private void OnButtonAlterPiecesClick(object sender, EventArgs e)
         {
-            string input = Interaction.InputBox("Type Font Family for pieces, leave empty for default.");
+            _pieceDialog.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
+            _pieceDialog.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
+            _pieceDialog.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
+            _pieceDialog.SizeFactor = SerializedInfo.Instance.PieceSizeFactor;
 
-            if (DoesFontExist(input, FontStyle.Regular) || input == "")
+            if (_pieceDialog.ShowDialog() == DialogResult.OK)
             {
-                SerializedInfo.Instance.PieceFontFamily = input;
+                SerializedInfo.Instance.PieceSizeFactor = _pieceDialog.SizeFactor;
+                SerializedInfo.Instance.ChessFontChars = _pieceDialog.ChessFontChars;
+                SerializedInfo.Instance.PieceFontFamily = _pieceDialog.PieceFontFamily;
+                SerializedInfo.Instance.IsUnicodeFont = _pieceDialog.IsUnicodeFont;
+                _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
+                _chessPanel.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
+                _chessPanel.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
                 _chessPanel.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
                 _chessPanel.Invalidate();
             }
         }
 
-        private bool DoesFontExist(string fontFamilyName, FontStyle fontStyle)
+        private void OnDialogFontSelected()
         {
-            bool result;
-
-            try
-            {
-                using (FontFamily family = new FontFamily(fontFamilyName))
-                    result = family.IsStyleAvailable(fontStyle);
-            }
-            catch (ArgumentException)
-            {
-                result = false;
-            }
-
-            return result;
+            SerializedInfo.Instance.PieceSizeFactor = _pieceDialog.SizeFactor;
+            SerializedInfo.Instance.ChessFontChars = _pieceDialog.ChessFontChars;
+            SerializedInfo.Instance.PieceFontFamily = _pieceDialog.PieceFontFamily;
+            SerializedInfo.Instance.IsUnicodeFont = _pieceDialog.IsUnicodeFont;
+            _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
+            _chessPanel.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
+            _chessPanel.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
+            _chessPanel.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
+            _chessPanel.Invalidate();
         }
 
         #endregion
@@ -944,7 +968,10 @@ namespace BerldChess.View
                         WindowState = FormWindowState.Maximized;
                     }
 
+                    _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
+                    _chessPanel.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
                     _chessPanel.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
+                    _chessPanel.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
                     _checkBoxHideOutput.Checked = SerializedInfo.Instance.HideOutput;
                     _checkBoxHideArrows.Checked = SerializedInfo.Instance.HideArrows;
                     _checkBoxGridBorder.Checked = SerializedInfo.Instance.DisplayGridBorder;
@@ -1175,7 +1202,8 @@ namespace BerldChess.View
             return _vm.Game.IsCheckmated(ChessPlayer.Black)
                 || _vm.Game.IsCheckmated(ChessPlayer.White)
                 || _vm.Game.IsStalemated(ChessPlayer.Black)
-                || _vm.Game.IsStalemated(ChessPlayer.White);
+                || _vm.Game.IsStalemated(ChessPlayer.White)
+                || _vm.Game.IsDraw();
         }
 
         #endregion

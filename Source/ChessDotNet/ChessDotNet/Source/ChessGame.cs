@@ -94,12 +94,90 @@ namespace ChessDotNet
         }
 
         protected bool fiftyMoves = false;
+
         public virtual bool DrawCanBeClaimed
         {
             get
             {
-                return fiftyMoves && !IsCheckmated(WhoseTurn) && !IsStalemated(WhoseTurn);
+                return Is3Fold() || !HasSufficientMaterial() || fiftyMoves || IsCheckmated(WhoseTurn) || IsStalemated(WhoseTurn);
             }
+        }
+
+        private struct LocPiece
+        {
+            public ChessPiece Piece;
+            public int X;
+            public int Y;
+        }
+
+        private bool Is3Fold()
+        {
+            if(_positions.Count < 3)
+            {
+                return false;
+            }
+
+            int sameCount = 0;
+
+            for (int checkedI = 0; checkedI < _positions.Count; checkedI++)
+            {
+                for (int i = checkedI + 1; i < _positions.Count; i++)
+                {
+                    if(_positions[checkedI] == _positions[i])
+                    {
+                        sameCount++;
+
+                        if(sameCount > 2)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                sameCount = 0;
+            }
+
+            return false;
+        }
+
+        private bool HasSufficientMaterial()
+        {
+            List<LocPiece> pieces = new List<LocPiece>();
+
+            for (int y = 0; y < Board.Length; y++)
+            {
+                for (int x = 0; x < Board.Length; x++)
+                {
+                    if (Board[x][y] == null || Board[x][y].Owner == ChessPlayer.None || Board[x][y].GetFENLetter() == 'k' || Board[x][y].GetFENLetter() == 'K')
+                    {
+                        continue;
+                    }
+
+                    LocPiece locPiece = new LocPiece();
+                    locPiece.Piece = Board[x][y];
+                    locPiece.X = x;
+                    locPiece.Y = y;
+
+                    pieces.Add(locPiece);
+                }
+            }
+
+            if (pieces.Count == 0)
+            {
+                return false;
+            }
+            else if (pieces.Count == 1)
+            {
+                if (pieces[0].Piece.GetFENLetter() == 'B' ||
+                    pieces[0].Piece.GetFENLetter() == 'b' ||
+                    pieces[0].Piece.GetFENLetter() == 'N' ||
+                    pieces[0].Piece.GetFENLetter() == 'n')
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public ChessPlayer WhoseTurn
@@ -154,6 +232,20 @@ namespace ChessDotNet
         public ChessPiece[][] GetBoard()
         {
             return CloneBoard(Board);
+        }
+
+        List<string> _positions = new List<string>();
+
+        public ReadOnlyCollection<string> Positions
+        {
+            get
+            {
+                return new ReadOnlyCollection<string>(_positions);
+            }
+            protected set
+            {
+                _positions = value.ToList();
+            }
         }
 
         List<DetailedMove> _moves = new List<DetailedMove>();
@@ -217,6 +309,7 @@ namespace ChessDotNet
         {
             WhoseTurn = ChessPlayer.White;
             _moves = new List<DetailedMove>();
+            _positions = new List<string>();
             Board = new ChessPiece[8][];
             ChessPiece kw = FenMappings['K'];
             ChessPiece kb = FenMappings['k'];
@@ -433,6 +526,92 @@ namespace ChessDotNet
             fenBuilder.Append(' ');
 
             fenBuilder.Append(_fullMoveNumber);
+
+            return fenBuilder.ToString();
+        }
+
+        protected virtual string GetPosition()
+        {
+            StringBuilder fenBuilder = new StringBuilder();
+            ChessPiece[][] board = GetBoard();
+            for (int i = 0; i < board.Length; i++)
+            {
+                ChessPiece[] row = board[i];
+                int empty = 0;
+                foreach (ChessPiece piece in row)
+                {
+                    char pieceChar = piece == null ? '\0' : piece.GetFENLetter();
+                    if (pieceChar == '\0')
+                    {
+                        empty++;
+                        continue;
+                    }
+                    if (empty != 0)
+                    {
+                        fenBuilder.Append(empty);
+                        empty = 0;
+                    }
+                    fenBuilder.Append(pieceChar);
+                }
+                if (empty != 0)
+                {
+                    fenBuilder.Append(empty);
+                }
+                if (i != board.Length - 1)
+                {
+                    fenBuilder.Append('/');
+                }
+            }
+
+            fenBuilder.Append(' ');
+
+            fenBuilder.Append(WhoseTurn == ChessPlayer.White ? 'w' : 'b');
+
+            fenBuilder.Append(' ');
+
+            bool hasAnyCastlingOptions = false;
+
+
+            if (CanWhiteCastleKingSide)
+            {
+                fenBuilder.Append('K');
+                hasAnyCastlingOptions = true;
+            }
+            if (CanWhiteCastleQueenSide)
+            {
+                fenBuilder.Append('Q');
+                hasAnyCastlingOptions = true;
+            }
+
+
+            if (CanBlackCastleKingSide)
+            {
+                fenBuilder.Append('k');
+                hasAnyCastlingOptions = true;
+            }
+            if (CanBlackCastleQueenSide)
+            {
+                fenBuilder.Append('q');
+                hasAnyCastlingOptions = true;
+            }
+            if (!hasAnyCastlingOptions)
+            {
+                fenBuilder.Append('-');
+            }
+
+            fenBuilder.Append(' ');
+
+            DetailedMove last;
+            if (Moves.Count > 0 && (last = Moves[Moves.Count - 1]).Piece is Pawn && Math.Abs(last.OriginalPosition.Rank - last.NewPosition.Rank) == 2
+                && last.OriginalPosition.Rank == (last.Player == ChessPlayer.White ? 2 : 7))
+            {
+                fenBuilder.Append(last.NewPosition.File.ToString().ToLowerInvariant());
+                fenBuilder.Append(last.Player == ChessPlayer.White ? 3 : 6);
+            }
+            else
+            {
+                fenBuilder.Append("-");
+            }
 
             return fenBuilder.ToString();
         }
@@ -695,6 +874,7 @@ namespace ChessDotNet
             SetPieceAt(move.OriginalPosition.File, move.OriginalPosition.Rank, null);
             WhoseTurn = ChessUtility.GetOpponentOf(move.Player);
             _moves.Add(new DetailedMove(move, movingPiece, isCapture, castle));
+            _positions.Add(GetPosition());
             return type;
         }
 
@@ -854,7 +1034,7 @@ namespace ChessDotNet
 
         public virtual bool IsDraw()
         {
-            return DrawClaimed || IsStalemated(ChessPlayer.White) || IsStalemated(ChessPlayer.Black);
+            return DrawCanBeClaimed;
         }
 
         public virtual bool WouldBeInCheckAfter(Move move, ChessPlayer player)

@@ -38,8 +38,48 @@ namespace BerldChess.Model
         private Rectangle _bounds;
         private int _multiPV = 250;
         private int _animTime = 300;
+        private string _chessFontChars;
+        private bool _isUnicodeFont = false;
+        private double _sizeFactor = 0.9;
 
         private string _pieceFontFamily = null;
+
+        public double PieceSizeFactor
+        {
+            get
+            {
+                return _sizeFactor;
+            }
+            set
+            {
+                _sizeFactor = value;
+            }
+        }
+
+        public string ChessFontChars
+        {
+            get
+            {
+                return _chessFontChars;
+            }
+
+            set
+            {
+                _chessFontChars = value;
+            }
+        }
+
+        public bool IsUnicodeFont
+        {
+            get
+            {
+                return _isUnicodeFont;
+            }
+            set
+            {
+                _isUnicodeFont = value;
+            }
+        }
 
         public string PieceFontFamily
         {
