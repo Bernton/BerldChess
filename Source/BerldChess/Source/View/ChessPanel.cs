@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using BerldChess.Model;
+using System.Runtime.InteropServices;
 
 namespace BerldChess.View
 {
@@ -557,52 +558,132 @@ namespace BerldChess.View
         private Bitmap FillTransparentSectors(Bitmap image)
         {
             Bitmap filledImage;
-
             filledImage = Transparent2Color(image, Color.White);
 
-            BitmapData imageData = filledImage.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            FloodFiller filler = new FloodFiller();
+            //BitmapData imageData = filledImage.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+
+            //FloodFiller filler = new FloodFiller();
             //filler.FillColor = Color.White;
 
-            unsafe
-            {
-                //int pixelLength = 4;
-                //int height = image.Height;
-                //int width = imageData.Width;
-                //int stride = imageData.Stride;
+            //unsafe
+            //{
+            //    int pixelLength = 4;
+            //    int height = image.Height;
+            //    int width = imageData.Width;
+            //    int stride = imageData.Stride;
+            //    int tolerance = 0;
 
-                //byte* sourcePointer = (byte*)(void*)imageData.Scan0;
-                //byte* currentPointer;
-
-                //for (int y = 0; y < height; y++)
-                //{
-                //    for (int x = 0; x < width; x++)
-                //    {
-                //        currentPointer = sourcePointer + y * stride + x * pixelLength;
-
-                //        if (currentPointer[3] == 0)
-                //        {
-                //            filler.FloodFill(imageData, new Point(x, y));
-                //        }
-                //    }
-                //}
+            //    byte* sourcePointer = (byte*)(void*)imageData.Scan0;
+            //    byte* currentPointer;
 
 
-                byte[] tolerance = new byte[4];
 
-                for (int i = 0; i < tolerance.Length; i++)
-                {
-                    tolerance[i] = 65;
-                }
+            //    for (int y = 0; y < height; y++)
+            //    {
+            //        for (int x = 0; x < width; x++)
+            //        {
 
-                filler.Tolerance = tolerance;
+            //            currentPointer = sourcePointer + y * stride + x * pixelLength;
 
-                filler.FillColor = Color.FromArgb(0);
-                filler.FloodFill(imageData, new Point(0, 0));
-                filledImage.UnlockBits(imageData);
-            }
+            //            if (currentPointer[3] == 0)
+            //            {
+
+            //            }
+            //        }
+            //    }
+
+
+            //    byte[] tolerance = new byte[4];
+
+            //    for (int i = 0; i < tolerance.Length; i++)
+            //    {
+            //        tolerance[i] = 65;
+            //    }
+
+            //    filler.Tolerance = tolerance;
+
+            //    filler.FillColor = Color.FromArgb(0);
+            //    filler.FloodFill(imageData, new Point(0, 0));
+            //    filledImage.UnlockBits(imageData);
+            //}
+
+            //filledImage.UnlockBits(imageData);
+
+            FloodFill(filledImage, 0, 0);
 
             return filledImage;
+        }
+
+        void FloodFill(Bitmap bitmap, int x, int y)
+        {
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+
+            int[] bits = new int[data.Stride / 4 * data.Height];
+            Marshal.Copy(data.Scan0, bits, 0, bits.Length);
+            LinkedList<Point> check = new LinkedList<Point>();
+
+            List<int> borderSmoothPixel = new List<int>();
+            List<int> smoothColors = new List<int>();
+
+            int alpha0 = (Color.FromArgb(0, 0, 0, 0)).ToArgb();
+            int alpha1 = (Color.FromArgb(1, 0, 0, 0)).ToArgb();
+            int aphha2 = (Color.FromArgb(255, 255,255, 255)).ToArgb();
+
+            int offcount = 0;
+
+            int floodTo = 0xFFFFFF;
+            int floodFrom = bits[x + y * data.Stride / 4];
+            bits[x + y * data.Stride / 4] = floodTo;
+
+            Point[] offSets = new Point[]
+            {
+                new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0)
+            };
+
+            if (floodFrom != floodTo)
+            {
+                check.AddLast(new Point(x, y));
+
+                while (check.Count > 0)
+                {
+                    Point current = check.First.Value;
+                    check.RemoveFirst();
+
+                    foreach (Point offSet in offSets)
+                    {
+                        Point next = new Point(current.X + offSet.X, current.Y + offSet.Y);
+
+                        if (next.X >= 0 && next.Y >= 0 && next.X < data.Width && next.Y < data.Height)
+                        {
+                            if (bits[next.X + next.Y * data.Stride / 4] != -16777216 && (bits[next.X + next.Y * data.Stride / 4] > alpha1 || bits[next.X + next.Y * data.Stride / 4] < 0))
+                            {
+                                check.AddLast(next);
+
+                                if (!(bits[next.X + next.Y * data.Stride / 4] == floodFrom))
+                                {
+                                    borderSmoothPixel.Add(next.X + next.Y * data.Stride / 4);
+                                    smoothColors.Add(bits[next.X + next.Y * data.Stride / 4]);
+                                }
+
+                                bits[next.X + next.Y * data.Stride / 4] = floodTo;
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < borderSmoothPixel.Count; i++)
+            {
+                int colorVal = smoothColors[i];
+                Color color = Color.FromArgb(colorVal);
+
+                bits[borderSmoothPixel[i]] = (Color.FromArgb(Math.Abs(color.R - 255), 0, 0, 0)).ToArgb();
+            }
+
+            Debug.WriteLine(offcount.ToString());
+
+            Marshal.Copy(bits, 0, data.Scan0, bits.Length);
+            bitmap.UnlockBits(data);
         }
 
         private Bitmap Transparent2Color(Bitmap bmp1, Color target)
