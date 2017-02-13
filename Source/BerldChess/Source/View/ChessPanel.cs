@@ -1,17 +1,15 @@
-﻿using BerldChess.Properties;
-using ChessDotNet;
+﻿using ChessDotNet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Drawing.Text;
-using System.Windows.Forms;
-using System.Diagnostics;
 using System.Drawing.Imaging;
-using BerldChess.Model;
+using System.Drawing.Text;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace BerldChess.View
 {
@@ -19,16 +17,13 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private double _fontSizeFactor = -1;
-
         private bool _wasResized = true;
-        private int _pieceDimension;
         private int _boardDimension;
         private double _fieldSize;
+        private double _fontSizeFactor = -1;
         private Point _boardLocation;
         private Point _movingPieceIndex = new Point(-1, -1);
         private Point _movingPoint = new Point(-1, -1);
-        //private Point _movingOffset = new Point(-1, -1);
         private List<Arrow> _arrows = new List<Arrow>();
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
@@ -143,15 +138,6 @@ namespace BerldChess.View
 
             _fieldSize = _boardDimension / (double)_board.Length;
 
-            if (PieceFontFamily != "")
-            {
-                _pieceDimension = Round(_fieldSize);
-            }
-            else
-            {
-                _pieceDimension = Round(_fieldSize * 1.05);
-            }
-
             if (_wasResized)
             {
                 if (PieceFontFamily != "")
@@ -167,7 +153,12 @@ namespace BerldChess.View
                 {
                     for (int i = 0; i < _scaledPieceImages.Length; i++)
                     {
-                        _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], _pieceDimension, _pieceDimension);
+                        if (PieceSizeFactor > 1.5)
+                        {
+                            PieceSizeFactor = 1.5;
+                        }
+
+                        _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], (int)(_fieldSize * PieceSizeFactor), (int)(_fieldSize * PieceSizeFactor));
                     }
                 }
 
@@ -275,20 +266,17 @@ namespace BerldChess.View
 
                     if (!IsFlipped)
                     {
-                        absX = Round(x * _fieldSize + _boardLocation.X + (_fieldSize - _pieceDimension) / 2.0);
-                        absY = Round(y * _fieldSize + _boardLocation.Y + (_fieldSize - _pieceDimension) / 2.0);
+                        absX = Round(x * _fieldSize + _boardLocation.X);
+                        absY = Round(y * _fieldSize + _boardLocation.Y);
                     }
                     else
                     {
-                        absX = Round(Invert(Game.BoardHeight - 1, x) * _fieldSize + _boardLocation.X + (_fieldSize - _pieceDimension) / 2.0);
-                        absY = Round(Invert(Game.BoardHeight - 1, y) * _fieldSize + _boardLocation.Y + (_fieldSize - _pieceDimension) / 2.0);
+                        absX = Round(Invert(Game.BoardHeight - 1, x) * _fieldSize + _boardLocation.X);
+                        absY = Round(Invert(Game.BoardHeight - 1, y) * _fieldSize + _boardLocation.Y);
                     }
 
-                    if (PieceFontFamily != "")
-                    {
-                        absX += Round((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Width) / 2);
-                        absY += (int)Math.Ceiling((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Height) / 2);
-                    }
+                    absX += Round((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Width) / 2);
+                    absY += (int)Math.Ceiling((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Height) / 2);
 
                     g.DrawImageUnscaled(_scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())], absX, absY);
                 }
@@ -485,6 +473,7 @@ namespace BerldChess.View
 
             Bitmap[] pieceImages = new Bitmap[12];
 
+            int minFontSize = 80;
             int whiteKing = 0x2654;
 
             char[] characters;
@@ -546,10 +535,23 @@ namespace BerldChess.View
                 fontSize = (int)_fieldSize;
             }
 
-            for (int i = 0; i < pieceImages.Length; i++)
+            if (fontSize < minFontSize)
             {
-                pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
-                pieceImages[i] = FillTransparentSectors(pieceImages[i]);
+                for (int i = 0; i < pieceImages.Length; i++)
+                {
+                    Bitmap originalImage = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
+                    pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, minFontSize, characters[i]));
+                    pieceImages[i] = FillTransparentSectors(pieceImages[i]);
+                    pieceImages[i] = ResizeImage(pieceImages[i], originalImage.Width, originalImage.Height);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < pieceImages.Length; i++)
+                {
+                    pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
+                    pieceImages[i] = FillTransparentSectors(pieceImages[i]);
+                }
             }
 
             return pieceImages;
@@ -558,82 +560,30 @@ namespace BerldChess.View
         private Bitmap FillTransparentSectors(Bitmap image)
         {
             Bitmap filledImage;
-            filledImage = Transparent2Color(image, Color.White);
-
-            //BitmapData imageData = filledImage.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-
-            //FloodFiller filler = new FloodFiller();
-            //filler.FillColor = Color.White;
-
-            //unsafe
-            //{
-            //    int pixelLength = 4;
-            //    int height = image.Height;
-            //    int width = imageData.Width;
-            //    int stride = imageData.Stride;
-            //    int tolerance = 0;
-
-            //    byte* sourcePointer = (byte*)(void*)imageData.Scan0;
-            //    byte* currentPointer;
-
-
-
-            //    for (int y = 0; y < height; y++)
-            //    {
-            //        for (int x = 0; x < width; x++)
-            //        {
-
-            //            currentPointer = sourcePointer + y * stride + x * pixelLength;
-
-            //            if (currentPointer[3] == 0)
-            //            {
-
-            //            }
-            //        }
-            //    }
-
-
-            //    byte[] tolerance = new byte[4];
-
-            //    for (int i = 0; i < tolerance.Length; i++)
-            //    {
-            //        tolerance[i] = 65;
-            //    }
-
-            //    filler.Tolerance = tolerance;
-
-            //    filler.FillColor = Color.FromArgb(0);
-            //    filler.FloodFill(imageData, new Point(0, 0));
-            //    filledImage.UnlockBits(imageData);
-            //}
-
-            //filledImage.UnlockBits(imageData);
-
+            filledImage = TransparentToColor(image, Color.White);
             FloodFill(filledImage, 0, 0);
-
             return filledImage;
         }
 
-        void FloodFill(Bitmap bitmap, int x, int y)
+        private void FloodFill(Bitmap image, int x, int y)
         {
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-
-            int[] bits = new int[data.Stride / 4 * data.Height];
-            Marshal.Copy(data.Scan0, bits, 0, bits.Length);
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             LinkedList<Point> check = new LinkedList<Point>();
 
-            List<int> borderSmoothPixel = new List<int>();
-            List<int> smoothColors = new List<int>();
+            int recordLength = 4;
+            int[] bits = new int[data.Stride / recordLength * data.Height];
 
-            int alpha0 = (Color.FromArgb(0, 0, 0, 0)).ToArgb();
-            int alpha1 = (Color.FromArgb(1, 0, 0, 0)).ToArgb();
-            int aphha2 = (Color.FromArgb(255, 255,255, 255)).ToArgb();
+            Marshal.Copy(data.Scan0, bits, 0, bits.Length);
 
-            int offcount = 0;
+            List<int> smoothPixelLocations = new List<int>();
+            List<int> smoothPixelColors = new List<int>();
 
-            int floodTo = 0xFFFFFF;
-            int floodFrom = bits[x + y * data.Stride / 4];
-            bits[x + y * data.Stride / 4] = floodTo;
+            int border = -16777216;
+            int alpha1 = 16777216;
+            int floodTo = 16777215;
+            int floodFrom = bits[x + y * data.Stride / recordLength];
+
+            bits[x + y * data.Stride / recordLength] = floodTo;
 
             Point[] offSets = new Point[]
             {
@@ -655,47 +605,47 @@ namespace BerldChess.View
 
                         if (next.X >= 0 && next.Y >= 0 && next.X < data.Width && next.Y < data.Height)
                         {
-                            if (bits[next.X + next.Y * data.Stride / 4] != -16777216 && (bits[next.X + next.Y * data.Stride / 4] > alpha1 || bits[next.X + next.Y * data.Stride / 4] < 0))
+                            if (bits[next.X + next.Y * data.Stride / recordLength] != border && (bits[next.X + next.Y * data.Stride / recordLength] > alpha1 || bits[next.X + next.Y * data.Stride / recordLength] < 0))
                             {
                                 check.AddLast(next);
 
-                                if (!(bits[next.X + next.Y * data.Stride / 4] == floodFrom))
+                                if (bits[next.X + next.Y * data.Stride / recordLength] != floodFrom)
                                 {
-                                    borderSmoothPixel.Add(next.X + next.Y * data.Stride / 4);
-                                    smoothColors.Add(bits[next.X + next.Y * data.Stride / 4]);
+                                    smoothPixelLocations.Add(next.X + next.Y * data.Stride / recordLength);
+                                    smoothPixelColors.Add(bits[next.X + next.Y * data.Stride / recordLength]);
                                 }
 
-                                bits[next.X + next.Y * data.Stride / 4] = floodTo;
+                                bits[next.X + next.Y * data.Stride / recordLength] = floodTo;
                             }
                         }
                     }
                 }
             }
 
-            for (int i = 0; i < borderSmoothPixel.Count; i++)
+            for (int i = 0; i < smoothPixelLocations.Count; i++)
             {
-                int colorVal = smoothColors[i];
-                Color color = Color.FromArgb(colorVal);
+                int colorInteger = smoothPixelColors[i];
+                Color color = Color.FromArgb(colorInteger);
 
-                bits[borderSmoothPixel[i]] = (Color.FromArgb(Math.Abs(color.R - 255), 0, 0, 0)).ToArgb();
+                bits[smoothPixelLocations[i]] = (Color.FromArgb(Math.Abs(color.R - 255), 0, 0, 0)).ToArgb();
             }
-
-            Debug.WriteLine(offcount.ToString());
 
             Marshal.Copy(bits, 0, data.Scan0, bits.Length);
-            bitmap.UnlockBits(data);
+            image.UnlockBits(data);
         }
 
-        private Bitmap Transparent2Color(Bitmap bmp1, Color target)
+        private Bitmap TransparentToColor(Bitmap image, Color color)
         {
-            Bitmap bmp2 = new Bitmap(bmp1.Width, bmp1.Height);
-            Rectangle rect = new Rectangle(Point.Empty, bmp1.Size);
-            using (Graphics G = Graphics.FromImage(bmp2))
+            Bitmap filledImage = new Bitmap(image.Width, image.Height);
+            Rectangle rectangle = new Rectangle(Point.Empty, image.Size);
+
+            using (Graphics g = Graphics.FromImage(filledImage))
             {
-                G.Clear(target);
-                G.DrawImageUnscaledAndClipped(bmp1, rect);
+                g.Clear(color);
+                g.DrawImageUnscaledAndClipped(image, rectangle);
             }
-            return bmp2;
+
+            return filledImage;
         }
 
         public Bitmap CropTransparentBorders(Bitmap image)

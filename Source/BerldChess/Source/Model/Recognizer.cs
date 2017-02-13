@@ -8,89 +8,52 @@ namespace BerldChess.Model
 {
     public static class Recognizer
     {
+        #region Fields
 
-        public static Bitmap[] Pieces { get; private set; } = new Bitmap[12];
-        public static int ScreenIndex { get; private set; }
-        private static Point? _boardLocation = null;
-        private static Size? _boardSize = null;
-
-        private static Color _lightColor;
-        private static Color _darkColor;
-
+        private const int SideLength = 8;
+        private static Color _darkSquare;
+        private static Color _lightSquare;
         private static Bitmap _lastBoardSnap;
 
-        public static double FieldSize { get; private set; } = -1;
+        #endregion
+
+        #region Properties
 
         public static bool BoardFound { get; private set; } = false;
+        public static int ScreenIndex { get; private set; } = -1;
+        public static int MinimumSize { get; set; } = 32;
+        public static Point BoardLocation { get; private set; }
+        public static Size BoardSize { get; private set; }
+        public static SizeF FieldSize { get; set; }
+        public static PointF CenterPixelLocation { get; set; } = new PointF(0.5F, 0.73F);
 
-        public static Point BoardLocation
-        {
-            get
-            {
-                if (_boardLocation != null)
-                {
-                    return (Point)_boardLocation;
-                }
-                else
-                {
-                    throw new InvalidOperationException("No board found yet.");
-                }
-            }
-        }
+        #endregion
 
-        public static Size BoardSize
-        {
-            get
-            {
-                if (_boardSize != null)
-                {
-                    return (Size)_boardSize;
-                }
-                else
-                {
-                    throw new InvalidOperationException("No board found yet.");
-                }
-            }
-        }
-
-        public static Bitmap GetBoardSnap()
-        {
-            if (BoardFound)
-            {
-                Bitmap screenShot = GetScreenshot(Screen.AllScreens[ScreenIndex]);
-                Rectangle cloneRectangle = new Rectangle(BoardLocation, BoardSize);
-                return screenShot.Clone(cloneRectangle, screenShot.PixelFormat);
-            }
-
-            return null;
-        }
-
-        private static Bitmap GetSectionClone(Bitmap source, Rectangle section)
-        {
-            return source.Clone(section, source.PixelFormat);
-        }
+        #region Methods
 
         public static void UpdateBoardImage()
         {
-            _lastBoardSnap = GetBoardSnap();
+            if (BoardFound)
+            {
+                _lastBoardSnap = GetBoardSnap();
+            }
         }
 
         public static bool SearchBoard(Color lightSquareColor, Color darkSquareColor)
         {
             for (int i = 0; i < Screen.AllScreens.Length; i++)
             {
-                if (SearchBoard(GetScreenshot(Screen.AllScreens[i]), lightSquareColor, darkSquareColor))
+                if (SearchBoard(GetScreenshot(Screen.AllScreens[i]), darkSquareColor, lightSquareColor))
                 {
-                    if(BoardSize.Width < 24 || BoardSize.Height < 24)
+                    if (BoardSize.Width < MinimumSize || BoardSize.Height < MinimumSize)
                     {
                         return false;
                     }
 
-                    _lightColor = lightSquareColor;
-                    _darkColor = darkSquareColor;
-
-                    ScreenIndex = i;
                     BoardFound = true;
+                    ScreenIndex = i;
+                    _darkSquare = darkSquareColor;
+                    _lightSquare = lightSquareColor;
                     _lastBoardSnap = GetBoardSnap();
                     return true;
                 }
@@ -133,35 +96,27 @@ namespace BerldChess.Model
             return changedSquares.ToArray();
         }
 
-        private static Bitmap[] GetPieceImages(Bitmap board)
+        public static Bitmap GetBoardSnap()
         {
-            Bitmap[] pieces = new Bitmap[12];
+            if (BoardFound)
+            {
+                Bitmap screenshot = GetScreenshot(Screen.AllScreens[ScreenIndex]);
+                Rectangle cloneRectangle = new Rectangle(BoardLocation, BoardSize);
+                return screenshot.Clone(cloneRectangle, screenshot.PixelFormat);
+            }
 
-            double fieldWidth = board.Width / 8.0;
-            double fieldHeight = board.Height / 8.0;
-
-            pieces[0] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 4), Round(fieldHeight * 7), (int)fieldWidth, (int)fieldHeight));
-            pieces[1] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 3), Round(fieldHeight * 7), (int)fieldWidth, (int)fieldHeight));
-            pieces[2] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 0), Round(fieldHeight * 7), (int)fieldWidth, (int)fieldHeight));
-            pieces[3] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 2), Round(fieldHeight * 7), (int)fieldWidth, (int)fieldHeight));
-            pieces[4] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 1), Round(fieldHeight * 7), (int)fieldWidth, (int)fieldHeight));
-            pieces[5] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 0), Round(fieldHeight * 6), (int)fieldWidth, (int)fieldHeight));
-            pieces[6] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 4), Round(fieldHeight * 0), (int)fieldWidth, (int)fieldHeight));
-            pieces[7] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 3), Round(fieldHeight * 0), (int)fieldWidth, (int)fieldHeight));
-            pieces[8] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 0), Round(fieldHeight * 0), (int)fieldWidth, (int)fieldHeight));
-            pieces[9] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 2), Round(fieldHeight * 0), (int)fieldWidth, (int)fieldHeight));
-            pieces[10] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 1), Round(fieldHeight * 0), (int)fieldWidth, (int)fieldHeight));
-            pieces[11] = GetSectionClone(board, new Rectangle(Round(fieldWidth * 0), Round(fieldHeight * 1), (int)fieldWidth, (int)fieldHeight));
-
-            return pieces;
+            return null;
         }
 
-        private static int Round(double number)
+        public static Bitmap GetScreenshot(Screen screen)
         {
-            return (int)Math.Round(number, 0);
+            Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height, PixelFormat.Format24bppRgb);
+            Graphics g = Graphics.FromImage(screenshot);
+            g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screen.Bounds.Size, CopyPixelOperation.SourceCopy);
+            return screenshot;
         }
 
-        private static bool SearchBoard(Bitmap image, Color lightSquareColor, Color darkSquareColor)
+        private static bool SearchBoard(Bitmap image, Color darkSquareColor, Color lightSquareColor)
         {
             BitmapData imageData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
@@ -284,8 +239,9 @@ namespace BerldChess.Model
 
             if (heightFound)
             {
-                _boardLocation = new Point(boardX, boardY);
-                _boardSize = new Size(boardWidth, boardHeight);
+                BoardLocation = new Point(boardX, boardY);
+                BoardSize = new Size(boardWidth, boardHeight);
+                FieldSize = new SizeF(BoardSize.Width / (float)SideLength, BoardSize.Height / (float)SideLength);
             }
 
             return heightFound;
@@ -296,112 +252,11 @@ namespace BerldChess.Model
             return tolerance >= Math.Abs(color1.R - color2.R) + Math.Abs(color1.G - color2.G) + Math.Abs(color1.B - color2.B);
         }
 
-        public static Bitmap GetScreenshot(Screen screen)
+        private static int Round(double number)
         {
-            Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height, PixelFormat.Format24bppRgb);
-            Graphics g = Graphics.FromImage(screenshot);
-            g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screen.Bounds.Size, CopyPixelOperation.SourceCopy);
-            return screenshot;
+            return (int)Math.Round(number, 0);
         }
 
-        private static Rectangle SearchBitmap(Bitmap smallBmp, Bitmap bigBmp, double tolerance)
-        {
-            BitmapData smallData =
-              smallBmp.LockBits(new Rectangle(0, 0, smallBmp.Width, smallBmp.Height),
-                       System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                       System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            BitmapData bigData =
-              bigBmp.LockBits(new Rectangle(0, 0, bigBmp.Width, bigBmp.Height),
-                       System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                       System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-            int smallStride = smallData.Stride;
-            int bigStride = bigData.Stride;
-
-            int bigWidth = bigBmp.Width;
-            int bigHeight = bigBmp.Height - smallBmp.Height + 1;
-            int smallWidth = smallBmp.Width * 3;
-            int smallHeight = smallBmp.Height;
-
-            Rectangle location = Rectangle.Empty;
-            int margin = Convert.ToInt32(255.0 * tolerance);
-
-            unsafe
-            {
-                byte* pSmall = (byte*)(void*)smallData.Scan0;
-                byte* pBig = (byte*)(void*)bigData.Scan0;
-
-                int smallOffset = smallStride - smallBmp.Width * 3;
-                int bigOffset = bigStride - bigBmp.Width * 3;
-
-                bool matchFound = true;
-
-                for (int y = 0; y < bigHeight; y++)
-                {
-                    for (int x = 0; x < bigWidth; x++)
-                    {
-                        byte* pBigBackup = pBig;
-                        byte* pSmallBackup = pSmall;
-
-                        //Look for the small picture.
-                        for (int i = 0; i < smallHeight; i++)
-                        {
-                            int j = 0;
-                            matchFound = true;
-                            for (j = 0; j < smallWidth; j++)
-                            {
-                                //With tolerance: pSmall value should be between margins.
-                                int inf = pBig[0] - margin;
-                                int sup = pBig[0] + margin;
-                                if (sup < pSmall[0] || inf > pSmall[0])
-                                {
-                                    matchFound = false;
-                                    break;
-                                }
-
-                                pBig++;
-                                pSmall++;
-                            }
-
-                            if (!matchFound) break;
-
-                            //We restore the pointers.
-                            pSmall = pSmallBackup;
-                            pBig = pBigBackup;
-
-                            //Next rows of the small and big pictures.
-                            pSmall += smallStride * (1 + i);
-                            pBig += bigStride * (1 + i);
-                        }
-
-                        //If match found, we return.
-                        if (matchFound)
-                        {
-                            location.X = x;
-                            location.Y = y;
-                            location.Width = smallBmp.Width;
-                            location.Height = smallBmp.Height;
-                            break;
-                        }
-                        //If no match found, we restore the pointers and continue.
-                        else
-                        {
-                            pBig = pBigBackup;
-                            pSmall = pSmallBackup;
-                            pBig += 3;
-                        }
-                    }
-
-                    if (matchFound) break;
-
-                    pBig += bigOffset;
-                }
-            }
-
-            bigBmp.UnlockBits(bigData);
-            smallBmp.UnlockBits(smallData);
-
-            return location;
-        }
+        #endregion
     }
 }

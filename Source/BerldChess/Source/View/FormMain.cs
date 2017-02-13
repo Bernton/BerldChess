@@ -69,9 +69,6 @@ namespace BerldChess.View
             ResetDataGridColumn(_columnOrder);
             ResetDataGridRows(SerializedInfo.Instance.MultiPV);
 
-            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
-            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
-
             OnButtonApplyClick(null, null);
 
             Recognizer.SearchBoard(SerializedInfo.Instance.LightSquare, SerializedInfo.Instance.DarkSquare);
@@ -381,10 +378,10 @@ namespace BerldChess.View
                                     double max = ushort.MaxValue;
                                     Point currCurPos = Cursor.Position;
 
-                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[0].Y + 0.45)) / pH));
+                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fW * (positions[0].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     Thread.Sleep(50);
-                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[1].Y + 0.45)) / pH));
+                                    _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fH * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[1].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
 
@@ -602,17 +599,11 @@ namespace BerldChess.View
                 _chessPanel.Arrows.Clear();
                 _chessPanel.Invalidate();
             }
-
-            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
-            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
         }
 
         private void OnCheckBoxHideOutputCheckedChanged(object sender, EventArgs e)
         {
             _splitContainerOuter.Panel2Collapsed = _checkBoxHideOutput.Checked;
-
-            _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
-            _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked) || _checkBoxCheatMode.Checked;
         }
 
         private void OnSlowTimerTick(object sender, EventArgs e)
@@ -665,7 +656,7 @@ namespace BerldChess.View
             _chessPanel.Game = _vm.Game;
             _vm.PositionHistory.Clear();
             _chessPanel.HighlighedSquares.Clear();
-            _vm.PositionHistory.Add(new ChessPosition(_textBoxFen.Text));
+            _vm.PositionHistory.Add(new ChessPosition(_vm.Game.GetFen()));
             _vm.NavIndex = 0;
             _vm.Engine.Query("ucinewgame");
 
@@ -688,7 +679,6 @@ namespace BerldChess.View
             }
 
             _chessPanel.Invalidate();
-
         }
 
         private void OnButtonComputerMoveClick(object sender, EventArgs e)
@@ -732,20 +722,6 @@ namespace BerldChess.View
 
                     ResetDataGridRows(multiPV);
                 }
-            }
-        }
-
-        private void OnCheckBoxCheatModeCheckedChanged(object sender, EventArgs e)
-        {
-            if (_checkBoxCheatMode.Checked)
-            {
-                _labelCPStatus.Visible = true;
-                _labelEvaluation.Visible = true;
-            }
-            else
-            {
-                _labelCPStatus.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
-                _labelEvaluation.Visible = !(_checkBoxHideArrows.Checked && _checkBoxHideOutput.Checked);
             }
         }
 
@@ -946,6 +922,17 @@ namespace BerldChess.View
             _chessPanel.Invalidate();
         }
 
+        private void OnCheckBoxCheatModeCheckedChanged(object sender, EventArgs e)
+        {
+            for (int i = 0; i < _splitContainerInner.Panel2.Controls.Count; i++)
+            {
+                if((string)_splitContainerInner.Panel2.Controls[i].Tag == "Cheat")
+                {
+                    _splitContainerInner.Panel2.Controls[i].Visible = _checkBoxCheatMode.Checked;
+                }
+            }
+        }
+
         #endregion
 
         #region Other Methods
@@ -997,6 +984,7 @@ namespace BerldChess.View
         {
             try
             {
+                SerializedInfo.Instance.Bounds = Bounds;
                 SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
                 SerializedInfo.Instance.DisplayGridBorder = _checkBoxGridBorder.Checked;
                 SerializedInfo.Instance.BoardFlipped = _checkBoxFlipped.Checked;

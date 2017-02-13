@@ -88,49 +88,23 @@ namespace BerldChess.View
             }
         }
 
-        private void OnButtonApplyCloseClick(object sender, EventArgs e)
-        {
-            if (_checkBoxDefault.Checked)
-            {
-                PieceFontFamily = "";
-                DialogResult = DialogResult.OK;
-            }
-            else if (DoesFontExist(_comboBoxFont.Text, FontStyle.Regular))
-            {
-                double factor;
-
-                if(double.TryParse(_textBoxSizeFactor.Text, out factor))
-                {
-                    _sizeFactor = factor;
-                }
-
-                _isUnicodeFont = _checkBoxUnicodeFont.Checked;
-                PieceFontFamily = _comboBoxFont.Text;
-                ChessFontChars = _textBoxFontChars.Text;
-                DialogResult = DialogResult.OK;
-            }
-            else
-            {
-                MessageBox.Show("Invalid font.", "Berd Chess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
         private void OnButtonApplyClick(object sender, EventArgs e)
         {
+            double factor;
+
+            if (double.TryParse(_textBoxSizeFactor.Text, out factor))
+            {
+                _sizeFactor = factor;
+            }
+
             if (_checkBoxDefault.Checked)
             {
                 PieceFontFamily = "";
+
                 FontSelected?.Invoke();
             }
             else if (DoesFontExist(_comboBoxFont.Text, FontStyle.Regular))
             {
-                double factor;
-
-                if (double.TryParse(_textBoxSizeFactor.Text, out factor))
-                {
-                    _sizeFactor = factor;
-                }
-
                 _isUnicodeFont = _checkBoxUnicodeFont.Checked;
                 PieceFontFamily = _comboBoxFont.Text;
                 ChessFontChars = _textBoxFontChars.Text;

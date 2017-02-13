@@ -147,7 +147,7 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 461);
-            this._splitContainerInner.SplitterDistance = 616;
+            this._splitContainerInner.SplitterDistance = 617;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
@@ -170,7 +170,9 @@
             this._labelAnimTime.Name = "_labelAnimTime";
             this._labelAnimTime.Size = new System.Drawing.Size(79, 13);
             this._labelAnimTime.TabIndex = 29;
+            this._labelAnimTime.Tag = "Cheat";
             this._labelAnimTime.Text = "Animation Time";
+            this._labelAnimTime.Visible = false;
             // 
             // _textBoxAnimTime
             // 
@@ -178,8 +180,10 @@
             this._textBoxAnimTime.Name = "_textBoxAnimTime";
             this._textBoxAnimTime.Size = new System.Drawing.Size(59, 20);
             this._textBoxAnimTime.TabIndex = 28;
+            this._textBoxAnimTime.Tag = "Cheat";
             this._textBoxAnimTime.Text = "300";
             this._textBoxAnimTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this._textBoxAnimTime.Visible = false;
             this._textBoxAnimTime.TextChanged += new System.EventHandler(this.OnTextBoxAnimTimeTextChanged);
             // 
             // _checkBoxCheckAuto
@@ -190,8 +194,10 @@
             this._checkBoxCheckAuto.Name = "_checkBoxCheckAuto";
             this._checkBoxCheckAuto.Size = new System.Drawing.Size(82, 17);
             this._checkBoxCheckAuto.TabIndex = 27;
+            this._checkBoxCheckAuto.Tag = "Cheat";
             this._checkBoxCheckAuto.Text = "Check Auto";
             this._checkBoxCheckAuto.UseVisualStyleBackColor = false;
+            this._checkBoxCheckAuto.Visible = false;
             // 
             // _buttonReset
             // 
@@ -199,8 +205,10 @@
             this._buttonReset.Name = "_buttonReset";
             this._buttonReset.Size = new System.Drawing.Size(54, 23);
             this._buttonReset.TabIndex = 26;
+            this._buttonReset.Tag = "Cheat";
             this._buttonReset.Text = "Reset";
             this._buttonReset.UseVisualStyleBackColor = true;
+            this._buttonReset.Visible = false;
             this._buttonReset.Click += new System.EventHandler(this.OnButtonResetClick);
             // 
             // _buttonColorDialog
@@ -209,8 +217,10 @@
             this._buttonColorDialog.Name = "_buttonColorDialog";
             this._buttonColorDialog.Size = new System.Drawing.Size(22, 23);
             this._buttonColorDialog.TabIndex = 25;
+            this._buttonColorDialog.Tag = "Cheat";
             this._buttonColorDialog.Text = "..";
             this._buttonColorDialog.UseVisualStyleBackColor = true;
+            this._buttonColorDialog.Visible = false;
             this._buttonColorDialog.Click += new System.EventHandler(this.OnButtonColorDialogClick);
             // 
             // _buttonUpdateRec
@@ -219,8 +229,10 @@
             this._buttonUpdateRec.Name = "_buttonUpdateRec";
             this._buttonUpdateRec.Size = new System.Drawing.Size(82, 23);
             this._buttonUpdateRec.TabIndex = 24;
+            this._buttonUpdateRec.Tag = "Cheat";
             this._buttonUpdateRec.Text = "Update";
             this._buttonUpdateRec.UseVisualStyleBackColor = true;
+            this._buttonUpdateRec.Visible = false;
             this._buttonUpdateRec.Click += new System.EventHandler(this.OnButtonUpdateRecClick);
             // 
             // _buttonMoveRec
@@ -229,8 +241,10 @@
             this._buttonMoveRec.Name = "_buttonMoveRec";
             this._buttonMoveRec.Size = new System.Drawing.Size(82, 23);
             this._buttonMoveRec.TabIndex = 23;
+            this._buttonMoveRec.Tag = "Cheat";
             this._buttonMoveRec.Text = "Auto Move";
             this._buttonMoveRec.UseVisualStyleBackColor = true;
+            this._buttonMoveRec.Visible = false;
             this._buttonMoveRec.Click += new System.EventHandler(this.OnButtonMoveRecClick);
             // 
             // _checkBoxSound

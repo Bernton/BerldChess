@@ -30,7 +30,6 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PieceSelectionDialog));
             this._checkBoxUnicodeFont = new System.Windows.Forms.CheckBox();
-            this._buttonApply = new System.Windows.Forms.Button();
             this._comboBoxFont = new System.Windows.Forms.ComboBox();
             this._checkBoxDefault = new System.Windows.Forms.CheckBox();
             this._buttonPreview = new System.Windows.Forms.Button();
@@ -50,16 +49,6 @@
             this._checkBoxUnicodeFont.Text = "Is Unicode Font";
             this._checkBoxUnicodeFont.UseVisualStyleBackColor = true;
             this._checkBoxUnicodeFont.CheckedChanged += new System.EventHandler(this.OnCheckBoxUnicodeFontCheckedChanged);
-            // 
-            // _buttonApply
-            // 
-            this._buttonApply.Location = new System.Drawing.Point(141, 189);
-            this._buttonApply.Name = "_buttonApply";
-            this._buttonApply.Size = new System.Drawing.Size(130, 32);
-            this._buttonApply.TabIndex = 2;
-            this._buttonApply.Text = "Apply and Close";
-            this._buttonApply.UseVisualStyleBackColor = true;
-            this._buttonApply.Click += new System.EventHandler(this.OnButtonApplyCloseClick);
             // 
             // _comboBoxFont
             // 
@@ -83,9 +72,9 @@
             // 
             // _buttonPreview
             // 
-            this._buttonPreview.Location = new System.Drawing.Point(12, 189);
+            this._buttonPreview.Location = new System.Drawing.Point(12, 192);
             this._buttonPreview.Name = "_buttonPreview";
-            this._buttonPreview.Size = new System.Drawing.Size(123, 32);
+            this._buttonPreview.Size = new System.Drawing.Size(101, 29);
             this._buttonPreview.TabIndex = 5;
             this._buttonPreview.Text = "Apply";
             this._buttonPreview.UseVisualStyleBackColor = true;
@@ -110,10 +99,10 @@
             this._labelFontChars.TabIndex = 7;
             this._labelFontChars.Text = "Chess Font Characters (Order: K,Q,B,N,R,P,k,q,b,n,r,p)";
             // 
-            // textBox1
+            // _textBoxSizeFactor
             // 
             this._textBoxSizeFactor.Location = new System.Drawing.Point(196, 10);
-            this._textBoxSizeFactor.Name = "textBox1";
+            this._textBoxSizeFactor.Name = "_textBoxSizeFactor";
             this._textBoxSizeFactor.Size = new System.Drawing.Size(79, 20);
             this._textBoxSizeFactor.TabIndex = 8;
             this._textBoxSizeFactor.Text = "0.9";
@@ -139,7 +128,6 @@
             this.Controls.Add(this._buttonPreview);
             this.Controls.Add(this._checkBoxDefault);
             this.Controls.Add(this._comboBoxFont);
-            this.Controls.Add(this._buttonApply);
             this.Controls.Add(this._checkBoxUnicodeFont);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -156,7 +144,6 @@
         #endregion
 
         private System.Windows.Forms.CheckBox _checkBoxUnicodeFont;
-        private System.Windows.Forms.Button _buttonApply;
         private System.Windows.Forms.ComboBox _comboBoxFont;
         private System.Windows.Forms.CheckBox _checkBoxDefault;
         private System.Windows.Forms.Button _buttonPreview;

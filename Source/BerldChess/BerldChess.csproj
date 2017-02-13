@@ -79,9 +79,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Source\Model\AbstractFloodFiller.cs" />
     <Compile Include="Source\Model\ChessPosition.cs" />
-    <Compile Include="Source\Model\FloodFiller.cs" />
     <Compile Include="Source\Model\Recognizer.cs" />
     <Compile Include="Source\Model\SerializedInfo.cs" />
     <Compile Include="Source\ViewModel\FormMainViewModel.cs" />
