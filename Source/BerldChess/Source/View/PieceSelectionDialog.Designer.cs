@@ -85,8 +85,9 @@
             // 
             this._textBoxFontChars.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._textBoxFontChars.Location = new System.Drawing.Point(12, 135);
+            this._textBoxFontChars.Multiline = true;
             this._textBoxFontChars.Name = "_textBoxFontChars";
-            this._textBoxFontChars.Size = new System.Drawing.Size(259, 35);
+            this._textBoxFontChars.Size = new System.Drawing.Size(259, 39);
             this._textBoxFontChars.TabIndex = 6;
             this._textBoxFontChars.Tag = "kqbnrplwvmto";
             this._textBoxFontChars.Text = "kqbnrplwvmto";

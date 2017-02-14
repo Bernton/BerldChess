@@ -30,491 +30,76 @@
         {
             this.components = new System.ComponentModel.Container();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
-            this._splitContainerInner = new System.Windows.Forms.SplitContainer();
-            this._buttonAlterPieces = new System.Windows.Forms.Button();
-            this._labelAnimTime = new System.Windows.Forms.Label();
-            this._textBoxAnimTime = new System.Windows.Forms.TextBox();
-            this._checkBoxCheckAuto = new System.Windows.Forms.CheckBox();
-            this._buttonReset = new System.Windows.Forms.Button();
-            this._buttonColorDialog = new System.Windows.Forms.Button();
-            this._buttonUpdateRec = new System.Windows.Forms.Button();
-            this._buttonMoveRec = new System.Windows.Forms.Button();
-            this._checkBoxSound = new System.Windows.Forms.CheckBox();
-            this._buttonAutoPlay = new System.Windows.Forms.Button();
-            this._buttonApply = new System.Windows.Forms.Button();
-            this._labelMultiPV = new System.Windows.Forms.Label();
-            this._textBoxMultiPV = new System.Windows.Forms.TextBox();
-            this._labelComputerTime = new System.Windows.Forms.Label();
-            this._textBoxEngineTime = new System.Windows.Forms.TextBox();
-            this._checkBoxCheatMode = new System.Windows.Forms.CheckBox();
-            this._buttonComputerMove = new System.Windows.Forms.Button();
-            this._buttonNew = new System.Windows.Forms.Button();
-            this._labelEvaluation = new System.Windows.Forms.Label();
-            this._checkBoxLocalMode = new System.Windows.Forms.CheckBox();
-            this._labelCPStatus = new System.Windows.Forms.Label();
-            this._checkBoxHideOutput = new System.Windows.Forms.CheckBox();
-            this._checkBoxHideArrows = new System.Windows.Forms.CheckBox();
-            this._checkBoxFlipped = new System.Windows.Forms.CheckBox();
-            this._checkBoxGridBorder = new System.Windows.Forms.CheckBox();
-            this._buttonLatest = new System.Windows.Forms.Button();
-            this._buttonStart = new System.Windows.Forms.Button();
-            this._buttonForward = new System.Windows.Forms.Button();
-            this._buttonBack = new System.Windows.Forms.Button();
-            this._buttonLoadFen = new System.Windows.Forms.Button();
-            this._labelFEN = new System.Windows.Forms.Label();
-            this._textBoxFen = new System.Windows.Forms.TextBox();
             this._dataGridView = new System.Windows.Forms.DataGridView();
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
             this._engineTimer = new System.Windows.Forms.Timer(this.components);
             this._timerAutoCheck = new System.Windows.Forms.Timer(this.components);
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.engineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.appearanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.engineTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.multiPVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.playNowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoplayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.alterPiecesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.navigationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.goBackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.goForwardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.goToStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.goToLatestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cheatModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gridBorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.flipBoardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.soundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hideOutputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hideArrowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.localModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.squareColorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoMoveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkAutoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.animTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemLatest = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemBack = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemForward = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemStart = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyFENToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._labelShowEval = new System.Windows.Forms.Label();
+            this._labelEval = new System.Windows.Forms.Label();
+            this._panelRight = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
-            this._splitContainerOuter.Panel1.SuspendLayout();
             this._splitContainerOuter.Panel2.SuspendLayout();
             this._splitContainerOuter.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._splitContainerInner)).BeginInit();
-            this._splitContainerInner.Panel2.SuspendLayout();
-            this._splitContainerInner.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).BeginInit();
+            this.menuStrip.SuspendLayout();
+            this._panelRight.SuspendLayout();
             this.SuspendLayout();
             // 
             // _splitContainerOuter
             // 
+            this._splitContainerOuter.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this._splitContainerOuter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this._splitContainerOuter.Dock = System.Windows.Forms.DockStyle.Fill;
             this._splitContainerOuter.ForeColor = System.Drawing.SystemColors.ControlText;
-            this._splitContainerOuter.Location = new System.Drawing.Point(0, 0);
+            this._splitContainerOuter.Location = new System.Drawing.Point(-1, 34);
             this._splitContainerOuter.Name = "_splitContainerOuter";
             this._splitContainerOuter.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // _splitContainerOuter.Panel1
-            // 
-            this._splitContainerOuter.Panel1.Controls.Add(this._splitContainerInner);
             // 
             // _splitContainerOuter.Panel2
             // 
             this._splitContainerOuter.Panel2.Controls.Add(this._dataGridView);
             this._splitContainerOuter.Panel2Collapsed = true;
-            this._splitContainerOuter.Size = new System.Drawing.Size(836, 507);
+            this._splitContainerOuter.Size = new System.Drawing.Size(604, 473);
             this._splitContainerOuter.SplitterDistance = 461;
             this._splitContainerOuter.SplitterWidth = 3;
             this._splitContainerOuter.TabIndex = 0;
             this._splitContainerOuter.TabStop = false;
-            // 
-            // _splitContainerInner
-            // 
-            this._splitContainerInner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this._splitContainerInner.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._splitContainerInner.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this._splitContainerInner.Location = new System.Drawing.Point(0, 0);
-            this._splitContainerInner.Name = "_splitContainerInner";
-            // 
-            // _splitContainerInner.Panel1
-            // 
-            this._splitContainerInner.Panel1.Cursor = System.Windows.Forms.Cursors.Default;
-            // 
-            // _splitContainerInner.Panel2
-            // 
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonAlterPieces);
-            this._splitContainerInner.Panel2.Controls.Add(this._labelAnimTime);
-            this._splitContainerInner.Panel2.Controls.Add(this._textBoxAnimTime);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxCheckAuto);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonReset);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonColorDialog);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonUpdateRec);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonMoveRec);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxSound);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonAutoPlay);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonApply);
-            this._splitContainerInner.Panel2.Controls.Add(this._labelMultiPV);
-            this._splitContainerInner.Panel2.Controls.Add(this._textBoxMultiPV);
-            this._splitContainerInner.Panel2.Controls.Add(this._labelComputerTime);
-            this._splitContainerInner.Panel2.Controls.Add(this._textBoxEngineTime);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxCheatMode);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonComputerMove);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonNew);
-            this._splitContainerInner.Panel2.Controls.Add(this._labelEvaluation);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxLocalMode);
-            this._splitContainerInner.Panel2.Controls.Add(this._labelCPStatus);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxHideOutput);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxHideArrows);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxFlipped);
-            this._splitContainerInner.Panel2.Controls.Add(this._checkBoxGridBorder);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonLatest);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonStart);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonForward);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonBack);
-            this._splitContainerInner.Panel2.Controls.Add(this._buttonLoadFen);
-            this._splitContainerInner.Panel2.Controls.Add(this._labelFEN);
-            this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
-            this._splitContainerInner.Panel2MinSize = 200;
-            this._splitContainerInner.Size = new System.Drawing.Size(836, 507);
-            this._splitContainerInner.SplitterDistance = 619;
-            this._splitContainerInner.SplitterWidth = 3;
-            this._splitContainerInner.TabIndex = 0;
-            this._splitContainerInner.TabStop = false;
-            // 
-            // _buttonAlterPieces
-            // 
-            this._buttonAlterPieces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonAlterPieces.Location = new System.Drawing.Point(125, 254);
-            this._buttonAlterPieces.Name = "_buttonAlterPieces";
-            this._buttonAlterPieces.Size = new System.Drawing.Size(81, 23);
-            this._buttonAlterPieces.TabIndex = 30;
-            this._buttonAlterPieces.Text = "Alter Pieces";
-            this._buttonAlterPieces.UseVisualStyleBackColor = true;
-            this._buttonAlterPieces.Click += new System.EventHandler(this.OnButtonAlterPiecesClick);
-            // 
-            // _labelAnimTime
-            // 
-            this._labelAnimTime.AutoSize = true;
-            this._labelAnimTime.Location = new System.Drawing.Point(12, 347);
-            this._labelAnimTime.Name = "_labelAnimTime";
-            this._labelAnimTime.Size = new System.Drawing.Size(79, 13);
-            this._labelAnimTime.TabIndex = 29;
-            this._labelAnimTime.Tag = "Cheat";
-            this._labelAnimTime.Text = "Animation Time";
-            this._labelAnimTime.Visible = false;
-            // 
-            // _textBoxAnimTime
-            // 
-            this._textBoxAnimTime.Location = new System.Drawing.Point(28, 363);
-            this._textBoxAnimTime.Name = "_textBoxAnimTime";
-            this._textBoxAnimTime.Size = new System.Drawing.Size(59, 20);
-            this._textBoxAnimTime.TabIndex = 28;
-            this._textBoxAnimTime.Tag = "Cheat";
-            this._textBoxAnimTime.Text = "300";
-            this._textBoxAnimTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this._textBoxAnimTime.Visible = false;
-            this._textBoxAnimTime.TextChanged += new System.EventHandler(this.OnTextBoxAnimTimeTextChanged);
-            // 
-            // _checkBoxCheckAuto
-            // 
-            this._checkBoxCheckAuto.AutoSize = true;
-            this._checkBoxCheckAuto.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxCheckAuto.Location = new System.Drawing.Point(11, 316);
-            this._checkBoxCheckAuto.Name = "_checkBoxCheckAuto";
-            this._checkBoxCheckAuto.Size = new System.Drawing.Size(82, 17);
-            this._checkBoxCheckAuto.TabIndex = 27;
-            this._checkBoxCheckAuto.Tag = "Cheat";
-            this._checkBoxCheckAuto.Text = "Check Auto";
-            this._checkBoxCheckAuto.UseVisualStyleBackColor = false;
-            this._checkBoxCheckAuto.Visible = false;
-            // 
-            // _buttonReset
-            // 
-            this._buttonReset.Location = new System.Drawing.Point(9, 229);
-            this._buttonReset.Name = "_buttonReset";
-            this._buttonReset.Size = new System.Drawing.Size(54, 23);
-            this._buttonReset.TabIndex = 26;
-            this._buttonReset.Tag = "Cheat";
-            this._buttonReset.Text = "Reset";
-            this._buttonReset.UseVisualStyleBackColor = true;
-            this._buttonReset.Visible = false;
-            this._buttonReset.Click += new System.EventHandler(this.OnButtonResetClick);
-            // 
-            // _buttonColorDialog
-            // 
-            this._buttonColorDialog.Location = new System.Drawing.Point(69, 229);
-            this._buttonColorDialog.Name = "_buttonColorDialog";
-            this._buttonColorDialog.Size = new System.Drawing.Size(22, 23);
-            this._buttonColorDialog.TabIndex = 25;
-            this._buttonColorDialog.Tag = "Cheat";
-            this._buttonColorDialog.Text = "..";
-            this._buttonColorDialog.UseVisualStyleBackColor = true;
-            this._buttonColorDialog.Visible = false;
-            this._buttonColorDialog.Click += new System.EventHandler(this.OnButtonColorDialogClick);
-            // 
-            // _buttonUpdateRec
-            // 
-            this._buttonUpdateRec.Location = new System.Drawing.Point(9, 258);
-            this._buttonUpdateRec.Name = "_buttonUpdateRec";
-            this._buttonUpdateRec.Size = new System.Drawing.Size(82, 23);
-            this._buttonUpdateRec.TabIndex = 24;
-            this._buttonUpdateRec.Tag = "Cheat";
-            this._buttonUpdateRec.Text = "Update";
-            this._buttonUpdateRec.UseVisualStyleBackColor = true;
-            this._buttonUpdateRec.Visible = false;
-            this._buttonUpdateRec.Click += new System.EventHandler(this.OnButtonUpdateRecClick);
-            // 
-            // _buttonMoveRec
-            // 
-            this._buttonMoveRec.Location = new System.Drawing.Point(9, 287);
-            this._buttonMoveRec.Name = "_buttonMoveRec";
-            this._buttonMoveRec.Size = new System.Drawing.Size(82, 23);
-            this._buttonMoveRec.TabIndex = 23;
-            this._buttonMoveRec.Tag = "Cheat";
-            this._buttonMoveRec.Text = "Auto Move";
-            this._buttonMoveRec.UseVisualStyleBackColor = true;
-            this._buttonMoveRec.Visible = false;
-            this._buttonMoveRec.Click += new System.EventHandler(this.OnButtonMoveRecClick);
-            // 
-            // _checkBoxSound
-            // 
-            this._checkBoxSound.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxSound.AutoSize = true;
-            this._checkBoxSound.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxSound.Checked = true;
-            this._checkBoxSound.CheckState = System.Windows.Forms.CheckState.Checked;
-            this._checkBoxSound.Location = new System.Drawing.Point(117, 476);
-            this._checkBoxSound.Name = "_checkBoxSound";
-            this._checkBoxSound.Size = new System.Drawing.Size(57, 17);
-            this._checkBoxSound.TabIndex = 22;
-            this._checkBoxSound.Text = "Sound";
-            this._checkBoxSound.UseVisualStyleBackColor = false;
-            // 
-            // _buttonAutoPlay
-            // 
-            this._buttonAutoPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonAutoPlay.Location = new System.Drawing.Point(103, 98);
-            this._buttonAutoPlay.Name = "_buttonAutoPlay";
-            this._buttonAutoPlay.Size = new System.Drawing.Size(20, 25);
-            this._buttonAutoPlay.TabIndex = 21;
-            this._buttonAutoPlay.Text = "A";
-            this._buttonAutoPlay.UseVisualStyleBackColor = true;
-            this._buttonAutoPlay.Click += new System.EventHandler(this.OnButtonAutoPlayClick);
-            // 
-            // _buttonApply
-            // 
-            this._buttonApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonApply.Location = new System.Drawing.Point(146, 222);
-            this._buttonApply.Name = "_buttonApply";
-            this._buttonApply.Size = new System.Drawing.Size(59, 23);
-            this._buttonApply.TabIndex = 20;
-            this._buttonApply.Text = "Apply";
-            this._buttonApply.UseVisualStyleBackColor = true;
-            this._buttonApply.Click += new System.EventHandler(this.OnButtonApplyClick);
-            // 
-            // _labelMultiPV
-            // 
-            this._labelMultiPV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._labelMultiPV.AutoSize = true;
-            this._labelMultiPV.Location = new System.Drawing.Point(158, 180);
-            this._labelMultiPV.Name = "_labelMultiPV";
-            this._labelMultiPV.Size = new System.Drawing.Size(46, 13);
-            this._labelMultiPV.TabIndex = 19;
-            this._labelMultiPV.Text = "Multi PV";
-            // 
-            // _textBoxMultiPV
-            // 
-            this._textBoxMultiPV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._textBoxMultiPV.Location = new System.Drawing.Point(163, 196);
-            this._textBoxMultiPV.Name = "_textBoxMultiPV";
-            this._textBoxMultiPV.Size = new System.Drawing.Size(41, 20);
-            this._textBoxMultiPV.TabIndex = 18;
-            this._textBoxMultiPV.Text = "250";
-            this._textBoxMultiPV.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // _labelComputerTime
-            // 
-            this._labelComputerTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._labelComputerTime.AutoSize = true;
-            this._labelComputerTime.Location = new System.Drawing.Point(138, 134);
-            this._labelComputerTime.Name = "_labelComputerTime";
-            this._labelComputerTime.Size = new System.Drawing.Size(66, 13);
-            this._labelComputerTime.TabIndex = 17;
-            this._labelComputerTime.Text = "Engine Time";
-            // 
-            // _textBoxEngineTime
-            // 
-            this._textBoxEngineTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._textBoxEngineTime.Location = new System.Drawing.Point(147, 150);
-            this._textBoxEngineTime.Name = "_textBoxEngineTime";
-            this._textBoxEngineTime.Size = new System.Drawing.Size(57, 20);
-            this._textBoxEngineTime.TabIndex = 16;
-            this._textBoxEngineTime.Text = "300";
-            this._textBoxEngineTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this._textBoxEngineTime.TextChanged += new System.EventHandler(this.OnTextBoxEngineTimeTextChanged);
-            // 
-            // _checkBoxCheatMode
-            // 
-            this._checkBoxCheatMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxCheatMode.AutoSize = true;
-            this._checkBoxCheatMode.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxCheatMode.Location = new System.Drawing.Point(117, 351);
-            this._checkBoxCheatMode.Name = "_checkBoxCheatMode";
-            this._checkBoxCheatMode.Size = new System.Drawing.Size(84, 17);
-            this._checkBoxCheatMode.TabIndex = 15;
-            this._checkBoxCheatMode.Text = "Cheat Mode";
-            this._checkBoxCheatMode.UseVisualStyleBackColor = false;
-            this._checkBoxCheatMode.CheckedChanged += new System.EventHandler(this.OnCheckBoxCheatModeCheckedChanged);
-            // 
-            // _buttonComputerMove
-            // 
-            this._buttonComputerMove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonComputerMove.Location = new System.Drawing.Point(129, 98);
-            this._buttonComputerMove.Name = "_buttonComputerMove";
-            this._buttonComputerMove.Size = new System.Drawing.Size(75, 25);
-            this._buttonComputerMove.TabIndex = 14;
-            this._buttonComputerMove.Text = "Engine";
-            this._buttonComputerMove.UseVisualStyleBackColor = true;
-            this._buttonComputerMove.Click += new System.EventHandler(this.OnButtonComputerMoveClick);
-            // 
-            // _buttonNew
-            // 
-            this._buttonNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonNew.Location = new System.Drawing.Point(129, 67);
-            this._buttonNew.Name = "_buttonNew";
-            this._buttonNew.Size = new System.Drawing.Size(75, 25);
-            this._buttonNew.TabIndex = 2;
-            this._buttonNew.Text = "New";
-            this._buttonNew.UseVisualStyleBackColor = true;
-            this._buttonNew.Click += new System.EventHandler(this.OnButtonNewClick);
-            // 
-            // _labelEvaluation
-            // 
-            this._labelEvaluation.AutoSize = true;
-            this._labelEvaluation.Location = new System.Drawing.Point(6, 168);
-            this._labelEvaluation.Name = "_labelEvaluation";
-            this._labelEvaluation.Size = new System.Drawing.Size(57, 13);
-            this._labelEvaluation.TabIndex = 13;
-            this._labelEvaluation.Text = "Evaluation";
-            // 
-            // _checkBoxLocalMode
-            // 
-            this._checkBoxLocalMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxLocalMode.AutoSize = true;
-            this._checkBoxLocalMode.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxLocalMode.Location = new System.Drawing.Point(117, 413);
-            this._checkBoxLocalMode.Name = "_checkBoxLocalMode";
-            this._checkBoxLocalMode.Size = new System.Drawing.Size(81, 17);
-            this._checkBoxLocalMode.TabIndex = 9;
-            this._checkBoxLocalMode.Text = "Local mode";
-            this._checkBoxLocalMode.UseVisualStyleBackColor = false;
-            this._checkBoxLocalMode.CheckedChanged += new System.EventHandler(this.OnCheckBoxPlayModeCheckedChanged);
-            // 
-            // _labelCPStatus
-            // 
-            this._labelCPStatus.AutoSize = true;
-            this._labelCPStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelCPStatus.Location = new System.Drawing.Point(3, 184);
-            this._labelCPStatus.Name = "_labelCPStatus";
-            this._labelCPStatus.Size = new System.Drawing.Size(71, 31);
-            this._labelCPStatus.TabIndex = 11;
-            this._labelCPStatus.Text = "0.00";
-            // 
-            // _checkBoxHideOutput
-            // 
-            this._checkBoxHideOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxHideOutput.AutoSize = true;
-            this._checkBoxHideOutput.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideOutput.Checked = true;
-            this._checkBoxHideOutput.CheckState = System.Windows.Forms.CheckState.Checked;
-            this._checkBoxHideOutput.Location = new System.Drawing.Point(117, 371);
-            this._checkBoxHideOutput.Name = "_checkBoxHideOutput";
-            this._checkBoxHideOutput.Size = new System.Drawing.Size(83, 17);
-            this._checkBoxHideOutput.TabIndex = 7;
-            this._checkBoxHideOutput.Text = "Hide Output";
-            this._checkBoxHideOutput.UseVisualStyleBackColor = false;
-            this._checkBoxHideOutput.CheckedChanged += new System.EventHandler(this.OnCheckBoxHideOutputCheckedChanged);
-            // 
-            // _checkBoxHideArrows
-            // 
-            this._checkBoxHideArrows.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxHideArrows.AutoSize = true;
-            this._checkBoxHideArrows.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxHideArrows.Location = new System.Drawing.Point(117, 392);
-            this._checkBoxHideArrows.Name = "_checkBoxHideArrows";
-            this._checkBoxHideArrows.Size = new System.Drawing.Size(83, 17);
-            this._checkBoxHideArrows.TabIndex = 8;
-            this._checkBoxHideArrows.Text = "Hide Arrows";
-            this._checkBoxHideArrows.UseVisualStyleBackColor = false;
-            this._checkBoxHideArrows.CheckedChanged += new System.EventHandler(this.OnCheckBoxHideArrowsCheckedChanged);
-            // 
-            // _checkBoxFlipped
-            // 
-            this._checkBoxFlipped.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxFlipped.AutoSize = true;
-            this._checkBoxFlipped.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxFlipped.Location = new System.Drawing.Point(117, 434);
-            this._checkBoxFlipped.Name = "_checkBoxFlipped";
-            this._checkBoxFlipped.Size = new System.Drawing.Size(60, 17);
-            this._checkBoxFlipped.TabIndex = 10;
-            this._checkBoxFlipped.Text = "Flipped";
-            this._checkBoxFlipped.UseVisualStyleBackColor = false;
-            this._checkBoxFlipped.CheckedChanged += new System.EventHandler(this.OnCheckBoxFlippedCheckedChanged);
-            // 
-            // _checkBoxGridBorder
-            // 
-            this._checkBoxGridBorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._checkBoxGridBorder.AutoSize = true;
-            this._checkBoxGridBorder.BackColor = System.Drawing.SystemColors.Control;
-            this._checkBoxGridBorder.Location = new System.Drawing.Point(117, 455);
-            this._checkBoxGridBorder.Name = "_checkBoxGridBorder";
-            this._checkBoxGridBorder.Size = new System.Drawing.Size(79, 17);
-            this._checkBoxGridBorder.TabIndex = 11;
-            this._checkBoxGridBorder.Text = "Grid Border";
-            this._checkBoxGridBorder.UseVisualStyleBackColor = false;
-            this._checkBoxGridBorder.CheckedChanged += new System.EventHandler(this.OnCheckBoxGridBorderCheckedChanged);
-            // 
-            // _buttonLatest
-            // 
-            this._buttonLatest.Location = new System.Drawing.Point(6, 129);
-            this._buttonLatest.Name = "_buttonLatest";
-            this._buttonLatest.Size = new System.Drawing.Size(75, 25);
-            this._buttonLatest.TabIndex = 6;
-            this._buttonLatest.Text = "Go to latest";
-            this._buttonLatest.UseVisualStyleBackColor = true;
-            this._buttonLatest.Click += new System.EventHandler(this.OnButtonLatestClick);
-            // 
-            // _buttonStart
-            // 
-            this._buttonStart.Location = new System.Drawing.Point(6, 98);
-            this._buttonStart.Name = "_buttonStart";
-            this._buttonStart.Size = new System.Drawing.Size(75, 25);
-            this._buttonStart.TabIndex = 5;
-            this._buttonStart.Text = "Go to start";
-            this._buttonStart.UseVisualStyleBackColor = true;
-            this._buttonStart.Click += new System.EventHandler(this.OnButtonStartClick);
-            // 
-            // _buttonForward
-            // 
-            this._buttonForward.Location = new System.Drawing.Point(6, 67);
-            this._buttonForward.Name = "_buttonForward";
-            this._buttonForward.Size = new System.Drawing.Size(75, 25);
-            this._buttonForward.TabIndex = 4;
-            this._buttonForward.Text = "Go forward";
-            this._buttonForward.UseVisualStyleBackColor = true;
-            this._buttonForward.Click += new System.EventHandler(this.OnButtonForwardClick);
-            // 
-            // _buttonBack
-            // 
-            this._buttonBack.Location = new System.Drawing.Point(6, 36);
-            this._buttonBack.Name = "_buttonBack";
-            this._buttonBack.Size = new System.Drawing.Size(75, 25);
-            this._buttonBack.TabIndex = 3;
-            this._buttonBack.Text = "Go back";
-            this._buttonBack.UseVisualStyleBackColor = true;
-            this._buttonBack.Click += new System.EventHandler(this.OnButtonBackClick);
-            // 
-            // _buttonLoadFen
-            // 
-            this._buttonLoadFen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._buttonLoadFen.Location = new System.Drawing.Point(129, 36);
-            this._buttonLoadFen.Name = "_buttonLoadFen";
-            this._buttonLoadFen.Size = new System.Drawing.Size(75, 25);
-            this._buttonLoadFen.TabIndex = 1;
-            this._buttonLoadFen.Text = "Load";
-            this._buttonLoadFen.UseVisualStyleBackColor = true;
-            this._buttonLoadFen.Click += new System.EventHandler(this.OnButtonLoadFenClick);
-            // 
-            // _labelFEN
-            // 
-            this._labelFEN.AutoSize = true;
-            this._labelFEN.Location = new System.Drawing.Point(3, 14);
-            this._labelFEN.Name = "_labelFEN";
-            this._labelFEN.Size = new System.Drawing.Size(25, 13);
-            this._labelFEN.TabIndex = 1;
-            this._labelFEN.Text = "Fen";
-            // 
-            // _textBoxFen
-            // 
-            this._textBoxFen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._textBoxFen.Location = new System.Drawing.Point(34, 10);
-            this._textBoxFen.Name = "_textBoxFen";
-            this._textBoxFen.Size = new System.Drawing.Size(170, 20);
-            this._textBoxFen.TabIndex = 0;
-            this._textBoxFen.WordWrap = false;
             // 
             // _dataGridView
             // 
@@ -531,7 +116,7 @@
             this._dataGridView.ShowCellErrors = false;
             this._dataGridView.ShowEditingIcon = false;
             this._dataGridView.ShowRowErrors = false;
-            this._dataGridView.Size = new System.Drawing.Size(834, 41);
+            this._dataGridView.Size = new System.Drawing.Size(148, 44);
             this._dataGridView.TabIndex = 0;
             // 
             // _slowTimer
@@ -550,72 +135,421 @@
             this._timerAutoCheck.Interval = 400;
             this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
             // 
+            // menuStrip
+            // 
+            this.menuStrip.BackColor = System.Drawing.SystemColors.Control;
+            this.menuStrip.Font = new System.Drawing.Font("Arial Unicode MS", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.gameToolStripMenuItem,
+            this.engineToolStripMenuItem,
+            this.appearanceToolStripMenuItem,
+            this.navigationToolStripMenuItem,
+            this.optionsToolStripMenuItem,
+            this.toolStripMenuItemLatest,
+            this.toolStripMenuItemForward,
+            this.toolStripMenuItemBack,
+            this.toolStripMenuItemStart});
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.menuStrip.Size = new System.Drawing.Size(836, 33);
+            this.menuStrip.TabIndex = 1;
+            this.menuStrip.Text = "menuStrip1";
+            // 
+            // gameToolStripMenuItem
+            // 
+            this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newToolStripMenuItem,
+            this.loadToolStripMenuItem,
+            this.copyFENToClipboardToolStripMenuItem});
+            this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
+            this.gameToolStripMenuItem.Size = new System.Drawing.Size(62, 29);
+            this.gameToolStripMenuItem.Text = "Game";
+            // 
+            // engineToolStripMenuItem
+            // 
+            this.engineToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.engineTimeToolStripMenuItem,
+            this.multiPVToolStripMenuItem,
+            this.playNowToolStripMenuItem,
+            this.autoplayToolStripMenuItem,
+            this.cheatModeToolStripMenuItem});
+            this.engineToolStripMenuItem.Name = "engineToolStripMenuItem";
+            this.engineToolStripMenuItem.Size = new System.Drawing.Size(66, 29);
+            this.engineToolStripMenuItem.Text = "Engine";
+            // 
+            // appearanceToolStripMenuItem
+            // 
+            this.appearanceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.alterPiecesToolStripMenuItem,
+            this.gridBorderToolStripMenuItem});
+            this.appearanceToolStripMenuItem.Name = "appearanceToolStripMenuItem";
+            this.appearanceToolStripMenuItem.Size = new System.Drawing.Size(100, 29);
+            this.appearanceToolStripMenuItem.Text = "Appearance";
+            // 
+            // newToolStripMenuItem
+            // 
+            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+            this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(234, 24);
+            this.newToolStripMenuItem.Text = "New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.OnNewClick);
+            // 
+            // loadToolStripMenuItem
+            // 
+            this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
+            this.loadToolStripMenuItem.Size = new System.Drawing.Size(234, 24);
+            this.loadToolStripMenuItem.Text = "Load from FEN";
+            this.loadToolStripMenuItem.Click += new System.EventHandler(this.OnButtonLoadFenClick);
+            // 
+            // engineTimeToolStripMenuItem
+            // 
+            this.engineTimeToolStripMenuItem.Name = "engineTimeToolStripMenuItem";
+            this.engineTimeToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
+            this.engineTimeToolStripMenuItem.Text = "Engine Time";
+            this.engineTimeToolStripMenuItem.Click += new System.EventHandler(this.engineTimeToolStripMenuItem_Click);
+            // 
+            // multiPVToolStripMenuItem
+            // 
+            this.multiPVToolStripMenuItem.Name = "multiPVToolStripMenuItem";
+            this.multiPVToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
+            this.multiPVToolStripMenuItem.Text = "MultiPV";
+            this.multiPVToolStripMenuItem.Click += new System.EventHandler(this.multiPVToolStripMenuItem_Click);
+            // 
+            // playNowToolStripMenuItem
+            // 
+            this.playNowToolStripMenuItem.Name = "playNowToolStripMenuItem";
+            this.playNowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.playNowToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
+            this.playNowToolStripMenuItem.Text = "Play Now";
+            this.playNowToolStripMenuItem.Click += new System.EventHandler(this.OnButtonComputerMoveClick);
+            // 
+            // autoplayToolStripMenuItem
+            // 
+            this.autoplayToolStripMenuItem.Name = "autoplayToolStripMenuItem";
+            this.autoplayToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.C)));
+            this.autoplayToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
+            this.autoplayToolStripMenuItem.Text = "Autoplay";
+            this.autoplayToolStripMenuItem.Click += new System.EventHandler(this.OnButtonAutoPlayClick);
+            // 
+            // alterPiecesToolStripMenuItem
+            // 
+            this.alterPiecesToolStripMenuItem.Name = "alterPiecesToolStripMenuItem";
+            this.alterPiecesToolStripMenuItem.Size = new System.Drawing.Size(157, 24);
+            this.alterPiecesToolStripMenuItem.Text = "Alter Pieces";
+            this.alterPiecesToolStripMenuItem.Click += new System.EventHandler(this.OnButtonAlterPiecesClick);
+            // 
+            // navigationToolStripMenuItem
+            // 
+            this.navigationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.goBackToolStripMenuItem,
+            this.goForwardToolStripMenuItem,
+            this.goToStartToolStripMenuItem,
+            this.goToLatestToolStripMenuItem});
+            this.navigationToolStripMenuItem.Name = "navigationToolStripMenuItem";
+            this.navigationToolStripMenuItem.Size = new System.Drawing.Size(90, 29);
+            this.navigationToolStripMenuItem.Text = "Navigation";
+            // 
+            // goBackToolStripMenuItem
+            // 
+            this.goBackToolStripMenuItem.Name = "goBackToolStripMenuItem";
+            this.goBackToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Left)));
+            this.goBackToolStripMenuItem.Size = new System.Drawing.Size(226, 24);
+            this.goBackToolStripMenuItem.Text = "Go back";
+            this.goBackToolStripMenuItem.Click += new System.EventHandler(this.OnButtonBackClick);
+            // 
+            // goForwardToolStripMenuItem
+            // 
+            this.goForwardToolStripMenuItem.Name = "goForwardToolStripMenuItem";
+            this.goForwardToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Right)));
+            this.goForwardToolStripMenuItem.Size = new System.Drawing.Size(226, 24);
+            this.goForwardToolStripMenuItem.Text = "Go forward";
+            this.goForwardToolStripMenuItem.Click += new System.EventHandler(this.OnButtonForwardClick);
+            // 
+            // goToStartToolStripMenuItem
+            // 
+            this.goToStartToolStripMenuItem.Name = "goToStartToolStripMenuItem";
+            this.goToStartToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Down)));
+            this.goToStartToolStripMenuItem.Size = new System.Drawing.Size(226, 24);
+            this.goToStartToolStripMenuItem.Text = "Go to start";
+            this.goToStartToolStripMenuItem.Click += new System.EventHandler(this.OnButtonStartClick);
+            // 
+            // goToLatestToolStripMenuItem
+            // 
+            this.goToLatestToolStripMenuItem.Name = "goToLatestToolStripMenuItem";
+            this.goToLatestToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Up)));
+            this.goToLatestToolStripMenuItem.Size = new System.Drawing.Size(226, 24);
+            this.goToLatestToolStripMenuItem.Text = "Go to latest";
+            this.goToLatestToolStripMenuItem.Click += new System.EventHandler(this.OnButtonLatestClick);
+            // 
+            // cheatModeToolStripMenuItem
+            // 
+            this.cheatModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.animTimeToolStripMenuItem,
+            this.resetToolStripMenuItem,
+            this.updateToolStripMenuItem,
+            this.squareColorsToolStripMenuItem,
+            this.autoMoveToolStripMenuItem,
+            this.checkAutoToolStripMenuItem});
+            this.cheatModeToolStripMenuItem.Name = "cheatModeToolStripMenuItem";
+            this.cheatModeToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
+            this.cheatModeToolStripMenuItem.Text = "Cheat Mode";
+            this.cheatModeToolStripMenuItem.Click += new System.EventHandler(this.cheatModeToolStripMenuItem_Click);
+            // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.flipBoardToolStripMenuItem,
+            this.soundToolStripMenuItem,
+            this.hideOutputToolStripMenuItem,
+            this.hideArrowsToolStripMenuItem,
+            this.localModeToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(72, 29);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // gridBorderToolStripMenuItem
+            // 
+            this.gridBorderToolStripMenuItem.Name = "gridBorderToolStripMenuItem";
+            this.gridBorderToolStripMenuItem.Size = new System.Drawing.Size(157, 24);
+            this.gridBorderToolStripMenuItem.Text = "Grid Border";
+            this.gridBorderToolStripMenuItem.Click += new System.EventHandler(this.OnCheckBoxGridBorderCheckedChanged);
+            // 
+            // flipBoardToolStripMenuItem
+            // 
+            this.flipBoardToolStripMenuItem.Name = "flipBoardToolStripMenuItem";
+            this.flipBoardToolStripMenuItem.Size = new System.Drawing.Size(159, 24);
+            this.flipBoardToolStripMenuItem.Text = "Flip Board";
+            this.flipBoardToolStripMenuItem.Click += new System.EventHandler(this.OnCheckBoxFlippedCheckedChanged);
+            // 
+            // soundToolStripMenuItem
+            // 
+            this.soundToolStripMenuItem.Name = "soundToolStripMenuItem";
+            this.soundToolStripMenuItem.Size = new System.Drawing.Size(159, 24);
+            this.soundToolStripMenuItem.Text = "Sound";
+            this.soundToolStripMenuItem.Click += new System.EventHandler(this.soundToolStripMenuItem_Click);
+            // 
+            // hideOutputToolStripMenuItem
+            // 
+            this.hideOutputToolStripMenuItem.Name = "hideOutputToolStripMenuItem";
+            this.hideOutputToolStripMenuItem.Size = new System.Drawing.Size(159, 24);
+            this.hideOutputToolStripMenuItem.Text = "Hide Output";
+            this.hideOutputToolStripMenuItem.Click += new System.EventHandler(this.OnCheckBoxHideOutputCheckedChanged);
+            // 
+            // hideArrowsToolStripMenuItem
+            // 
+            this.hideArrowsToolStripMenuItem.Name = "hideArrowsToolStripMenuItem";
+            this.hideArrowsToolStripMenuItem.Size = new System.Drawing.Size(159, 24);
+            this.hideArrowsToolStripMenuItem.Text = "Hide Arrows";
+            this.hideArrowsToolStripMenuItem.Click += new System.EventHandler(this.OnCheckBoxHideArrowsCheckedChanged);
+            // 
+            // localModeToolStripMenuItem
+            // 
+            this.localModeToolStripMenuItem.Name = "localModeToolStripMenuItem";
+            this.localModeToolStripMenuItem.Size = new System.Drawing.Size(159, 24);
+            this.localModeToolStripMenuItem.Text = "Local Mode";
+            this.localModeToolStripMenuItem.Click += new System.EventHandler(this.OnCheckBoxPlayModeCheckedChanged);
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(200, 24);
+            this.resetToolStripMenuItem.Text = "Reset";
+            this.resetToolStripMenuItem.Click += new System.EventHandler(this.OnButtonResetClick);
+            // 
+            // updateToolStripMenuItem
+            // 
+            this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(200, 24);
+            this.updateToolStripMenuItem.Text = "Update";
+            this.updateToolStripMenuItem.Click += new System.EventHandler(this.OnButtonUpdateRecClick);
+            // 
+            // squareColorsToolStripMenuItem
+            // 
+            this.squareColorsToolStripMenuItem.Name = "squareColorsToolStripMenuItem";
+            this.squareColorsToolStripMenuItem.Size = new System.Drawing.Size(200, 24);
+            this.squareColorsToolStripMenuItem.Text = "Square Colors";
+            this.squareColorsToolStripMenuItem.Click += new System.EventHandler(this.OnButtonColorDialogClick);
+            // 
+            // autoMoveToolStripMenuItem
+            // 
+            this.autoMoveToolStripMenuItem.Name = "autoMoveToolStripMenuItem";
+            this.autoMoveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.autoMoveToolStripMenuItem.Size = new System.Drawing.Size(200, 24);
+            this.autoMoveToolStripMenuItem.Text = "Auto Move";
+            this.autoMoveToolStripMenuItem.Click += new System.EventHandler(this.OnButtonMoveRecClick);
+            // 
+            // checkAutoToolStripMenuItem
+            // 
+            this.checkAutoToolStripMenuItem.Name = "checkAutoToolStripMenuItem";
+            this.checkAutoToolStripMenuItem.Size = new System.Drawing.Size(200, 24);
+            this.checkAutoToolStripMenuItem.Text = "Check Auto";
+            this.checkAutoToolStripMenuItem.Click += new System.EventHandler(this.checkAutoToolStripMenuItem_Click);
+            // 
+            // animTimeToolStripMenuItem
+            // 
+            this.animTimeToolStripMenuItem.Name = "animTimeToolStripMenuItem";
+            this.animTimeToolStripMenuItem.Size = new System.Drawing.Size(200, 24);
+            this.animTimeToolStripMenuItem.Text = "Anim Time";
+            this.animTimeToolStripMenuItem.Click += new System.EventHandler(this.animTimeToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItemLatest
+            // 
+            this.toolStripMenuItemLatest.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripMenuItemLatest.Font = new System.Drawing.Font("Agency FB", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItemLatest.Name = "toolStripMenuItemLatest";
+            this.toolStripMenuItemLatest.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.toolStripMenuItemLatest.Size = new System.Drawing.Size(40, 29);
+            this.toolStripMenuItemLatest.Text = ">>";
+            this.toolStripMenuItemLatest.Click += new System.EventHandler(this.OnButtonLatestClick);
+            // 
+            // toolStripMenuItemBack
+            // 
+            this.toolStripMenuItemBack.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripMenuItemBack.Font = new System.Drawing.Font("Agency FB", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItemBack.Name = "toolStripMenuItemBack";
+            this.toolStripMenuItemBack.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.toolStripMenuItemBack.Size = new System.Drawing.Size(32, 29);
+            this.toolStripMenuItemBack.Text = "<";
+            this.toolStripMenuItemBack.Click += new System.EventHandler(this.OnButtonBackClick);
+            // 
+            // toolStripMenuItemForward
+            // 
+            this.toolStripMenuItemForward.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripMenuItemForward.Font = new System.Drawing.Font("Agency FB", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItemForward.Name = "toolStripMenuItemForward";
+            this.toolStripMenuItemForward.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.toolStripMenuItemForward.Size = new System.Drawing.Size(32, 29);
+            this.toolStripMenuItemForward.Text = ">";
+            this.toolStripMenuItemForward.Click += new System.EventHandler(this.OnButtonForwardClick);
+            // 
+            // toolStripMenuItemStart
+            // 
+            this.toolStripMenuItemStart.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripMenuItemStart.Font = new System.Drawing.Font("Agency FB", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItemStart.Name = "toolStripMenuItemStart";
+            this.toolStripMenuItemStart.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.toolStripMenuItemStart.Size = new System.Drawing.Size(40, 29);
+            this.toolStripMenuItemStart.Text = "<<";
+            this.toolStripMenuItemStart.Click += new System.EventHandler(this.OnButtonStartClick);
+            // 
+            // copyFENToClipboardToolStripMenuItem
+            // 
+            this.copyFENToClipboardToolStripMenuItem.Name = "copyFENToClipboardToolStripMenuItem";
+            this.copyFENToClipboardToolStripMenuItem.Size = new System.Drawing.Size(234, 24);
+            this.copyFENToClipboardToolStripMenuItem.Text = "Copy FEN To Clipboard";
+            this.copyFENToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyFENToClipboardToolStripMenuItem_Click);
+            // 
+            // _labelShowEval
+            // 
+            this._labelShowEval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._labelShowEval.AutoSize = true;
+            this._labelShowEval.BackColor = System.Drawing.SystemColors.Control;
+            this._labelShowEval.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelShowEval.Location = new System.Drawing.Point(64, 26);
+            this._labelShowEval.Name = "_labelShowEval";
+            this._labelShowEval.Size = new System.Drawing.Size(80, 18);
+            this._labelShowEval.TabIndex = 2;
+            this._labelShowEval.Text = "Evaluation:";
+            // 
+            // _labelEval
+            // 
+            this._labelEval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._labelEval.AutoSize = true;
+            this._labelEval.BackColor = System.Drawing.SystemColors.Control;
+            this._labelEval.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelEval.Location = new System.Drawing.Point(57, 45);
+            this._labelEval.Name = "_labelEval";
+            this._labelEval.Size = new System.Drawing.Size(104, 39);
+            this._labelEval.TabIndex = 3;
+            this._labelEval.Text = "+0.00";
+            // 
+            // _panelRight
+            // 
+            this._panelRight.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this._panelRight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this._panelRight.Controls.Add(this._labelEval);
+            this._panelRight.Controls.Add(this._labelShowEval);
+            this._panelRight.Location = new System.Drawing.Point(602, 34);
+            this._panelRight.Name = "_panelRight";
+            this._panelRight.Size = new System.Drawing.Size(234, 473);
+            this._panelRight.TabIndex = 4;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(836, 507);
             this.Controls.Add(this._splitContainerOuter);
+            this.Controls.Add(this.menuStrip);
+            this.Controls.Add(this._panelRight);
             this.DoubleBuffered = true;
+            this.MainMenuStrip = this.menuStrip;
             this.MinimumSize = new System.Drawing.Size(852, 546);
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BerldChess Version X";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormMainClosing);
             this.Load += new System.EventHandler(this.OnFormMainLoad);
-            this._splitContainerOuter.Panel1.ResumeLayout(false);
             this._splitContainerOuter.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).EndInit();
             this._splitContainerOuter.ResumeLayout(false);
-            this._splitContainerInner.Panel2.ResumeLayout(false);
-            this._splitContainerInner.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._splitContainerInner)).EndInit();
-            this._splitContainerInner.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).EndInit();
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
+            this._panelRight.ResumeLayout(false);
+            this._panelRight.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.SplitContainer _splitContainerOuter;
-        private System.Windows.Forms.SplitContainer _splitContainerInner;
         private System.Windows.Forms.DataGridView _dataGridView;
-        private System.Windows.Forms.Button _buttonLoadFen;
-        private System.Windows.Forms.Label _labelFEN;
-        private System.Windows.Forms.TextBox _textBoxFen;
-        private System.Windows.Forms.Button _buttonLatest;
-        private System.Windows.Forms.Button _buttonStart;
-        private System.Windows.Forms.Button _buttonForward;
-        private System.Windows.Forms.Button _buttonBack;
-        private System.Windows.Forms.CheckBox _checkBoxGridBorder;
-        private System.Windows.Forms.CheckBox _checkBoxFlipped;
-        private System.Windows.Forms.CheckBox _checkBoxHideArrows;
-        private System.Windows.Forms.CheckBox _checkBoxHideOutput;
         private System.Windows.Forms.Timer _slowTimer;
-        private System.Windows.Forms.Label _labelCPStatus;
-        private System.Windows.Forms.CheckBox _checkBoxLocalMode;
-        private System.Windows.Forms.Label _labelEvaluation;
-        private System.Windows.Forms.Button _buttonNew;
-        private System.Windows.Forms.Button _buttonComputerMove;
         private System.Windows.Forms.Timer _engineTimer;
-        private System.Windows.Forms.CheckBox _checkBoxCheatMode;
-        private System.Windows.Forms.TextBox _textBoxEngineTime;
-        private System.Windows.Forms.Label _labelComputerTime;
-        private System.Windows.Forms.Label _labelMultiPV;
-        private System.Windows.Forms.TextBox _textBoxMultiPV;
-        private System.Windows.Forms.Button _buttonApply;
-        private System.Windows.Forms.Button _buttonAutoPlay;
-        private System.Windows.Forms.CheckBox _checkBoxSound;
-        private System.Windows.Forms.Button _buttonMoveRec;
-        private System.Windows.Forms.Button _buttonUpdateRec;
-        private System.Windows.Forms.Button _buttonColorDialog;
-        private System.Windows.Forms.Button _buttonReset;
-        private System.Windows.Forms.CheckBox _checkBoxCheckAuto;
         private System.Windows.Forms.Timer _timerAutoCheck;
-        private System.Windows.Forms.Label _labelAnimTime;
-        private System.Windows.Forms.TextBox _textBoxAnimTime;
-        private System.Windows.Forms.Button _buttonAlterPieces;
+        private System.Windows.Forms.MenuStrip menuStrip;
+        private System.Windows.Forms.ToolStripMenuItem gameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem engineToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem engineTimeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem multiPVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem playNowToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem autoplayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cheatModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem appearanceToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem alterPiecesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gridBorderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem navigationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem goBackToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem goForwardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem goToStartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem goToLatestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem flipBoardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem soundToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hideOutputToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hideArrowsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem localModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem squareColorsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem autoMoveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkAutoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem animTimeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemLatest;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemForward;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemBack;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemStart;
+        private System.Windows.Forms.ToolStripMenuItem copyFENToClipboardToolStripMenuItem;
+        private System.Windows.Forms.Label _labelShowEval;
+        private System.Windows.Forms.Label _labelEval;
+        private System.Windows.Forms.Panel _panelRight;
     }
 }
 
