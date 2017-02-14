@@ -147,7 +147,7 @@
             this._splitContainerInner.Panel2.Controls.Add(this._textBoxFen);
             this._splitContainerInner.Panel2MinSize = 200;
             this._splitContainerInner.Size = new System.Drawing.Size(836, 461);
-            this._splitContainerInner.SplitterDistance = 617;
+            this._splitContainerInner.SplitterDistance = 618;
             this._splitContainerInner.SplitterWidth = 3;
             this._splitContainerInner.TabIndex = 0;
             this._splitContainerInner.TabStop = false;
@@ -387,9 +387,9 @@
             this._labelCPStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelCPStatus.Location = new System.Drawing.Point(3, 184);
             this._labelCPStatus.Name = "_labelCPStatus";
-            this._labelCPStatus.Size = new System.Drawing.Size(69, 31);
+            this._labelCPStatus.Size = new System.Drawing.Size(71, 31);
             this._labelCPStatus.TabIndex = 11;
-            this._labelCPStatus.Text = "cp 0";
+            this._labelCPStatus.Text = "0.00";
             // 
             // _checkBoxHideOutput
             // 
@@ -559,6 +559,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BerldChess Version X";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormMainClosing);
+            this.Load += new System.EventHandler(this.OnFormMainLoad);
             this._splitContainerOuter.Panel1.ResumeLayout(false);
             this._splitContainerOuter.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).EndInit();

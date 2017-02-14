@@ -26,6 +26,8 @@ namespace BerldChess.Model
 
         #endregion
 
+        #region Fields
+
         private bool _localMode;
         private bool _hideOutput;
         private bool _hideArrows;
@@ -43,6 +45,10 @@ namespace BerldChess.Model
         private double _sizeFactor = 0.9;
 
         private string _pieceFontFamily = null;
+
+        #endregion
+
+        #region Properties
 
         public double PieceSizeFactor
         {
@@ -105,24 +111,36 @@ namespace BerldChess.Model
             }
         }
 
-
         [XmlIgnore]
         public Color DarkSquare { get; set; } = Color.FromArgb(186, 85, 70);
+
         [XmlIgnore]
         public Color LightSquare { get; set; } = Color.FromArgb(240, 216, 191);
 
         [XmlElement("DarkSquare")]
         public int DarkSquareAsArgb
         {
-            get { return DarkSquare.ToArgb(); }
-            set { DarkSquare = Color.FromArgb(value); }
+            get
+            {
+                return DarkSquare.ToArgb();
+            }
+            set
+            {
+                DarkSquare = Color.FromArgb(value);
+            }
         }
 
         [XmlElement("LightSquare")]
         public int LightSquareAsArgb
         {
-            get { return LightSquare.ToArgb(); }
-            set { LightSquare = Color.FromArgb(value); }
+            get
+            {
+                return LightSquare.ToArgb();
+            }
+            set
+            {
+                LightSquare = Color.FromArgb(value);
+            }
         }
 
         public bool Sound
@@ -258,6 +276,8 @@ namespace BerldChess.Model
                 _bounds = value;
             }
         }
+
+        #endregion
 
         private SerializedInfo() { }
     }

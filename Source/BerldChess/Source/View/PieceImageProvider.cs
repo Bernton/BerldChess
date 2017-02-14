@@ -1,9 +1,6 @@
 ﻿using BerldChess.Properties;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 
 namespace BerldChess.View
 {
@@ -73,7 +70,7 @@ namespace BerldChess.View
             throw new ArgumentException("Invalid char.");
         }
 
-        public static Bitmap CropImage(Bitmap source, Rectangle section)
+        private static Bitmap CropImage(Bitmap source, Rectangle section)
         {
             Bitmap bitmap = new Bitmap(section.Width, section.Height);
             Graphics g = Graphics.FromImage(bitmap);

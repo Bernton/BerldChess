@@ -4,7 +4,6 @@ using BerldChess.ViewModel;
 using ChessDotNet;
 using ChessDotNet.Pieces;
 using ChessEngineInterface;
-using Microsoft.VisualBasic;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -303,7 +302,7 @@ namespace BerldChess.View
 
                         if (_chessPanel.Arrows.Count < multiPV)
                         {
-                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 1.6, GetReferenceColor(centipawn, _multiPV1Reference)));
+                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 1.25, GetReferenceColor(centipawn, _multiPV1Reference)));
                         }
                         else
                         {
@@ -733,45 +732,7 @@ namespace BerldChess.View
 
         private void OnButtonMoveRecClick(object sender, EventArgs e)
         {
-            Point[] changedSquares = Recognizer.GetChangedSquares();
-
-            Point source = Point.Empty;
-            Point destination = Point.Empty;
-
-            if (changedSquares.Length == 4)
-            {
-                if (changedSquares[0].X == 4)
-                {
-                    source = changedSquares[0];
-                    destination = changedSquares[2];
-
-                }
-                else
-                {
-                    source = changedSquares[3];
-                    destination = changedSquares[1];
-                }
-            }
-            else if (changedSquares.Length == 2)
-            {
-                ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
-
-                if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
-                {
-                    source = changedSquares[0];
-                    destination = changedSquares[1];
-                }
-                else
-                {
-                    source = changedSquares[1];
-                    destination = changedSquares[0];
-                }
-            }
-
-            FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
-            OnPieceMoved(null, args);
-
-            Recognizer.UpdateBoardImage();
+            AutoMove();
         }
 
         private void OnButtonUpdateRecClick(object sender, EventArgs e)
@@ -824,50 +785,7 @@ namespace BerldChess.View
         {
             if (_checkBoxCheckAuto.Checked)
             {
-                Point[] changedSquares = Recognizer.GetChangedSquares();
-
-                if (changedSquares.Length == 0)
-                {
-                    return;
-                }
-
-                Point source = Point.Empty;
-                Point destination = Point.Empty;
-
-                if (changedSquares.Length == 4)
-                {
-                    if (changedSquares[0].X == 4)
-                    {
-                        source = changedSquares[0];
-                        destination = changedSquares[2];
-
-                    }
-                    else
-                    {
-                        source = changedSquares[3];
-                        destination = changedSquares[1];
-                    }
-                }
-                else if (changedSquares.Length == 2)
-                {
-                    ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
-
-                    if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
-                    {
-                        source = changedSquares[0];
-                        destination = changedSquares[1];
-                    }
-                    else
-                    {
-                        source = changedSquares[1];
-                        destination = changedSquares[0];
-                    }
-                }
-
-                _moveTry = true;
-
-                FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
-                OnPieceMoved(null, args);
+                AutoMove();
             }
         }
 
@@ -890,17 +808,17 @@ namespace BerldChess.View
 
         private void OnButtonAlterPiecesClick(object sender, EventArgs e)
         {
-            _pieceDialog.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
-            _pieceDialog.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
-            _pieceDialog.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
+            _pieceDialog.FontFamily = SerializedInfo.Instance.PieceFontFamily;
+            _pieceDialog.IsUnicode = SerializedInfo.Instance.IsUnicodeFont;
+            _pieceDialog.FontChars = SerializedInfo.Instance.ChessFontChars;
             _pieceDialog.SizeFactor = SerializedInfo.Instance.PieceSizeFactor;
 
             if (_pieceDialog.ShowDialog() == DialogResult.OK)
             {
                 SerializedInfo.Instance.PieceSizeFactor = _pieceDialog.SizeFactor;
-                SerializedInfo.Instance.ChessFontChars = _pieceDialog.ChessFontChars;
-                SerializedInfo.Instance.PieceFontFamily = _pieceDialog.PieceFontFamily;
-                SerializedInfo.Instance.IsUnicodeFont = _pieceDialog.IsUnicodeFont;
+                SerializedInfo.Instance.ChessFontChars = _pieceDialog.FontChars;
+                SerializedInfo.Instance.PieceFontFamily = _pieceDialog.FontFamily;
+                SerializedInfo.Instance.IsUnicodeFont = _pieceDialog.IsUnicode;
                 _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
                 _chessPanel.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
                 _chessPanel.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
@@ -912,9 +830,9 @@ namespace BerldChess.View
         private void OnDialogFontSelected()
         {
             SerializedInfo.Instance.PieceSizeFactor = _pieceDialog.SizeFactor;
-            SerializedInfo.Instance.ChessFontChars = _pieceDialog.ChessFontChars;
-            SerializedInfo.Instance.PieceFontFamily = _pieceDialog.PieceFontFamily;
-            SerializedInfo.Instance.IsUnicodeFont = _pieceDialog.IsUnicodeFont;
+            SerializedInfo.Instance.ChessFontChars = _pieceDialog.FontChars;
+            SerializedInfo.Instance.PieceFontFamily = _pieceDialog.FontFamily;
+            SerializedInfo.Instance.IsUnicodeFont = _pieceDialog.IsUnicode;
             _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
             _chessPanel.ChessFontChars = SerializedInfo.Instance.ChessFontChars;
             _chessPanel.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
@@ -930,6 +848,14 @@ namespace BerldChess.View
                 {
                     _splitContainerInner.Panel2.Controls[i].Visible = _checkBoxCheatMode.Checked;
                 }
+            }
+        }
+
+        private void OnFormMainLoad(object sender, EventArgs e)
+        {
+            if (SerializedInfo.Instance.IsMaximized)
+            {
+                WindowState = FormWindowState.Maximized;
             }
         }
 
@@ -950,11 +876,6 @@ namespace BerldChess.View
 
                     Bounds = SerializedInfo.Instance.Bounds;
 
-                    if (SerializedInfo.Instance.IsMaximized)
-                    {
-                        WindowState = FormWindowState.Maximized;
-                    }
-
                     _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
                     _chessPanel.IsUnicodeFont = SerializedInfo.Instance.IsUnicodeFont;
                     _chessPanel.PieceFontFamily = SerializedInfo.Instance.PieceFontFamily;
@@ -968,7 +889,7 @@ namespace BerldChess.View
                     _textBoxEngineTime.Text = SerializedInfo.Instance.EngineTime.ToString();
                     _textBoxMultiPV.Text = SerializedInfo.Instance.MultiPV.ToString();
                     _checkBoxSound.Checked = SerializedInfo.Instance.Sound;
-                    _animTime = SerializedInfo.Instance.AnimationTime;
+                    _textBoxAnimTime.Text = SerializedInfo.Instance.AnimationTime.ToString();
                 }
             }
             catch (Exception ex)
@@ -984,7 +905,15 @@ namespace BerldChess.View
         {
             try
             {
-                SerializedInfo.Instance.Bounds = Bounds;
+                if(WindowState == FormWindowState.Maximized)
+                {
+                    SerializedInfo.Instance.Bounds = RestoreBounds;
+                }
+                else
+                {
+                    SerializedInfo.Instance.Bounds = Bounds;
+                }
+
                 SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
                 SerializedInfo.Instance.DisplayGridBorder = _checkBoxGridBorder.Checked;
                 SerializedInfo.Instance.BoardFlipped = _checkBoxFlipped.Checked;
@@ -1183,6 +1112,54 @@ namespace BerldChess.View
                     _dataGridView.Rows[rowI].Cells[cellI].Value = "";
                 }
             }
+        }
+
+        private void AutoMove()
+        {
+            Point[] changedSquares = Recognizer.GetChangedSquares();
+
+            if (changedSquares == null || changedSquares.Length == 0)
+            {
+                return;
+            }
+
+            Point source = Point.Empty;
+            Point destination = Point.Empty;
+
+            if (changedSquares.Length == 4)
+            {
+                if (changedSquares[0].X == 4)
+                {
+                    source = changedSquares[0];
+                    destination = changedSquares[2];
+
+                }
+                else
+                {
+                    source = changedSquares[3];
+                    destination = changedSquares[1];
+                }
+            }
+            else if (changedSquares.Length == 2)
+            {
+                ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
+
+                if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
+                {
+                    source = changedSquares[0];
+                    destination = changedSquares[1];
+                }
+                else
+                {
+                    source = changedSquares[1];
+                    destination = changedSquares[0];
+                }
+            }
+
+            _moveTry = true;
+
+            FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
+            OnPieceMoved(null, args);
         }
 
         private bool IsFinishedPosition()

@@ -64,36 +64,41 @@ namespace BerldChess.Model
 
         public static Point[] GetChangedSquares()
         {
-            List<Point> changedSquares = new List<Point>();
-            Bitmap boardSnap = GetBoardSnap();
-
-            double fieldWidth = boardSnap.Width / 8.0;
-            double fieldHeight = boardSnap.Height / 8.0;
-
-            for (int y = 0; y < 8; y++)
+            if (BoardFound)
             {
-                for (int x = 0; x < 8; x++)
+                List<Point> changedSquares = new List<Point>();
+                Bitmap boardSnap = GetBoardSnap();
+
+                double fieldWidth = boardSnap.Width / 8.0;
+                double fieldHeight = boardSnap.Height / 8.0;
+
+                for (int y = 0; y < 8; y++)
                 {
-                    Color borderColor = boardSnap.GetPixel(Round((x * fieldWidth + 4)), Round((y * fieldHeight + 4)));
-                    Color centerColor = boardSnap.GetPixel(Round((x * fieldWidth + (fieldWidth / 2.0))), Round((y * fieldHeight + fieldHeight * 0.73)));
-                    bool same = borderColor.ToArgb() == centerColor.ToArgb();
-
-                    Color lastBorderColor = _lastBoardSnap.GetPixel(Round((x * fieldWidth + 4)), Round((y * fieldHeight + 4)));
-                    Color lastCenterColor = _lastBoardSnap.GetPixel(Round((x * fieldWidth + (fieldWidth / 2.0))), Round((y * fieldHeight + fieldHeight * 0.73)));
-                    bool lastSame = lastBorderColor.ToArgb() == lastCenterColor.ToArgb();
-
-                    if (same != lastSame)
+                    for (int x = 0; x < 8; x++)
                     {
-                        changedSquares.Add(new Point(x, y));
-                    }
-                    else if (same == false && centerColor.ToArgb() != lastCenterColor.ToArgb())
-                    {
-                        changedSquares.Add(new Point(x, y));
+                        Color borderColor = boardSnap.GetPixel(Round((x * fieldWidth + 4)), Round((y * fieldHeight + 4)));
+                        Color centerColor = boardSnap.GetPixel(Round((x * fieldWidth + (fieldWidth / 2.0))), Round((y * fieldHeight + fieldHeight * 0.73)));
+                        bool same = borderColor.ToArgb() == centerColor.ToArgb();
+
+                        Color lastBorderColor = _lastBoardSnap.GetPixel(Round((x * fieldWidth + 4)), Round((y * fieldHeight + 4)));
+                        Color lastCenterColor = _lastBoardSnap.GetPixel(Round((x * fieldWidth + (fieldWidth / 2.0))), Round((y * fieldHeight + fieldHeight * 0.73)));
+                        bool lastSame = lastBorderColor.ToArgb() == lastCenterColor.ToArgb();
+
+                        if (same != lastSame)
+                        {
+                            changedSquares.Add(new Point(x, y));
+                        }
+                        else if (same == false && centerColor.ToArgb() != lastCenterColor.ToArgb())
+                        {
+                            changedSquares.Add(new Point(x, y));
+                        }
                     }
                 }
+
+                return changedSquares.ToArray();
             }
 
-            return changedSquares.ToArray();
+            return null;
         }
 
         public static Bitmap GetBoardSnap()

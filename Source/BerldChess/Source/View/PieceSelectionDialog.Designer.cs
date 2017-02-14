@@ -37,6 +37,7 @@
             this._labelFontChars = new System.Windows.Forms.Label();
             this._textBoxSizeFactor = new System.Windows.Forms.TextBox();
             this._labelSize = new System.Windows.Forms.Label();
+            this._buttonClose = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // _checkBoxUnicodeFont
@@ -74,7 +75,7 @@
             // 
             this._buttonPreview.Location = new System.Drawing.Point(12, 192);
             this._buttonPreview.Name = "_buttonPreview";
-            this._buttonPreview.Size = new System.Drawing.Size(101, 29);
+            this._buttonPreview.Size = new System.Drawing.Size(119, 29);
             this._buttonPreview.TabIndex = 5;
             this._buttonPreview.Text = "Apply";
             this._buttonPreview.UseVisualStyleBackColor = true;
@@ -89,6 +90,7 @@
             this._textBoxFontChars.TabIndex = 6;
             this._textBoxFontChars.Tag = "kqbnrplwvmto";
             this._textBoxFontChars.Text = "kqbnrplwvmto";
+            this._textBoxFontChars.WordWrap = false;
             // 
             // _labelFontChars
             // 
@@ -116,11 +118,22 @@
             this._labelSize.TabIndex = 9;
             this._labelSize.Text = "Size:";
             // 
+            // _buttonClose
+            // 
+            this._buttonClose.Location = new System.Drawing.Point(152, 192);
+            this._buttonClose.Name = "_buttonClose";
+            this._buttonClose.Size = new System.Drawing.Size(119, 29);
+            this._buttonClose.TabIndex = 10;
+            this._buttonClose.Text = "Close";
+            this._buttonClose.UseVisualStyleBackColor = true;
+            this._buttonClose.Click += new System.EventHandler(this.OnButtonCloseClick);
+            // 
             // PieceSelectionDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(283, 233);
+            this.Controls.Add(this._buttonClose);
             this.Controls.Add(this._labelSize);
             this.Controls.Add(this._textBoxSizeFactor);
             this.Controls.Add(this._labelFontChars);
@@ -151,5 +164,6 @@
         private System.Windows.Forms.Label _labelFontChars;
         private System.Windows.Forms.TextBox _textBoxSizeFactor;
         private System.Windows.Forms.Label _labelSize;
+        private System.Windows.Forms.Button _buttonClose;
     }
 }

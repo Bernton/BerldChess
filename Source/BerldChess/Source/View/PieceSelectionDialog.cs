@@ -7,12 +7,30 @@ namespace BerldChess.View
 {
     public partial class PieceSelectionDialog : Form
     {
-        public event Action FontSelected;
+        #region Fields
 
-        private string _pieceFontFamily;
-        private bool _isUnicodeFont;
-        private string _chessFontChars;
+        private bool _isUnicode;
         private double _sizeFactor;
+        private string _fontFamily;
+        private string _fontChars;
+
+        #endregion
+
+        #region Properties & Events
+
+        public bool IsUnicode
+        {
+            get
+            {
+                return _isUnicode;
+            }
+
+            set
+            {
+                _isUnicode = value;
+                _checkBoxUnicodeFont.Checked = _isUnicode;
+            }
+        }
 
         public double SizeFactor
         {
@@ -27,45 +45,18 @@ namespace BerldChess.View
             }
         }
 
-        public string ChessFontChars
+        public string FontFamily
         {
             get
             {
-                return _chessFontChars;
+                return _fontFamily;
             }
             set
             {
-                _chessFontChars = value;
-                _textBoxFontChars.Text = value;
-            }
-        }
+                _fontFamily = value;
+                _comboBoxFont.Text = _fontFamily;
 
-        public bool IsUnicodeFont
-        {
-            get
-            {
-                return _isUnicodeFont;
-            }
-
-            set
-            {
-                _isUnicodeFont = value;
-                _checkBoxUnicodeFont.Checked = _isUnicodeFont;
-            }
-        }
-
-        public string PieceFontFamily
-        {
-            get
-            {
-                return _pieceFontFamily;
-            }
-            set
-            {
-                _pieceFontFamily = value;
-                _comboBoxFont.Text = _pieceFontFamily;
-
-                if (_pieceFontFamily == "")
+                if (_fontFamily == "")
                 {
                     _checkBoxDefault.Checked = true;
                 }
@@ -75,6 +66,25 @@ namespace BerldChess.View
                 }
             }
         }
+
+        public string FontChars
+        {
+            get
+            {
+                return _fontChars;
+            }
+            set
+            {
+                _fontChars = value;
+                _textBoxFontChars.Text = _fontChars;
+            }
+        }
+
+        public event Action FontSelected;
+
+        #endregion
+
+        #region Constructors
 
         public PieceSelectionDialog()
         {
@@ -88,6 +98,10 @@ namespace BerldChess.View
             }
         }
 
+        #endregion
+
+        #region Methods
+
         private void OnButtonApplyClick(object sender, EventArgs e)
         {
             double factor;
@@ -99,49 +113,31 @@ namespace BerldChess.View
 
             if (_checkBoxDefault.Checked)
             {
-                PieceFontFamily = "";
-
-                FontSelected?.Invoke();
+                FontFamily = "";
             }
-            else if (DoesFontExist(_comboBoxFont.Text, FontStyle.Regular))
+            else if (FontExists(_comboBoxFont.Text, FontStyle.Regular))
             {
-                _isUnicodeFont = _checkBoxUnicodeFont.Checked;
-                PieceFontFamily = _comboBoxFont.Text;
-                ChessFontChars = _textBoxFontChars.Text;
-                FontSelected?.Invoke();
-            }
-        }
-
-        private bool DoesFontExist(string fontFamilyName, FontStyle fontStyle)
-        {
-            bool result;
-
-            try
-            {
-                using (FontFamily family = new FontFamily(fontFamilyName))
-                    result = family.IsStyleAvailable(fontStyle);
-            }
-            catch (ArgumentException)
-            {
-                result = false;
+                _isUnicode = _checkBoxUnicodeFont.Checked;
+                _fontFamily = _comboBoxFont.Text;
+                _fontChars = _textBoxFontChars.Text;
             }
 
-            return result;
+            FontSelected?.Invoke();
         }
 
         private void OnCheckBoxDefaultCheckedChanged(object sender, EventArgs e)
         {
             if (_checkBoxDefault.Checked)
             {
-                _comboBoxFont.Enabled = false;
                 _checkBoxUnicodeFont.Enabled = false;
+                _comboBoxFont.Enabled = false;
                 _labelFontChars.Enabled = false;
                 _textBoxFontChars.Enabled = false;
             }
             else
             {
-                _comboBoxFont.Enabled = true;
                 _checkBoxUnicodeFont.Enabled = true;
+                _comboBoxFont.Enabled = true;
                 _labelFontChars.Enabled = true;
                 _textBoxFontChars.Enabled = true;
             }
@@ -163,7 +159,7 @@ namespace BerldChess.View
 
         private void OnComboBoxFontTextChanged(object sender, EventArgs e)
         {
-            if (DoesFontExist(_comboBoxFont.Text, FontStyle.Regular))
+            if (FontExists(_comboBoxFont.Text, FontStyle.Regular))
             {
                 _textBoxFontChars.Font = new Font(_comboBoxFont.Text, _textBoxFontChars.Font.Size);
                 _textBoxFontChars.Text = (string)_textBoxFontChars.Tag;
@@ -173,5 +169,31 @@ namespace BerldChess.View
                 _textBoxFontChars.Text = "";
             }
         }
+
+        private void OnButtonCloseClick(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+        }
+
+        private bool FontExists(string fontFamilyName, FontStyle fontStyle)
+        {
+            bool result;
+
+            try
+            {
+                using (FontFamily family = new FontFamily(fontFamilyName))
+                {
+                    result = family.IsStyleAvailable(fontStyle);
+                }
+            }
+            catch (ArgumentException)
+            {
+                result = false;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

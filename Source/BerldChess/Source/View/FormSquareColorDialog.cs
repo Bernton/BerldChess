@@ -1,25 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace BerldChess.View
 {
     public partial class FormSquareColorDialog : Form
     {
-        private int _imageI = 0;
+        #region Fields
+
+        private int _imageIndex = 0;
         private Bitmap[] _images;
 
+        #endregion
+
+        #region Properties
+
         public Color? DarkSquareColor { get; private set; } = null;
-        public Color? LightSquareColor { get; set; } = null;
+        public Color? LightSquareColor { get; private set; } = null;
+
+        #endregion
+
+        #region Constructors
 
         public FormSquareColorDialog(Bitmap[] images)
         {
-            if(images == null)
+            if (images == null)
             {
                 throw new ArgumentException("'images' must not be null.");
             }
@@ -27,33 +32,44 @@ namespace BerldChess.View
             InitializeComponent();
 
             _images = images;
-
-            pictureBox.Image = _images[_imageI];
+            pictureBox.Image = _images[_imageIndex];
         }
+
+        #endregion
+
+        #region Methods
 
         private void OnPictureBoxMouseClick(object sender, MouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
-                _imageI++;
-                pictureBox.Image = _images[_imageI % _images.Length];
+                _imageIndex++;
+
+                if (_imageIndex >= _images.Length)
+                {
+                    _imageIndex = 0;
+                }
+
+                pictureBox.Image = _images[_imageIndex];
             }
             else
             {
-                int x = (int)((double)e.X / pictureBox.Width * _images[_imageI].Width);
-                int y = (int)((double)e.Y / pictureBox.Height * _images[_imageI].Height);
+                int x = (int)((double)e.X / pictureBox.Width * _images[_imageIndex].Width);
+                int y = (int)((double)e.Y / pictureBox.Height * _images[_imageIndex].Height);
 
-                if(DarkSquareColor == null)
+                if (DarkSquareColor == null)
                 {
-                    DarkSquareColor = _images[_imageI].GetPixel(x, y);
-                    Text = "Square Color Dialog - Light Square";
+                    DarkSquareColor = _images[_imageIndex].GetPixel(x, y);
+                    Text = "Square Color Dialog - Select Light Square";
                 }
                 else
                 {
-                    LightSquareColor = _images[_imageI].GetPixel(x, y);
+                    LightSquareColor = _images[_imageIndex].GetPixel(x, y);
                     DialogResult = DialogResult.OK;
                 }
             }
         }
+
+        #endregion
     }
 }
