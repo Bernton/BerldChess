@@ -34,7 +34,7 @@ namespace BerldChess.View
 
         #region Properties
 
-        public double PieceSizeFactor { get; set; }
+        public double PieceSizeFactor { get; set; } = 1;
 
         public bool IsUnicodeFont { get; set; }
 
