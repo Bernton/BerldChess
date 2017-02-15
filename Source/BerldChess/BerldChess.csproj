@@ -117,6 +117,9 @@
     <Compile Include="Source\View\PromotionDialog.Designer.cs">
       <DependentUpon>PromotionDialog.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Source\View\ChessPanel.resx">
+      <DependentUpon>ChessPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Source\View\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
       <SubType>Designer</SubType>

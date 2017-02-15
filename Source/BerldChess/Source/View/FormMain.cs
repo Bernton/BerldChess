@@ -6,8 +6,10 @@ using ChessDotNet.Pieces;
 using ChessEngineInterface;
 using Microsoft.VisualBasic;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.IO;
 using System.Media;
 using System.Reflection;
@@ -22,7 +24,8 @@ namespace BerldChess.View
     {
         #region Fields
 
-        PieceSelectionDialog _pieceDialog = new PieceSelectionDialog();
+        private Random _random = new Random();
+        private PieceSelectionDialog _pieceDialog = new PieceSelectionDialog();
         private bool _moveTry = false;
         private SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
         private SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
@@ -379,10 +382,12 @@ namespace BerldChess.View
 
                                     _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fW * (positions[0].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
-                                    Thread.Sleep(50);
+                                    Thread.Sleep(_random.Next(50, 120));
                                     _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fH * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[1].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
+                                    Thread.Sleep(_random.Next(50, 120));
+                                    _inputSimulator.Mouse.LeftButtonClick();
 
                                     Thread.Sleep(_animTime);
                                     Recognizer.UpdateBoardImage();
@@ -892,6 +897,42 @@ namespace BerldChess.View
             Clipboard.SetText(_vm.PositionHistory[_vm.NavIndex].FEN);
         }
 
+        protected override bool IsInputKey(Keys keyData)
+        {
+            switch (keyData)
+            {
+                case Keys.Right:
+                case Keys.Left:
+                case Keys.Up:
+                case Keys.Down:
+                    return true;
+                case Keys.Shift | Keys.Right:
+                case Keys.Shift | Keys.Left:
+                case Keys.Shift | Keys.Up:
+                case Keys.Shift | Keys.Down:
+                    return true;
+            }
+            return base.IsInputKey(keyData);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            foreach (ToolStripMenuItem item in GetItems(menuStrip))
+            {
+                if (string.IsNullOrEmpty(item.ShortcutKeyDisplayString))
+                {
+                    continue;
+                }
+
+                Keys key = (Keys)Enum.Parse(typeof(Keys), item.ShortcutKeyDisplayString);
+
+                if (e.KeyCode == key)
+                {
+                    item.PerformClick();
+                }
+            }
+        }
+
         #endregion
 
         #region Other Methods
@@ -1137,6 +1178,28 @@ namespace BerldChess.View
             return Color.FromArgb(red, green, 0);
         }
 
+        private List<ToolStripMenuItem> GetItems(MenuStrip menuStrip)
+        {
+            List<ToolStripMenuItem> myItems = new List<ToolStripMenuItem>();
+            foreach (ToolStripMenuItem i in menuStrip.Items)
+            {
+                GetMenuItems(i, myItems);
+            }
+            return myItems;
+        }
+
+        private void GetMenuItems(ToolStripMenuItem item, List<ToolStripMenuItem> items)
+        {
+            items.Add(item);
+            foreach (ToolStripItem i in item.DropDownItems)
+            {
+                if (i is ToolStripMenuItem)
+                {
+                    GetMenuItems((ToolStripMenuItem)i, items);
+                }
+            }
+        }
+
         private void EmptyDataGrid()
         {
             for (int rowI = 0; rowI < _dataGridView.Rows.Count; rowI++)
@@ -1205,10 +1268,6 @@ namespace BerldChess.View
                 || _vm.Game.IsDraw();
         }
 
-
-
         #endregion
-
-
     }
 }

@@ -246,6 +246,19 @@ namespace BerldChess.View
                 }
             }
 
+            int maxHeight = 0;
+            int heightOffset = 0;
+
+            for (int i = 0; i < _scaledPieceImages.Length; i++)
+            {
+                if(_scaledPieceImages[i].Height > maxHeight)
+                {
+                    maxHeight = _scaledPieceImages[i].Height;
+                }
+            }
+
+            heightOffset = (int)Math.Ceiling((_fieldSize - maxHeight) / 2.0);
+
             for (int y = 0; y < _board.Length; y++)
             {
                 for (int x = 0; x < _board.Length; x++)
@@ -276,7 +289,7 @@ namespace BerldChess.View
                     }
 
                     absX += Round((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Width) / 2);
-                    absY += (int)Math.Ceiling((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Height) / 2);
+                    absY += heightOffset + maxHeight - _scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())].Height;
 
                     g.DrawImageUnscaled(_scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())], absX, absY);
                 }
@@ -750,7 +763,7 @@ namespace BerldChess.View
         {
             Point[] index = new Point[2];
 
-            double offSet = 0.49;
+            double offSet = 0.50;
 
             if (!IsFlipped)
             {
@@ -826,5 +839,14 @@ namespace BerldChess.View
         }
 
         #endregion
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // ChessPanel
+            // 
+            this.ResumeLayout(false);
+        }
     }
 }
