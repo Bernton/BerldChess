@@ -72,6 +72,11 @@
             this._labelShowEval = new System.Windows.Forms.Label();
             this._labelEval = new System.Windows.Forms.Label();
             this._panelRight = new System.Windows.Forms.Panel();
+            this._panelEvalChart = new System.Windows.Forms.Panel();
+            this._listViewMoves = new System.Windows.Forms.ListView();
+            this.columnHeaderMoveNumber = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderWhite = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderBlack = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel2.SuspendLayout();
             this._splitContainerOuter.SuspendLayout();
@@ -452,7 +457,7 @@
             this._labelShowEval.AutoSize = true;
             this._labelShowEval.BackColor = System.Drawing.SystemColors.Control;
             this._labelShowEval.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowEval.Location = new System.Drawing.Point(64, 26);
+            this._labelShowEval.Location = new System.Drawing.Point(81, 10);
             this._labelShowEval.Name = "_labelShowEval";
             this._labelShowEval.Size = new System.Drawing.Size(80, 18);
             this._labelShowEval.TabIndex = 2;
@@ -463,7 +468,7 @@
             this._labelEval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._labelEval.BackColor = System.Drawing.SystemColors.Control;
             this._labelEval.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelEval.Location = new System.Drawing.Point(6, 44);
+            this._labelEval.Location = new System.Drawing.Point(6, 28);
             this._labelEval.Name = "_labelEval";
             this._labelEval.Size = new System.Drawing.Size(223, 39);
             this._labelEval.TabIndex = 3;
@@ -475,12 +480,60 @@
             this._panelRight.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this._panelRight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this._panelRight.Controls.Add(this._panelEvalChart);
+            this._panelRight.Controls.Add(this._listViewMoves);
             this._panelRight.Controls.Add(this._labelEval);
             this._panelRight.Controls.Add(this._labelShowEval);
             this._panelRight.Location = new System.Drawing.Point(602, 34);
             this._panelRight.Name = "_panelRight";
             this._panelRight.Size = new System.Drawing.Size(234, 473);
             this._panelRight.TabIndex = 4;
+            // 
+            // _panelEvalChart
+            // 
+            this._panelEvalChart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this._panelEvalChart.BackColor = System.Drawing.Color.White;
+            this._panelEvalChart.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this._panelEvalChart.Location = new System.Drawing.Point(-1, 279);
+            this._panelEvalChart.Name = "_panelEvalChart";
+            this._panelEvalChart.Size = new System.Drawing.Size(234, 193);
+            this._panelEvalChart.TabIndex = 5;
+            this._panelEvalChart.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPanelEvalChartPaint);
+            // 
+            // _listViewMoves
+            // 
+            this._listViewMoves.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this._listViewMoves.BackColor = System.Drawing.SystemColors.Control;
+            this._listViewMoves.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this._listViewMoves.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderMoveNumber,
+            this.columnHeaderWhite,
+            this.columnHeaderBlack});
+            this._listViewMoves.Font = new System.Drawing.Font("Arial Unicode MS", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._listViewMoves.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this._listViewMoves.Location = new System.Drawing.Point(-1, 72);
+            this._listViewMoves.Name = "_listViewMoves";
+            this._listViewMoves.Size = new System.Drawing.Size(234, 193);
+            this._listViewMoves.TabIndex = 4;
+            this._listViewMoves.UseCompatibleStateImageBehavior = false;
+            this._listViewMoves.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeaderMoveNumber
+            // 
+            this.columnHeaderMoveNumber.Text = "#";
+            this.columnHeaderMoveNumber.Width = 45;
+            // 
+            // columnHeaderWhite
+            // 
+            this.columnHeaderWhite.Text = "W";
+            this.columnHeaderWhite.Width = 75;
+            // 
+            // columnHeaderBlack
+            // 
+            this.columnHeaderBlack.Text = "B";
+            this.columnHeaderBlack.Width = 90;
             // 
             // FormMain
             // 
@@ -557,6 +610,11 @@
         private System.Windows.Forms.Label _labelShowEval;
         private System.Windows.Forms.Label _labelEval;
         private System.Windows.Forms.Panel _panelRight;
+        private System.Windows.Forms.ListView _listViewMoves;
+        private System.Windows.Forms.ColumnHeader columnHeaderMoveNumber;
+        private System.Windows.Forms.ColumnHeader columnHeaderWhite;
+        private System.Windows.Forms.ColumnHeader columnHeaderBlack;
+        private System.Windows.Forms.Panel _panelEvalChart;
     }
 }
 
