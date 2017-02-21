@@ -65,6 +65,14 @@ namespace BerldChess.Model
             }
         }
 
+        public static void UpdateBoardImage(Bitmap image)
+        {
+            if (BoardFound)
+            {
+                _lastBoardSnap = image;
+            }
+        }
+
         public static bool SearchBoard(Color lightSquareColor, Color darkSquareColor)
         {
             for (int i = 0; i < Screen.AllScreens.Length; i++)

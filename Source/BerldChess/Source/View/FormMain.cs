@@ -47,6 +47,8 @@ namespace BerldChess.View
         private FormMainViewModel _vm;
         private InfoType[] _columnOrder;
 
+        private volatile bool _updateAfterAnim = false;
+
         #endregion
 
         #region Constructors
@@ -398,8 +400,8 @@ namespace BerldChess.View
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
                                     _inputSimulator.Mouse.LeftButtonClick();
-                                    Thread.Sleep(_animTime);
-                                    Recognizer.UpdateBoardImage();
+                                    Thread.Sleep(20);
+                                    _updateAfterAnim = true;
                                 }
                             }
                         }
@@ -706,22 +708,6 @@ namespace BerldChess.View
         private void OnSlowTimerTick(object sender, EventArgs e)
         {
             _panelEvalChart.Invalidate();
-
-            if (_isAutoPlay && IsFinishedPosition())
-            {
-                _isAutoPlay = false;
-            }
-
-            if (_isAutoPlay)
-            {
-                _computerPlayer = _vm.Game.WhoseTurn;
-                if (!_timeSinceLastMove.IsRunning)
-                {
-                    _timeSinceLastMove.Restart();
-                }
-                _engineTimer.Enabled = true;
-            }
-
             _chessPanel.Invalidate();
         }
 
@@ -852,6 +838,21 @@ namespace BerldChess.View
 
         private void OnTimerAutoCheckTick(object sender, EventArgs e)
         {
+            if (_isAutoPlay && IsFinishedPosition())
+            {
+                _isAutoPlay = false;
+            }
+
+            if (_isAutoPlay)
+            {
+                _computerPlayer = _vm.Game.WhoseTurn;
+                if (!_timeSinceLastMove.IsRunning)
+                {
+                    _timeSinceLastMove.Restart();
+                }
+                _engineTimer.Enabled = true;
+            }
+
             if (checkAutoToolStripMenuItem.Checked && cheatModeToolStripMenuItem.Checked)
             {
                 AutoMove();
@@ -1493,8 +1494,16 @@ namespace BerldChess.View
             }
 
             Bitmap _currImg = Recognizer.GetBoardSnap();
+            bool areSame = AreSame(_currImg, _animTestImg);
 
-            if (AreSame(_currImg, _animTestImg))
+            if (_updateAfterAnim && areSame)
+            {
+                _updateAfterAnim = false;
+                Recognizer.UpdateBoardImage(_currImg);
+                return;
+            }
+
+            if (areSame)
             {
                 Point[] changedSquares = Recognizer.GetChangedSquares(_currImg);
 

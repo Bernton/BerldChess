@@ -138,7 +138,7 @@
             // _timerAutoCheck
             // 
             this._timerAutoCheck.Enabled = true;
-            this._timerAutoCheck.Interval = 50;
+            this._timerAutoCheck.Interval = 40;
             this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
             // 
             // menuStrip
