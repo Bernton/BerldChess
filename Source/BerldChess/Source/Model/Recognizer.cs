@@ -2,13 +2,39 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace BerldChess.Model
 {
     public static class Recognizer
     {
+        #region Extern
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetWindowDC(IntPtr window);
+        [DllImport("gdi32.dll", SetLastError = true)]
+        public static extern uint GetPixel(IntPtr dc, int x, int y);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int ReleaseDC(IntPtr window, IntPtr dc);
+
+        public static int GetColorAt(int x, int y)
+        {
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+            int a = (int)GetPixel(dc, x, y);
+            ReleaseDC(desk, dc);
+            return a;
+        }
+
+        #endregion
+
         #region Fields
+
+
+
 
         private const int SideLength = 8;
         private static Color _darkSquare;
@@ -62,43 +88,67 @@ namespace BerldChess.Model
             return false;
         }
 
-        public static Point[] GetChangedSquares()
+        public static Point[] GetChangedSquares(Bitmap boardSnap)
         {
             if (BoardFound)
             {
                 List<Point> changedSquares = new List<Point>();
-                Bitmap boardSnap = GetBoardSnap();
 
                 double fieldWidth = boardSnap.Width / 8.0;
                 double fieldHeight = boardSnap.Height / 8.0;
 
-                for (int y = 0; y < 8; y++)
+                unsafe
                 {
-                    for (int x = 0; x < 8; x++)
+                    BitmapData _data = boardSnap.LockBits(new Rectangle(0, 0, boardSnap.Width, boardSnap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData _lastData = _lastBoardSnap.LockBits(new Rectangle(0, 0, _lastBoardSnap.Width, _lastBoardSnap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    byte* dataScan0 = (byte*)_data.Scan0;
+                    byte* lastDataScan0 = (byte*)_lastData.Scan0;
+
+                    for (int y = 0; y < 8; y++)
                     {
-                        Color borderColor = boardSnap.GetPixel(Round((x * fieldWidth + 4)), Round((y * fieldHeight + 4)));
-                        Color centerColor = boardSnap.GetPixel(Round((x * fieldWidth + (fieldWidth / 2.0))), Round((y * fieldHeight + fieldHeight * 0.73)));
-                        bool same = borderColor.ToArgb() == centerColor.ToArgb();
-
-                        Color lastBorderColor = _lastBoardSnap.GetPixel(Round((x * fieldWidth + 4)), Round((y * fieldHeight + 4)));
-                        Color lastCenterColor = _lastBoardSnap.GetPixel(Round((x * fieldWidth + (fieldWidth / 2.0))), Round((y * fieldHeight + fieldHeight * 0.73)));
-                        bool lastSame = lastBorderColor.ToArgb() == lastCenterColor.ToArgb();
-
-                        if (same != lastSame)
+                        for (int x = 0; x < 8; x++)
                         {
-                            changedSquares.Add(new Point(x, y));
-                        }
-                        else if (same == false && centerColor.ToArgb() != lastCenterColor.ToArgb())
-                        {
-                            changedSquares.Add(new Point(x, y));
+                            int borderX = Round((x * fieldWidth + 4));
+                            int borderY = Round((y * fieldHeight + 4));
+                            int centerX = Round((x * fieldWidth + (fieldWidth / 2.0)));
+                            int centerY = Round((y * fieldHeight + fieldHeight * 0.73));
+
+                            int borderColor = GetPixel(dataScan0, _data.Stride, borderX, borderY);
+                            int centerColor = GetPixel(dataScan0, _data.Stride, centerX, centerY);
+                            bool same = borderColor == centerColor;
+
+                            int lastBorderColor = GetPixel(lastDataScan0, _lastData.Stride, borderX, borderY);
+                            int lastCenterColor = GetPixel(lastDataScan0, _lastData.Stride, centerX, centerY);
+                            bool lastSame = lastBorderColor == lastCenterColor;
+
+                            if (same != lastSame)
+                            {
+                                changedSquares.Add(new Point(x, y));
+                            }
+                            else if (same == false && centerColor != lastCenterColor)
+                            {
+                                changedSquares.Add(new Point(x, y));
+                            }
                         }
                     }
+
+                    boardSnap.UnlockBits(_data);
+                    _lastBoardSnap.UnlockBits(_lastData);
                 }
 
                 return changedSquares.ToArray();
             }
 
             return null;
+        }
+
+        private unsafe static int GetPixel(byte* scan0, int stride, int x, int y)
+        {
+            byte* colPointer = scan0;
+            colPointer += y * stride + x * 3;
+
+            return colPointer[0] * 255 * 255 + colPointer[1] * 255 + (int)colPointer[2];
         }
 
         public static Bitmap GetBoardSnap()

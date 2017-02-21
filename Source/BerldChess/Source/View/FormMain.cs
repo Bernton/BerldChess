@@ -18,12 +18,15 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using WindowsInput;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace BerldChess.View
 {
     public partial class FormMain : Form
     {
         #region Fields
+
+        private Bitmap _animTestImg = null;
 
         private Random _random = new Random();
         private PieceSelectionDialog _pieceDialog = new PieceSelectionDialog();
@@ -390,13 +393,11 @@ namespace BerldChess.View
 
                                     _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fW * (positions[0].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fW * (positions[0].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
-                                    Thread.Sleep(_random.Next(50, 120));
+                                    Thread.Sleep(_random.Next((int)(SerializedInfo.Instance.ClickDelay / 2.5), SerializedInfo.Instance.ClickDelay));
                                     _inputSimulator.Mouse.MoveMouseTo(max + (int)(max * (Recognizer.BoardLocation.X + fH * (positions[1].X + 0.45)) / pW), (int)(max * (Recognizer.BoardLocation.Y + fH * (positions[1].Y + 0.45)) / pH));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
-                                    Thread.Sleep(_random.Next(50, 120));
                                     _inputSimulator.Mouse.LeftButtonClick();
-
                                     Thread.Sleep(_animTime);
                                     Recognizer.UpdateBoardImage();
                                 }
@@ -587,6 +588,8 @@ namespace BerldChess.View
             _computerPlayer = ChessPlayer.None;
             _engineTimer.Enabled = false;
 
+            Recognizer.UpdateBoardImage();
+
             bool wasFinished = IsFinishedPosition();
 
             try
@@ -746,6 +749,8 @@ namespace BerldChess.View
             _computerPlayer = ChessPlayer.None;
             _engineTimer.Enabled = false;
 
+            Recognizer.UpdateBoardImage();
+
             bool wasFinished = IsFinishedPosition();
 
             _vm.Game = new ChessGame();
@@ -847,7 +852,7 @@ namespace BerldChess.View
 
         private void OnTimerAutoCheckTick(object sender, EventArgs e)
         {
-            if (checkAutoToolStripMenuItem.Checked)
+            if (checkAutoToolStripMenuItem.Checked && cheatModeToolStripMenuItem.Checked)
             {
                 AutoMove();
             }
@@ -892,6 +897,7 @@ namespace BerldChess.View
             engineTimeToolStripMenuItem.Text = $"Enginetime [{_engineTime}]";
             multiPVToolStripMenuItem.Text = $"MultiPV [{SerializedInfo.Instance.MultiPV}]";
             animTimeToolStripMenuItem.Text = $"Anim Time [{_animTime}]";
+            clickDelayToolStripMenuItem.Text = $"Click Delay [{SerializedInfo.Instance.ClickDelay}]";
 
             if (SerializedInfo.Instance.IsMaximized)
             {
@@ -1133,6 +1139,18 @@ namespace BerldChess.View
             }
         }
 
+        private void clickDelayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string input = Interaction.InputBox("Enter Click Delay:", "BerldChess -Click Delay");
+            int clickDelay;
+
+            if (int.TryParse(input, out clickDelay))
+            {
+                SerializedInfo.Instance.ClickDelay = clickDelay;
+                clickDelayToolStripMenuItem.Text = $"Click Delay [{clickDelay}]";
+            }
+        }
+
         #endregion
 
         #region Other Methods
@@ -1160,8 +1178,8 @@ namespace BerldChess.View
                     flipBoardToolStripMenuItem.Checked = SerializedInfo.Instance.BoardFlipped;
                     localModeToolStripMenuItem.Checked = SerializedInfo.Instance.LocalMode;
                     cheatModeToolStripMenuItem.Checked = SerializedInfo.Instance.CheatMode;
+                    checkAutoToolStripMenuItem.Checked = SerializedInfo.Instance.AutoCheck;
                     _engineTime = SerializedInfo.Instance.EngineTime;
-                    // = SerializedInfo.Instance.MultiPV.ToString();
                     soundToolStripMenuItem.Checked = SerializedInfo.Instance.Sound;
                     _animTime = SerializedInfo.Instance.AnimationTime;
                 }
@@ -1197,8 +1215,7 @@ namespace BerldChess.View
                 SerializedInfo.Instance.CheatMode = cheatModeToolStripMenuItem.Checked;
                 SerializedInfo.Instance.EngineTime = _engineTime;
                 SerializedInfo.Instance.Sound = soundToolStripMenuItem.Checked;
-
-
+                SerializedInfo.Instance.AutoCheck = checkAutoToolStripMenuItem.Checked;
                 SerializedInfo.Instance.AnimationTime = _animTime;
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
@@ -1469,50 +1486,96 @@ namespace BerldChess.View
 
         private void AutoMove()
         {
-            Point[] changedSquares = Recognizer.GetChangedSquares();
-
-            if (changedSquares == null || changedSquares.Length == 0)
+            if (_animTestImg == null)
             {
+                _animTestImg = Recognizer.GetBoardSnap();
                 return;
             }
 
-            Point source = Point.Empty;
-            Point destination = Point.Empty;
+            Bitmap _currImg = Recognizer.GetBoardSnap();
 
-            if (changedSquares.Length == 4)
+            if (AreSame(_currImg, _animTestImg))
             {
-                if (changedSquares[0].X == 4)
-                {
-                    source = changedSquares[0];
-                    destination = changedSquares[2];
+                Point[] changedSquares = Recognizer.GetChangedSquares(_currImg);
 
-                }
-                else
+                if (changedSquares == null || changedSquares.Length == 0)
                 {
-                    source = changedSquares[3];
-                    destination = changedSquares[1];
+                    return;
+                }
+
+                Point source = Point.Empty;
+                Point destination = Point.Empty;
+
+                if (changedSquares.Length == 4)
+                {
+                    if (changedSquares[0].X == 4)
+                    {
+                        source = changedSquares[0];
+                        destination = changedSquares[2];
+
+                    }
+                    else
+                    {
+                        source = changedSquares[3];
+                        destination = changedSquares[1];
+                    }
+                }
+                else if (changedSquares.Length == 2)
+                {
+                    ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
+
+                    if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
+                    {
+                        source = changedSquares[0];
+                        destination = changedSquares[1];
+                    }
+                    else
+                    {
+                        source = changedSquares[1];
+                        destination = changedSquares[0];
+                    }
+                }
+
+                _moveTry = true;
+
+                FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
+                OnPieceMoved(null, args);
+            }
+
+            _animTestImg = _currImg;
+        }
+
+        private bool AreSame(Bitmap bmp1, Bitmap bmp2)
+        {
+            bool equals = true;
+            Rectangle rect = new Rectangle(0, 0, bmp1.Width, bmp1.Height);
+            BitmapData bmpData1 = bmp1.LockBits(rect, ImageLockMode.ReadOnly, bmp1.PixelFormat);
+            BitmapData bmpData2 = bmp2.LockBits(rect, ImageLockMode.ReadOnly, bmp2.PixelFormat);
+            unsafe
+            {
+                byte* ptr1 = (byte*)bmpData1.Scan0.ToPointer();
+                byte* ptr2 = (byte*)bmpData2.Scan0.ToPointer();
+                int width = rect.Width * 3; // for 24bpp pixel data
+                for (int y = 0; equals && y < rect.Height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (*ptr1 != *ptr2)
+                        {
+                            equals = false;
+                            break;
+                        }
+                        ptr1++;
+                        ptr2++;
+                    }
+                    ptr1 += bmpData1.Stride - width;
+                    ptr2 += bmpData2.Stride - width;
                 }
             }
-            else if (changedSquares.Length == 2)
-            {
-                ChessPiece piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
+            bmp1.UnlockBits(bmpData1);
+            bmp2.UnlockBits(bmpData2);
 
-                if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
-                {
-                    source = changedSquares[0];
-                    destination = changedSquares[1];
-                }
-                else
-                {
-                    source = changedSquares[1];
-                    destination = changedSquares[0];
-                }
-            }
-
-            _moveTry = true;
-
-            FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
-            OnPieceMoved(null, args);
+            return equals;
         }
 
         private bool IsFinishedPosition()

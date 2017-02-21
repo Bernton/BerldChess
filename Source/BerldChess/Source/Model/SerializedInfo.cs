@@ -42,6 +42,8 @@ namespace BerldChess.Model
         private int _animTime = 300;
         private string _chessFontChars;
         private bool _isUnicodeFont = false;
+        private bool _autoCheck = false;
+        private int _clickDelay = 120;
         private double _sizeFactor = 0.9;
 
         private string _pieceFontFamily = null;
@@ -49,6 +51,30 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public int ClickDelay
+        {
+            get
+            {
+                return _clickDelay;
+            }
+            set
+            {
+                _clickDelay = value;
+            }
+        }
+
+        public bool AutoCheck
+        {
+            get
+            {
+                return _autoCheck;
+            }
+            set
+            {
+                _autoCheck = value;
+            }
+        }
 
         public double PieceSizeFactor
         {

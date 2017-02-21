@@ -46,6 +46,7 @@
             this.autoplayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.animTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clickDelayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.squareColorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -137,7 +138,7 @@
             // _timerAutoCheck
             // 
             this._timerAutoCheck.Enabled = true;
-            this._timerAutoCheck.Interval = 400;
+            this._timerAutoCheck.Interval = 50;
             this._timerAutoCheck.Tick += new System.EventHandler(this.OnTimerAutoCheckTick);
             // 
             // menuStrip
@@ -243,6 +244,7 @@
             // 
             this.cheatModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.animTimeToolStripMenuItem,
+            this.clickDelayToolStripMenuItem,
             this.resetToolStripMenuItem,
             this.updateToolStripMenuItem,
             this.squareColorsToolStripMenuItem,
@@ -259,6 +261,13 @@
             this.animTimeToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
             this.animTimeToolStripMenuItem.Text = "Anim Time";
             this.animTimeToolStripMenuItem.Click += new System.EventHandler(this.animTimeToolStripMenuItem_Click);
+            // 
+            // clickDelayToolStripMenuItem
+            // 
+            this.clickDelayToolStripMenuItem.Name = "clickDelayToolStripMenuItem";
+            this.clickDelayToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
+            this.clickDelayToolStripMenuItem.Text = "Click Delay";
+            this.clickDelayToolStripMenuItem.Click += new System.EventHandler(this.clickDelayToolStripMenuItem_Click);
             // 
             // resetToolStripMenuItem
             // 
@@ -615,6 +624,7 @@
         private System.Windows.Forms.ColumnHeader columnHeaderWhite;
         private System.Windows.Forms.ColumnHeader columnHeaderBlack;
         private System.Windows.Forms.Panel _panelEvalChart;
+        private System.Windows.Forms.ToolStripMenuItem clickDelayToolStripMenuItem;
     }
 }
 
