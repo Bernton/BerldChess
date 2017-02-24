@@ -9,16 +9,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Media;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using WindowsInput;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 
 namespace BerldChess.View
 {
@@ -26,28 +26,25 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private Bitmap _animTestImg = null;
-
+        private bool _isMoveTry = false;
+        private bool _isAutoPlay = false;
+        private volatile bool _updateAfterAnimation = false;
+        private int _multiPV1Reference;
+        private int _engineTime = 300;
+        private int _animationTime = 300;
+        private ChessPlayer _computerPlayer = ChessPlayer.None;
+        private InfoType[] _columnOrder;
         private Random _random = new Random();
+        private FormMainViewModel _vm;
         private PieceSelectionDialog _pieceDialog = new PieceSelectionDialog();
-        private bool _moveTry = false;
+        private ChessPanel _chessPanel;
         private SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
         private SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
         private SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
         private SoundPlayer _illegalPlayer = new SoundPlayer(Resources.Ilegal);
-
-        private bool _isAutoPlay = false;
-        private int _engineTime = 300;
         private InputSimulator _inputSimulator = new InputSimulator();
         private Stopwatch _timeSinceLastMove = new Stopwatch();
-        private ChessPlayer _computerPlayer = ChessPlayer.None;
-        private int _multiPV1Reference;
-        private int _animTime = 300;
-        private ChessPanel _chessPanel;
-        private FormMainViewModel _vm;
-        private InfoType[] _columnOrder;
-
-        private volatile bool _updateAfterAnim = false;
+        private Bitmap _animationTestImage = null;
 
         #endregion
 
@@ -170,14 +167,6 @@ namespace BerldChess.View
             else
             {
                 _vm.Engine.Query("go infinite");
-
-                if (IsHandleCreated)
-                {
-                    Invoke((MethodInvoker)delegate
-                    {
-                        //_textBoxFen.Text = _vm.Game.GetFen();
-                    });
-                }
             }
         }
 
@@ -341,25 +330,6 @@ namespace BerldChess.View
             }
         }
 
-        private Color CalculateEvaluationColor(double evaluation)
-        {
-            double range = 3;
-
-            if (evaluation > range)
-            {
-                evaluation = range;
-            }
-            else if (evaluation < -range)
-            {
-                evaluation = -range;
-            }
-
-            double fraction = evaluation / range * 0.5;
-            double x = 0.5 + fraction;
-
-            return Color.FromArgb((int)(x * 255), (int)((1 - x) * 255), 0);
-        }
-
         private void OnTimerTick(object sender, EventArgs e)
         {
             if (_computerPlayer != ChessPlayer.None)
@@ -401,7 +371,7 @@ namespace BerldChess.View
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     Thread.Sleep(20);
-                                    _updateAfterAnim = true;
+                                    _updateAfterAnimation = true;
                                 }
                             }
                         }
@@ -439,10 +409,10 @@ namespace BerldChess.View
 
             if (_vm.Game.IsValidMove(move))
             {
-                if (_moveTry)
+                if (_isMoveTry)
                 {
                     Recognizer.UpdateBoardImage();
-                    _moveTry = false;
+                    _isMoveTry = false;
                 }
 
                 moveType = _vm.Game.ApplyMove(move, true);
@@ -569,7 +539,7 @@ namespace BerldChess.View
             }
             else
             {
-                if (!_moveTry && soundToolStripMenuItem.Checked)
+                if (!_isMoveTry && soundToolStripMenuItem.Checked)
                 {
                     _illegalPlayer.Play();
                 }
@@ -897,7 +867,7 @@ namespace BerldChess.View
         {
             engineTimeToolStripMenuItem.Text = $"Enginetime [{_engineTime}]";
             multiPVToolStripMenuItem.Text = $"MultiPV [{SerializedInfo.Instance.MultiPV}]";
-            animTimeToolStripMenuItem.Text = $"Anim Time [{_animTime}]";
+            animTimeToolStripMenuItem.Text = $"Anim Time [{_animationTime}]";
             clickDelayToolStripMenuItem.Text = $"Click Delay [{SerializedInfo.Instance.ClickDelay}]";
 
             if (SerializedInfo.Instance.IsMaximized)
@@ -906,12 +876,12 @@ namespace BerldChess.View
             }
         }
 
-        private void soundToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnSoundToolStripMenuItemClick(object sender, EventArgs e)
         {
             soundToolStripMenuItem.Checked = !soundToolStripMenuItem.Checked;
         }
 
-        private void engineTimeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnEngineTimeToolStripMenuItemClick(object sender, EventArgs e)
         {
             string input = Interaction.InputBox("Enter Engine Time:", "BerldChess - Engine Time");
             int engineTime;
@@ -923,7 +893,7 @@ namespace BerldChess.View
             }
         }
 
-        private void multiPVToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnMultiPVToolStripMenuItemClick(object sender, EventArgs e)
         {
             string input = Interaction.InputBox("Enter MultiPV:", "BerldChess - MultiPV");
             int multiPV;
@@ -944,7 +914,7 @@ namespace BerldChess.View
             }
         }
 
-        private void cheatModeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnCheatModeToolStripMenuItemClick(object sender, EventArgs e)
         {
             cheatModeToolStripMenuItem.Checked = !cheatModeToolStripMenuItem.Checked;
 
@@ -961,44 +931,26 @@ namespace BerldChess.View
             }
         }
 
-        private void animTimeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnAnimTimeToolStripMenuItemClick(object sender, EventArgs e)
         {
             string input = Interaction.InputBox("Enter Animation Time:", "BerldChess - Animation Time");
             int animTime;
 
             if (int.TryParse(input, out animTime))
             {
-                _animTime = animTime;
-                animTimeToolStripMenuItem.Text = $"Anim Time [{_animTime}]";
+                _animationTime = animTime;
+                animTimeToolStripMenuItem.Text = $"Anim Time [{_animationTime}]";
             }
         }
 
-        private void checkAutoToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnCheckAutoToolStripMenuItemClick(object sender, EventArgs e)
         {
             checkAutoToolStripMenuItem.Checked = !checkAutoToolStripMenuItem.Checked;
         }
 
-        private void copyFENToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnCopyFENToClipboardToolStripMenuItemClick(object sender, EventArgs e)
         {
             Clipboard.SetText(_vm.PositionHistory[_vm.NavIndex].FEN);
-        }
-
-        protected override bool IsInputKey(Keys keyData)
-        {
-            switch (keyData)
-            {
-                case Keys.Right:
-                case Keys.Left:
-                case Keys.Up:
-                case Keys.Down:
-                    return true;
-                case Keys.Shift | Keys.Right:
-                case Keys.Shift | Keys.Left:
-                case Keys.Shift | Keys.Up:
-                case Keys.Shift | Keys.Down:
-                    return true;
-            }
-            return base.IsInputKey(keyData);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -1140,7 +1092,7 @@ namespace BerldChess.View
             }
         }
 
-        private void clickDelayToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnClickDelayToolStripMenuItemClick(object sender, EventArgs e)
         {
             string input = Interaction.InputBox("Enter Click Delay:", "BerldChess -Click Delay");
             int clickDelay;
@@ -1182,7 +1134,7 @@ namespace BerldChess.View
                     checkAutoToolStripMenuItem.Checked = SerializedInfo.Instance.AutoCheck;
                     _engineTime = SerializedInfo.Instance.EngineTime;
                     soundToolStripMenuItem.Checked = SerializedInfo.Instance.Sound;
-                    _animTime = SerializedInfo.Instance.AnimationTime;
+                    _animationTime = SerializedInfo.Instance.AnimationTime;
                 }
             }
             catch (Exception ex)
@@ -1217,7 +1169,7 @@ namespace BerldChess.View
                 SerializedInfo.Instance.EngineTime = _engineTime;
                 SerializedInfo.Instance.Sound = soundToolStripMenuItem.Checked;
                 SerializedInfo.Instance.AutoCheck = checkAutoToolStripMenuItem.Checked;
-                SerializedInfo.Instance.AnimationTime = _animTime;
+                SerializedInfo.Instance.AnimationTime = _animationTime;
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
                 FileStream fileStream = new FileStream(FormMainViewModel.ConfigFileName, FileMode.Create);
@@ -1452,6 +1404,25 @@ namespace BerldChess.View
             return Color.FromArgb(red, green, 0);
         }
 
+        private Color CalculateEvaluationColor(double evaluation)
+        {
+            double range = 3;
+
+            if (evaluation > range)
+            {
+                evaluation = range;
+            }
+            else if (evaluation < -range)
+            {
+                evaluation = -range;
+            }
+
+            double fraction = evaluation / range * 0.5;
+            double x = 0.5 + fraction;
+
+            return Color.FromArgb((int)(x * 255), (int)((1 - x) * 255), 0);
+        }
+
         private List<ToolStripMenuItem> GetItems(MenuStrip menuStrip)
         {
             List<ToolStripMenuItem> myItems = new List<ToolStripMenuItem>();
@@ -1487,18 +1458,18 @@ namespace BerldChess.View
 
         private void AutoMove()
         {
-            if (_animTestImg == null)
+            if (_animationTestImage == null)
             {
-                _animTestImg = Recognizer.GetBoardSnap();
+                _animationTestImage = Recognizer.GetBoardSnap();
                 return;
             }
 
             Bitmap _currImg = Recognizer.GetBoardSnap();
-            bool areSame = AreSame(_currImg, _animTestImg);
+            bool areSame = AreSame(_currImg, _animationTestImage);
 
-            if (_updateAfterAnim && areSame)
+            if (_updateAfterAnimation && areSame)
             {
-                _updateAfterAnim = false;
+                _updateAfterAnimation = false;
                 Recognizer.UpdateBoardImage(_currImg);
                 return;
             }
@@ -1545,13 +1516,13 @@ namespace BerldChess.View
                     }
                 }
 
-                _moveTry = true;
+                _isMoveTry = true;
 
                 FigureMovedEventArgs args = new FigureMovedEventArgs(source, destination);
                 OnPieceMoved(null, args);
             }
 
-            _animTestImg = _currImg;
+            _animationTestImage = _currImg;
         }
 
         private bool AreSame(Bitmap bmp1, Bitmap bmp2)
@@ -1608,6 +1579,24 @@ namespace BerldChess.View
                         System.Reflection.BindingFlags.Instance);
 
             aProp.SetValue(c, true, null);
+        }
+
+        protected override bool IsInputKey(Keys keyData)
+        {
+            switch (keyData)
+            {
+                case Keys.Right:
+                case Keys.Left:
+                case Keys.Up:
+                case Keys.Down:
+                    return true;
+                case Keys.Shift | Keys.Right:
+                case Keys.Shift | Keys.Left:
+                case Keys.Shift | Keys.Up:
+                case Keys.Shift | Keys.Down:
+                    return true;
+            }
+            return base.IsInputKey(keyData);
         }
 
         #endregion

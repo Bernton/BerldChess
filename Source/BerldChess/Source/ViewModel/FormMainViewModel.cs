@@ -30,8 +30,6 @@ namespace BerldChess.ViewModel
         {
             string[] engineArgs = null;
 
-
-
             NavIndex = 0;
             PositionHistory = new List<ChessPosition>();
             Engine = new Engine("engine.exe");

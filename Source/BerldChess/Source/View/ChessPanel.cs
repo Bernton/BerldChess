@@ -839,14 +839,5 @@ namespace BerldChess.View
         }
 
         #endregion
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            // 
-            // ChessPanel
-            // 
-            this.ResumeLayout(false);
-        }
     }
 }

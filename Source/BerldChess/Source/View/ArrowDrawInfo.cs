@@ -19,7 +19,6 @@ namespace BerldChess.View
 
                 return -1;
             }
-
         }
 
         private int GetDistance(int a, int b)

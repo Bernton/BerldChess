@@ -196,7 +196,7 @@
             this.copyFENToClipboardToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.C)));
             this.copyFENToClipboardToolStripMenuItem.Size = new System.Drawing.Size(280, 24);
             this.copyFENToClipboardToolStripMenuItem.Text = "Copy FEN To Clipboard";
-            this.copyFENToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyFENToClipboardToolStripMenuItem_Click);
+            this.copyFENToClipboardToolStripMenuItem.Click += new System.EventHandler(this.OnCopyFENToClipboardToolStripMenuItemClick);
             // 
             // engineToolStripMenuItem
             // 
@@ -215,14 +215,14 @@
             this.engineTimeToolStripMenuItem.Name = "engineTimeToolStripMenuItem";
             this.engineTimeToolStripMenuItem.Size = new System.Drawing.Size(187, 24);
             this.engineTimeToolStripMenuItem.Text = "Engine Time";
-            this.engineTimeToolStripMenuItem.Click += new System.EventHandler(this.engineTimeToolStripMenuItem_Click);
+            this.engineTimeToolStripMenuItem.Click += new System.EventHandler(this.OnEngineTimeToolStripMenuItemClick);
             // 
             // multiPVToolStripMenuItem
             // 
             this.multiPVToolStripMenuItem.Name = "multiPVToolStripMenuItem";
             this.multiPVToolStripMenuItem.Size = new System.Drawing.Size(187, 24);
             this.multiPVToolStripMenuItem.Text = "MultiPV";
-            this.multiPVToolStripMenuItem.Click += new System.EventHandler(this.multiPVToolStripMenuItem_Click);
+            this.multiPVToolStripMenuItem.Click += new System.EventHandler(this.OnMultiPVToolStripMenuItemClick);
             // 
             // playNowToolStripMenuItem
             // 
@@ -253,21 +253,21 @@
             this.cheatModeToolStripMenuItem.Name = "cheatModeToolStripMenuItem";
             this.cheatModeToolStripMenuItem.Size = new System.Drawing.Size(187, 24);
             this.cheatModeToolStripMenuItem.Text = "Cheat Mode";
-            this.cheatModeToolStripMenuItem.Click += new System.EventHandler(this.cheatModeToolStripMenuItem_Click);
+            this.cheatModeToolStripMenuItem.Click += new System.EventHandler(this.OnCheatModeToolStripMenuItemClick);
             // 
             // animTimeToolStripMenuItem
             // 
             this.animTimeToolStripMenuItem.Name = "animTimeToolStripMenuItem";
             this.animTimeToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
             this.animTimeToolStripMenuItem.Text = "Anim Time";
-            this.animTimeToolStripMenuItem.Click += new System.EventHandler(this.animTimeToolStripMenuItem_Click);
+            this.animTimeToolStripMenuItem.Click += new System.EventHandler(this.OnAnimTimeToolStripMenuItemClick);
             // 
             // clickDelayToolStripMenuItem
             // 
             this.clickDelayToolStripMenuItem.Name = "clickDelayToolStripMenuItem";
             this.clickDelayToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
             this.clickDelayToolStripMenuItem.Text = "Click Delay";
-            this.clickDelayToolStripMenuItem.Click += new System.EventHandler(this.clickDelayToolStripMenuItem_Click);
+            this.clickDelayToolStripMenuItem.Click += new System.EventHandler(this.OnClickDelayToolStripMenuItemClick);
             // 
             // resetToolStripMenuItem
             // 
@@ -303,7 +303,7 @@
             this.checkAutoToolStripMenuItem.Name = "checkAutoToolStripMenuItem";
             this.checkAutoToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
             this.checkAutoToolStripMenuItem.Text = "Check Auto";
-            this.checkAutoToolStripMenuItem.Click += new System.EventHandler(this.checkAutoToolStripMenuItem_Click);
+            this.checkAutoToolStripMenuItem.Click += new System.EventHandler(this.OnCheckAutoToolStripMenuItemClick);
             // 
             // appearanceToolStripMenuItem
             // 
@@ -397,7 +397,7 @@
             this.soundToolStripMenuItem.ShortcutKeyDisplayString = "S";
             this.soundToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
             this.soundToolStripMenuItem.Text = "Sound";
-            this.soundToolStripMenuItem.Click += new System.EventHandler(this.soundToolStripMenuItem_Click);
+            this.soundToolStripMenuItem.Click += new System.EventHandler(this.OnSoundToolStripMenuItemClick);
             // 
             // hideOutputToolStripMenuItem
             // 
