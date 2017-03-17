@@ -321,16 +321,6 @@ namespace BerldChess.View
                     arrowPen.EndCap = LineCap.ArrowAnchor;
                     arrowPen.StartCap = LineCap.RoundAnchor;
 
-                    if (moving)
-                    {
-                        Point relArrowStartPos = GetRelPositionsFromMoveString(drawInfo[i].Arrow.Move)[0];
-
-                        if (relArrowStartPos.X != _movingPieceIndex.X || relArrowStartPos.Y != _movingPieceIndex.Y)
-                        {
-                            continue;
-                        }
-                    }
-
                     g.DrawLine(arrowPen, drawInfo[i].Positions[0], drawInfo[i].Positions[1]);
                 }
             }

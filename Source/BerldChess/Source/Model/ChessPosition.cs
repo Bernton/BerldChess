@@ -4,7 +4,7 @@
     {
         public string FEN { get; }
         public string Move { get; }
-        public double Evaluation { get; }
+        public double Evaluation { get; set; }
 
         public ChessPosition(string FEN, double evaluation = 0.00, string move = null)
         {

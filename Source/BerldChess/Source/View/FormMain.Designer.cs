@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this._splitContainerOuter = new System.Windows.Forms.SplitContainer();
             this._dataGridView = new System.Windows.Forms.DataGridView();
             this._slowTimer = new System.Windows.Forms.Timer(this.components);
@@ -74,16 +75,17 @@
             this._labelEval = new System.Windows.Forms.Label();
             this._panelRight = new System.Windows.Forms.Panel();
             this._panelEvalChart = new System.Windows.Forms.Panel();
-            this._listViewMoves = new System.Windows.Forms.ListView();
-            this.columnHeaderMoveNumber = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeaderWhite = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeaderBlack = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this._dataGridViewMoves = new System.Windows.Forms.DataGridView();
+            this.WhiteMove = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.BlackMove = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.loadFromPGNToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this._splitContainerOuter)).BeginInit();
             this._splitContainerOuter.Panel2.SuspendLayout();
             this._splitContainerOuter.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).BeginInit();
             this.menuStrip.SuspendLayout();
             this._panelRight.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._dataGridViewMoves)).BeginInit();
             this.SuspendLayout();
             // 
             // _splitContainerOuter
@@ -167,7 +169,8 @@
             this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
             this.loadToolStripMenuItem,
-            this.copyFENToClipboardToolStripMenuItem});
+            this.copyFENToClipboardToolStripMenuItem,
+            this.loadFromPGNToolStripMenuItem});
             this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
             this.gameToolStripMenuItem.Size = new System.Drawing.Size(62, 29);
             this.gameToolStripMenuItem.Text = "Game";
@@ -490,9 +493,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this._panelRight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this._panelRight.Controls.Add(this._panelEvalChart);
-            this._panelRight.Controls.Add(this._listViewMoves);
             this._panelRight.Controls.Add(this._labelEval);
             this._panelRight.Controls.Add(this._labelShowEval);
+            this._panelRight.Controls.Add(this._dataGridViewMoves);
             this._panelRight.Location = new System.Drawing.Point(602, 34);
             this._panelRight.Name = "_panelRight";
             this._panelRight.Size = new System.Drawing.Size(234, 473);
@@ -510,39 +513,60 @@
             this._panelEvalChart.TabIndex = 5;
             this._panelEvalChart.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPanelEvalChartPaint);
             // 
-            // _listViewMoves
+            // _dataGridViewMoves
             // 
-            this._listViewMoves.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._listViewMoves.BackColor = System.Drawing.SystemColors.Control;
-            this._listViewMoves.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this._listViewMoves.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeaderMoveNumber,
-            this.columnHeaderWhite,
-            this.columnHeaderBlack});
-            this._listViewMoves.Font = new System.Drawing.Font("Arial Unicode MS", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._listViewMoves.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this._listViewMoves.Location = new System.Drawing.Point(-1, 72);
-            this._listViewMoves.Name = "_listViewMoves";
-            this._listViewMoves.Size = new System.Drawing.Size(234, 193);
-            this._listViewMoves.TabIndex = 4;
-            this._listViewMoves.UseCompatibleStateImageBehavior = false;
-            this._listViewMoves.View = System.Windows.Forms.View.Details;
+            this._dataGridViewMoves.AllowUserToAddRows = false;
+            this._dataGridViewMoves.AllowUserToDeleteRows = false;
+            this._dataGridViewMoves.AllowUserToResizeColumns = false;
+            this._dataGridViewMoves.AllowUserToResizeRows = false;
+            this._dataGridViewMoves.BackgroundColor = System.Drawing.Color.White;
+            this._dataGridViewMoves.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this._dataGridViewMoves.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this._dataGridViewMoves.ColumnHeadersVisible = false;
+            this._dataGridViewMoves.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.WhiteMove,
+            this.BlackMove});
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.ActiveCaption;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this._dataGridViewMoves.DefaultCellStyle = dataGridViewCellStyle2;
+            this._dataGridViewMoves.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this._dataGridViewMoves.Location = new System.Drawing.Point(-1, 72);
+            this._dataGridViewMoves.Name = "_dataGridViewMoves";
+            this._dataGridViewMoves.RowHeadersVisible = false;
+            this._dataGridViewMoves.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this._dataGridViewMoves.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this._dataGridViewMoves.ShowCellErrors = false;
+            this._dataGridViewMoves.ShowEditingIcon = false;
+            this._dataGridViewMoves.ShowRowErrors = false;
+            this._dataGridViewMoves.Size = new System.Drawing.Size(234, 193);
+            this._dataGridViewMoves.TabIndex = 6;
+            this._dataGridViewMoves.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.OnDataGridViewMovesCellMouseClick);
+            this._dataGridViewMoves.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnDataGridViewMovesKeyDown);
             // 
-            // columnHeaderMoveNumber
+            // WhiteMove
             // 
-            this.columnHeaderMoveNumber.Text = "#";
-            this.columnHeaderMoveNumber.Width = 45;
+            this.WhiteMove.HeaderText = "WhiteMove";
+            this.WhiteMove.Name = "WhiteMove";
+            this.WhiteMove.Width = 115;
             // 
-            // columnHeaderWhite
+            // BlackMove
             // 
-            this.columnHeaderWhite.Text = "W";
-            this.columnHeaderWhite.Width = 75;
+            this.BlackMove.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.BlackMove.HeaderText = "BlackMove";
+            this.BlackMove.Name = "BlackMove";
             // 
-            // columnHeaderBlack
+            // loadFromPGNToolStripMenuItem
             // 
-            this.columnHeaderBlack.Text = "B";
-            this.columnHeaderBlack.Width = 90;
+            this.loadFromPGNToolStripMenuItem.Name = "loadFromPGNToolStripMenuItem";
+            this.loadFromPGNToolStripMenuItem.Size = new System.Drawing.Size(280, 24);
+            this.loadFromPGNToolStripMenuItem.Text = "Load from PGN";
+            this.loadFromPGNToolStripMenuItem.Visible = false;
+            this.loadFromPGNToolStripMenuItem.Click += new System.EventHandler(this.loadFromPGNToolStripMenuItem_Click);
             // 
             // FormMain
             // 
@@ -569,6 +593,7 @@
             this.menuStrip.PerformLayout();
             this._panelRight.ResumeLayout(false);
             this._panelRight.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._dataGridViewMoves)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -577,7 +602,6 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer _splitContainerOuter;
-        private System.Windows.Forms.DataGridView _dataGridView;
         private System.Windows.Forms.Timer _slowTimer;
         private System.Windows.Forms.Timer _engineTimer;
         private System.Windows.Forms.Timer _timerAutoCheck;
@@ -619,12 +643,13 @@
         private System.Windows.Forms.Label _labelShowEval;
         private System.Windows.Forms.Label _labelEval;
         private System.Windows.Forms.Panel _panelRight;
-        private System.Windows.Forms.ListView _listViewMoves;
-        private System.Windows.Forms.ColumnHeader columnHeaderMoveNumber;
-        private System.Windows.Forms.ColumnHeader columnHeaderWhite;
-        private System.Windows.Forms.ColumnHeader columnHeaderBlack;
         private System.Windows.Forms.Panel _panelEvalChart;
         private System.Windows.Forms.ToolStripMenuItem clickDelayToolStripMenuItem;
+        private System.Windows.Forms.DataGridView _dataGridViewMoves;
+        private System.Windows.Forms.DataGridView _dataGridView;
+        private System.Windows.Forms.DataGridViewTextBoxColumn WhiteMove;
+        private System.Windows.Forms.DataGridViewTextBoxColumn BlackMove;
+        private System.Windows.Forms.ToolStripMenuItem loadFromPGNToolStripMenuItem;
     }
 }
 

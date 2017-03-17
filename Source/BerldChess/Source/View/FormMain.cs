@@ -54,7 +54,7 @@ namespace BerldChess.View
         {
             InitializeComponent();
             SetDoubleBuffered(_panelEvalChart);
-            SetDoubleBuffered(_listViewMoves);
+            SetDoubleBuffered(_dataGridViewMoves);
             InitializeWindow();
             InitializeViewModel();
             InitializeChessBoard();
@@ -302,7 +302,7 @@ namespace BerldChess.View
 
                         if (_chessPanel.Arrows.Count < multiPV)
                         {
-                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 1.25, GetReferenceColor(centipawn, _multiPV1Reference)));
+                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 1.0, GetReferenceColor(centipawn, _multiPV1Reference)));
                         }
                         else
                         {
@@ -371,7 +371,11 @@ namespace BerldChess.View
                                     _inputSimulator.Mouse.MoveMouseTo((int)(max * (double)currCurPos.X / (double)pW), (int)Math.Round((max * (double)currCurPos.Y / (double)pH * 0.97), 0));
                                     _inputSimulator.Mouse.LeftButtonClick();
                                     Thread.Sleep(20);
-                                    _updateAfterAnimation = true;
+
+                                    if (checkAutoToolStripMenuItem.Checked)
+                                    {
+                                        _updateAfterAnimation = true;
+                                    }
                                 }
                             }
                         }
@@ -447,11 +451,11 @@ namespace BerldChess.View
                     {
                         if (i % 2 == 0)
                         {
-                            _listViewMoves.Items.RemoveAt(i / 2);
+                            _dataGridViewMoves.Rows.RemoveAt(i / 2);
                         }
                         else
                         {
-                            _listViewMoves.Items[i / 2].SubItems[2] = new ListViewItem.ListViewSubItem(_listViewMoves.Items[i / 2], "");
+                            _dataGridViewMoves.Rows[i / 2].Cells[1].Value = "";
                         }
                     }
                 }
@@ -494,21 +498,29 @@ namespace BerldChess.View
 
                 int count = _vm.PositionHistory.Count;
 
+                string displayEval = _labelEval.Text;
+
+                if(displayEval.Substring(0, 4) == "Mate")
+                {
+                    displayEval = "#";
+                }
+
                 if (count % 2 == 0)
                 {
-                    string[] values = new string[3];
+                    DataGridViewRow row = new DataGridViewRow();
+                    DataGridViewTextBoxCell whiteMove = new DataGridViewTextBoxCell();
+                    DataGridViewTextBoxCell blackMove = new DataGridViewTextBoxCell();
 
-                    values[0] = (count / 2) + ".";
-                    values[1] = GetFormatMove(move, moveType);
-                    values[2] = "";
+                    whiteMove.Value = (count / 2) + ". " + GetFormatMove(move, moveType) + " (" + displayEval + ")";
 
-                    _listViewMoves.Items.Add(new ListViewItem(values));
-                    _listViewMoves.Items[_listViewMoves.Items.Count - 1].EnsureVisible();
+                    row.Cells.Add(whiteMove);
+                    row.Cells.Add(blackMove);
+
+                    _dataGridViewMoves.Rows.Add(row);
                 }
                 else
                 {
-                    _listViewMoves.Items[count / 2 - 1].SubItems[2] = new ListViewItem.ListViewSubItem(_listViewMoves.Items[count / 2 - 1], GetFormatMove(move, moveType));
-                    _listViewMoves.Items[count / 2 - 1].EnsureVisible();
+                    _dataGridViewMoves.Rows[count / 2 - 1].Cells[1].Value = GetFormatMove(move, moveType) + " (" + displayEval + ")";
                 }
 
                 if (localModeToolStripMenuItem.Checked)
@@ -518,6 +530,7 @@ namespace BerldChess.View
                 }
 
                 _vm.NavIndex++;
+                SelectCell(_vm.NavIndex);
 
                 if (_vm.Game.IsCheckmated(ChessPlayer.Black) || _vm.Game.IsCheckmated(ChessPlayer.White))
                 {
@@ -579,7 +592,6 @@ namespace BerldChess.View
 
             _chessPanel.Game = _vm.Game;
             _vm.PositionHistory.Clear();
-            _listViewMoves.Items.Clear();
 
             _vm.PositionHistory.Add(new ChessPosition(input));
             _chessPanel.HighlighedSquares.Clear();
@@ -713,7 +725,7 @@ namespace BerldChess.View
 
             _chessPanel.Game = _vm.Game;
             _vm.PositionHistory.Clear();
-            _listViewMoves.Items.Clear();
+            _dataGridViewMoves.Rows.Clear();
             _chessPanel.HighlighedSquares.Clear();
             _vm.PositionHistory.Add(new ChessPosition(_vm.Game.GetFen()));
             _vm.NavIndex = 0;
@@ -975,23 +987,29 @@ namespace BerldChess.View
         {
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.HighQuality;
-            Pen linePen = new Pen(Color.LightGray, 1);
+            Pen gridPen = new Pen(Color.LightGray, 1);
             Pen middleLinePen = new Pen(Color.Gray, 1);
             Pen chartLinePen = new Pen(Color.Black, 1);
 
+            Font font = new Font("Segue UI", 11);
             int chartYMiddle = Round(_panelEvalChart.Height / 2.0);
 
-            double peak;
+            int peak;
             double highestValue = _vm.PositionHistory.Max(c => c.Evaluation);
             double lowestValue = _vm.PositionHistory.Min(c => c.Evaluation);
 
             if (highestValue > Math.Abs(lowestValue))
             {
-                peak = highestValue;
+                peak = (int)Math.Ceiling(highestValue);
             }
             else
             {
-                peak = Math.Abs(lowestValue);
+                peak = (int)Math.Ceiling(Math.Abs(lowestValue));
+            }
+
+            if(peak % 2 == 1)
+            {
+                peak++;
             }
 
             if (peak < 3)
@@ -1003,64 +1021,67 @@ namespace BerldChess.View
                 peak = 10;
             }
 
-            double yUnitLength = _panelEvalChart.Height / peak / 2.0;
-            double xUnitLength = (double)_panelEvalChart.Width / (_vm.PositionHistory.Count - 1);
+            int rowCount = peak * 2;
+            int lineCount = 6;
 
-            int xPart = Round(_panelEvalChart.Width / 10.0);
-            int yPart = Round(_panelEvalChart.Height / 10.0);
+            double xPart = _panelEvalChart.Width / (double)lineCount;
+            double yPart = _panelEvalChart.Height / (double)rowCount;
 
-            for (int i = 1; i < 10; i++)
+            for (int i = 1; i < rowCount; i++)
             {
-                g.DrawLine(linePen, xPart * i, 0, xPart * i, _panelEvalChart.Height);
-                g.DrawLine(linePen, 0, yPart * i, _panelEvalChart.Width, yPart * i);
+                g.DrawLine(gridPen, 0, Round(yPart * i), _panelEvalChart.Width, Round(yPart * i));
             }
 
-            for (int i = 0; i <= 10; i++)
+            for (int i = 1; i < lineCount; i++)
             {
-                if (i % 2 == 1)
+                g.DrawLine(gridPen, Round(xPart * i), 0, Round(xPart * i), _panelEvalChart.Height);
+            }
+
+            for (int i = 1; i <= lineCount; i++)
+            {
+                if (i % 3 != 0)
                 {
                     continue;
                 }
 
-                int valueX = ((int)((_vm.PositionHistory.Count - 1) / 10.0 * i));
+                int valueX = (int)((_vm.PositionHistory.Count - 1) / (double)lineCount * i);
 
-                if (valueX > 2 || i == 10)
+                if (valueX > 2 || i == lineCount)
                 {
-                    string output;
+                    string output = valueX.ToString();
+                    int offSet = (int)((g.MeasureString(output, font).Width) / lineCount * i);
 
-                    if (i == 10)
-                    {
-                        output = "Ply " + valueX;
-                    }
-                    else
-                    {
-                        output = valueX.ToString();
-                    }
-
-                    g.DrawString(output, _panelEvalChart.Font, Brushes.Black, _panelEvalChart.Width / 10 * i - g.MeasureString(output, _panelEvalChart.Font).Width, _panelEvalChart.Height - _panelEvalChart.Font.Size * 2);
+                    g.DrawString(output, font, Brushes.Black, (_panelEvalChart.Width / lineCount * i) - offSet, _panelEvalChart.Height - font.Size * 2);
                 }
             }
 
-            for (int i = 0; i < 11; i++)
+            for (int i = 1; i < rowCount; i++)
             {
-                if (i % 2 == 1)
+                if(peak > 5 && i % 2 == 1)
                 {
                     continue;
                 }
 
-                int offSet = 0;
+                if(i == rowCount / 2)
+                {
+                    continue;
+                }
 
-                double valueY = Math.Round((peak - ((peak / 5.0 * i))), 1);
-                string displayed = valueY.ToString();
+                int valueY = peak - i;
+                string output = valueY.ToString();
 
-                offSet = Round(g.MeasureString(displayed, _panelEvalChart.Font).Height / 10.0 * i);
-                g.DrawString(displayed, _panelEvalChart.Font, Brushes.Black, _panelEvalChart.Font.Size / 2, (_panelEvalChart.Height / 10 * i) - offSet);
+                int offSet = Round(g.MeasureString(output, font).Height * 1.1 / 2);
+
+                g.DrawString(output, font, Brushes.Black, font.Size / 2, Round(_panelEvalChart.Height / (double)rowCount * i) - offSet);
             }
 
             g.DrawLine(middleLinePen, 0, chartYMiddle, _panelEvalChart.Width, chartYMiddle);
 
-            double upperBound = 9.9;
+            double upperBound = 10;
             double lowerBound = -9.7;
+
+            double yUnitLength = _panelEvalChart.Height / (double)rowCount;
+            double xUnitLength = (double)_panelEvalChart.Width / (_vm.PositionHistory.Count - 1);
 
             if (peak != 0)
             {
@@ -1102,6 +1123,22 @@ namespace BerldChess.View
                 SerializedInfo.Instance.ClickDelay = clickDelay;
                 clickDelayToolStripMenuItem.Text = $"Click Delay [{clickDelay}]";
             }
+        }
+
+        private void OnDataGridViewMovesKeyDown(object sender, KeyEventArgs e)
+        {
+            e.SuppressKeyPress = true;
+        }
+
+        private void OnDataGridViewMovesCellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            NavigateGame(e.RowIndex * 2 + e.ColumnIndex + 1);
+        }
+
+        private void loadFromPGNToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormPgnLoader pgnLoader = new FormPgnLoader();
+            pgnLoader.ShowDialog();
         }
 
         #endregion
@@ -1288,6 +1325,8 @@ namespace BerldChess.View
         {
             if (navIndex != _vm.NavIndex)
             {
+                SelectCell(navIndex);
+
                 _isAutoPlay = false;
                 _timeSinceLastMove.Reset();
                 _computerPlayer = ChessPlayer.None;
@@ -1326,6 +1365,29 @@ namespace BerldChess.View
                     _vm.Engine.RequestStop();
                 }
             }
+        }
+
+        private void SelectCell(int navIndex)
+        {
+            for (int i = 0; i < _dataGridViewMoves.SelectedCells.Count; i++)
+            {
+                _dataGridViewMoves.SelectedCells[i].Selected = false;
+            }
+
+            navIndex--;
+
+            if (navIndex < 0)
+            {
+                if (_dataGridViewMoves.Rows.Count > 0 && _dataGridViewMoves.Rows[0].Cells.Count > 0)
+                {
+                    _dataGridViewMoves.CurrentCell = _dataGridViewMoves.Rows[0].Cells[0];
+                }
+
+                return;
+            }
+
+            _dataGridViewMoves.Rows[navIndex / 2].Cells[navIndex % 2].Selected = true;
+            _dataGridViewMoves.CurrentCell = _dataGridViewMoves.Rows[navIndex / 2].Cells[navIndex % 2];
         }
 
         private int Round(double number)
