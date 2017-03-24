@@ -17,7 +17,7 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private bool _wasResized = true;
+        private bool _renderImages = true;
         private int _boardDimension;
         private double _fieldSize;
         private double _fontSizeFactor = -1;
@@ -57,7 +57,7 @@ namespace BerldChess.View
                 }
                 else
                 {
-                    _wasResized = true;
+                    _renderImages = true;
                 }
 
                 Invalidate();
@@ -138,7 +138,7 @@ namespace BerldChess.View
 
             _fieldSize = _boardDimension / (double)_board.Length;
 
-            if (_wasResized)
+            if (_renderImages)
             {
                 if (PieceFontFamily != "")
                 {
@@ -162,7 +162,7 @@ namespace BerldChess.View
                     }
                 }
 
-                _wasResized = false;
+                _renderImages = false;
             }
 
             SolidBrush figureBrush = null;
@@ -316,7 +316,8 @@ namespace BerldChess.View
 
                 for (int i = drawInfo.Length - 1; i >= 0; i--)
                 {
-                    Pen arrowPen = new Pen(Color.Black, Round(drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension));
+                    int arrowThickness = Round(drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension);
+                    Pen arrowPen = new Pen(Color.Black, arrowThickness);
                     arrowPen.Brush = new SolidBrush(drawInfo[i].Arrow.Color);
                     arrowPen.EndCap = LineCap.ArrowAnchor;
                     arrowPen.StartCap = LineCap.RoundAnchor;
@@ -459,7 +460,7 @@ namespace BerldChess.View
         {
             base.OnSizeChanged(e);
 
-            _wasResized = true;
+            _renderImages = true;
             Invalidate();
         }
 
@@ -753,7 +754,7 @@ namespace BerldChess.View
         {
             Point[] index = new Point[2];
 
-            double offSet = 0.50;
+            double offSet = 0.495;
 
             if (!IsFlipped)
             {

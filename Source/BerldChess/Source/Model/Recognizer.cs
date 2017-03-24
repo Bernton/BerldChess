@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
@@ -46,6 +47,7 @@ namespace BerldChess.Model
         {
             if (BoardFound)
             {
+                Debug.WriteLine("# Update #");
                 _lastBoardSnap = image;
             }
         }
@@ -140,9 +142,11 @@ namespace BerldChess.Model
         {
             if (BoardFound)
             {
-                Bitmap screenshot = GetScreenshot(Screen.AllScreens[ScreenIndex]);
-                Rectangle cloneRectangle = new Rectangle(BoardLocation, BoardSize);
-                return screenshot.Clone(cloneRectangle, screenshot.PixelFormat);
+                Screen screen = Screen.AllScreens[ScreenIndex];
+                Bitmap screenshot = new Bitmap(BoardSize.Width, BoardSize.Height, PixelFormat.Format24bppRgb);
+                Graphics g = Graphics.FromImage(screenshot);
+                g.CopyFromScreen(screen.Bounds.X + BoardLocation.X, screen.Bounds.Y + BoardLocation.Y, 0, 0, BoardSize, CopyPixelOperation.SourceCopy);
+                return screenshot;
             }
 
             return null;
@@ -168,7 +172,7 @@ namespace BerldChess.Model
             int boardWidth = 0;
             int boardHeight = 0;
             int matchTolerance = 0;
-            int initSuccTol = -1;
+            int initSuccTol = 4;
             int successivelyTolerance = -1;
             int imageStride = imageData.Stride;
             int imageWidth = image.Width * 3;
@@ -214,7 +218,7 @@ namespace BerldChess.Model
                         {
                             if (successivelyTolerance == -1 && matchFound)
                             {
-                                initSuccTol = (int)Math.Ceiling(boardWidth / 40.0);
+                                initSuccTol = (int)Math.Ceiling(boardWidth / 10.0);
                                 successivelyTolerance = initSuccTol;
                             }
 

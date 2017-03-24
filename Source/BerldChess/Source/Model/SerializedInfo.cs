@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Xml.Serialization;
 
@@ -40,17 +41,41 @@ namespace BerldChess.Model
         private Rectangle _bounds;
         private int _multiPV = 250;
         private int _animTime = 300;
-        private string _chessFontChars;
-        private bool _isUnicodeFont = false;
+        private List<ChessFont> _chessFonts = new List<ChessFont>();
+        private int _selectedFontIndex = 0;
         private bool _autoCheck = false;
         private int _clickDelay = 120;
         private double _sizeFactor = 0.9;
 
-        private string _pieceFontFamily = null;
-
         #endregion
 
         #region Properties
+
+        public int SelectedFontIndex
+        {
+            get
+            {
+                return _selectedFontIndex;
+            }
+
+            set
+            {
+                _selectedFontIndex = value;
+            }
+        }
+
+        public List<ChessFont> ChessFonts
+        {
+            get
+           {
+                return _chessFonts;
+            }
+
+            set
+            {
+                _chessFonts = value;
+            }
+        }
 
         public int ClickDelay
         {
@@ -85,43 +110,6 @@ namespace BerldChess.Model
             set
             {
                 _sizeFactor = value;
-            }
-        }
-
-        public string ChessFontChars
-        {
-            get
-            {
-                return _chessFontChars;
-            }
-
-            set
-            {
-                _chessFontChars = value;
-            }
-        }
-
-        public bool IsUnicodeFont
-        {
-            get
-            {
-                return _isUnicodeFont;
-            }
-            set
-            {
-                _isUnicodeFont = value;
-            }
-        }
-
-        public string PieceFontFamily
-        {
-            get
-            {
-                return _pieceFontFamily;
-            }
-            set
-            {
-                _pieceFontFamily = value;
             }
         }
 
@@ -305,6 +293,7 @@ namespace BerldChess.Model
 
         #endregion
 
-        private SerializedInfo() { }
+        private SerializedInfo()
+        {  }
     }
 }

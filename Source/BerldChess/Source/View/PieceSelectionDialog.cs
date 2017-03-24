@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BerldChess.Model;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
@@ -7,87 +9,21 @@ namespace BerldChess.View
 {
     public partial class PieceSelectionDialog : Form
     {
-        #region Fields
-
-        private bool _isUnicode;
-        private double _sizeFactor;
-        private string _fontFamily;
-        private string _fontChars;
-
-        #endregion
-
-        #region Properties & Events
-
-        public bool IsUnicode
-        {
-            get
-            {
-                return _isUnicode;
-            }
-
-            set
-            {
-                _isUnicode = value;
-                _checkBoxUnicodeFont.Checked = _isUnicode;
-            }
-        }
-
-        public double SizeFactor
-        {
-            get
-            {
-                return _sizeFactor;
-            }
-            set
-            {
-                _sizeFactor = value;
-                _textBoxSizeFactor.Text = _sizeFactor.ToString();
-            }
-        }
-
-        public string FontFamily
-        {
-            get
-            {
-                return _fontFamily;
-            }
-            set
-            {
-                _fontFamily = value;
-                _comboBoxFont.Text = _fontFamily;
-
-                if (_fontFamily == "")
-                {
-                    _checkBoxDefault.Checked = true;
-                }
-                else
-                {
-                    _checkBoxDefault.Checked = false;
-                }
-            }
-        }
-
-        public string FontChars
-        {
-            get
-            {
-                return _fontChars;
-            }
-            set
-            {
-                _fontChars = value;
-                _textBoxFontChars.Text = _fontChars;
-            }
-        }
+        private List<ChessFont> _chessFonts;
 
         public event Action FontSelected;
 
-        #endregion
-
         #region Constructors
 
-        public PieceSelectionDialog()
+        public PieceSelectionDialog(List<ChessFont> chessFonts, int selectedIndex)
         {
+            if(selectedIndex < 0)
+            {
+                selectedIndex = 0;
+            }
+
+            _chessFonts = chessFonts;
+
             InitializeComponent();
 
             InstalledFontCollection fonts = new InstalledFontCollection();
@@ -96,51 +32,69 @@ namespace BerldChess.View
             {
                 _comboBoxFont.Items.Add(fonts.Families[i].Name);
             }
+
+            for (int i = 0; i < _chessFonts.Count; i++)
+            {
+                _listBoxConfigs.Items.Add(_chessFonts[i].Name);
+            }
+
+            _listBoxConfigs.SelectedIndex = selectedIndex;
+            OpenFontConfig(_listBoxConfigs.SelectedIndex);
         }
 
         #endregion
 
         #region Methods
 
-        private void OnButtonApplyClick(object sender, EventArgs e)
+        private void OnListBoxConfigsSelectedIndexChanged(object sender, EventArgs e)
         {
-            double factor;
-
-            if (double.TryParse(_textBoxSizeFactor.Text, out factor))
-            {
-                _sizeFactor = factor;
-            }
-
-            if (_checkBoxDefault.Checked)
-            {
-                FontFamily = "";
-            }
-            else if (FontExists(_comboBoxFont.Text, FontStyle.Regular))
-            {
-                _isUnicode = _checkBoxUnicodeFont.Checked;
-                _fontFamily = _comboBoxFont.Text;
-                _fontChars = _textBoxFontChars.Text;
-            }
-
-            FontSelected?.Invoke();
+            OpenFontConfig(_listBoxConfigs.SelectedIndex);
         }
 
-        private void OnCheckBoxDefaultCheckedChanged(object sender, EventArgs e)
+        private void OpenFontConfig(int index)
         {
-            if (_checkBoxDefault.Checked)
+            if (index < 0)
             {
-                _checkBoxUnicodeFont.Enabled = false;
-                _comboBoxFont.Enabled = false;
-                _labelFontChars.Enabled = false;
-                _textBoxFontChars.Enabled = false;
+                index = 0;
+            }
+
+            if (index == 0)
+            {
+                _buttonApply.Enabled = false;
+                _buttonRemove.Enabled = false;
             }
             else
             {
-                _checkBoxUnicodeFont.Enabled = true;
-                _comboBoxFont.Enabled = true;
-                _labelFontChars.Enabled = true;
-                _textBoxFontChars.Enabled = true;
+                _buttonApply.Enabled = true;
+                _buttonRemove.Enabled = true;
             }
+
+            ChessFont font = _chessFonts[index];
+
+            _textBoxName.Text = font.Name;
+            _textBoxSizeFactor.Text = font.SizeFactor.ToString();
+            _textBoxFontChars.Text = font.PieceCharacters;
+            _checkBoxUnicodeFont.Checked = font.IsUnicode;
+            _comboBoxFont.Text = font.FontFamily;
+
+            SerializedInfo.Instance.SelectedFontIndex = index;
+            FontSelected?.Invoke();
+        }
+
+        private void OnButtonApplyClick(object sender, EventArgs e)
+        {
+            double factor;
+            ChessFont font = _chessFonts[_listBoxConfigs.SelectedIndex];
+
+            if (double.TryParse(_textBoxSizeFactor.Text, out factor))
+            {
+                font.SizeFactor = factor;
+            }
+
+            font.IsUnicode = _checkBoxUnicodeFont.Checked;
+            font.FontFamily = _comboBoxFont.Text;
+            font.PieceCharacters = _textBoxFontChars.Text;
+            FontSelected?.Invoke();
         }
 
         private void OnCheckBoxUnicodeFontCheckedChanged(object sender, EventArgs e)
@@ -159,10 +113,14 @@ namespace BerldChess.View
 
         private void OnComboBoxFontTextChanged(object sender, EventArgs e)
         {
-            if (FontExists(_comboBoxFont.Text, FontStyle.Regular))
+            if (FontExists(_comboBoxFont.Text, FontStyle.Regular) && _comboBoxFont.Text != "")
             {
                 _textBoxFontChars.Font = new Font(_comboBoxFont.Text, _textBoxFontChars.Font.Size);
-                _textBoxFontChars.Text = (string)_textBoxFontChars.Tag;
+
+                if(_chessFonts[_listBoxConfigs.SelectedIndex].PieceCharacters == "")
+                {
+                    _textBoxFontChars.Text = (string)_textBoxFontChars.Tag;
+                }
             }
             else
             {
@@ -172,7 +130,12 @@ namespace BerldChess.View
 
         private void OnButtonCloseClick(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.Cancel;
+            int selected = _listBoxConfigs.SelectedIndex;
+
+            SerializedInfo.Instance.ChessFonts.RemoveAt(selected);
+
+            _listBoxConfigs.Items.RemoveAt(selected);
+            _listBoxConfigs.SelectedIndex = selected - 1;
         }
 
         private bool FontExists(string fontFamilyName, FontStyle fontStyle)
@@ -193,6 +156,42 @@ namespace BerldChess.View
 
             return result;
         }
+
+        private void OnButtonAddNewClick(object sender, EventArgs e)
+        {
+            double factor;
+            ChessFont newFont = new ChessFont();
+
+            if (_listBoxConfigs.Items.Contains(_textBoxName.Text))
+            {
+                MessageBox.Show(this, "Can't have 2 font configurations with the same name.", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (double.TryParse(_textBoxSizeFactor.Text, out factor))
+            {
+                newFont.SizeFactor = factor;
+            }
+            else
+            {
+                newFont.SizeFactor = 1;
+            }
+
+            newFont.Name = _textBoxName.Text;
+            newFont.IsUnicode = _checkBoxUnicodeFont.Checked;
+            newFont.FontFamily = _comboBoxFont.Text;
+            newFont.PieceCharacters = _textBoxFontChars.Text;
+
+            SerializedInfo.Instance.ChessFonts.Add(newFont);
+            SerializedInfo.Instance.SelectedFontIndex = SerializedInfo.Instance.ChessFonts.Count - 1;
+
+            _listBoxConfigs.Items.Add(newFont.Name);
+            _listBoxConfigs.SelectedIndex = _listBoxConfigs.Items.Count - 1;
+
+            FontSelected?.Invoke();
+        }
+
+
 
         #endregion
     }
