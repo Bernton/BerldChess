@@ -44,12 +44,26 @@ namespace BerldChess.Model
         private List<ChessFont> _chessFonts = new List<ChessFont>();
         private int _selectedFontIndex = 0;
         private bool _autoCheck = false;
+        private bool _darkMode = false;
         private int _clickDelay = 120;
         private double _sizeFactor = 0.9;
 
         #endregion
 
         #region Properties
+
+        public bool DarkMode
+        {
+            get
+            {
+                return _darkMode;
+            }
+            
+            set
+            {
+                _darkMode = value;
+            }
+        }
 
         public int SelectedFontIndex
         {
@@ -126,34 +140,66 @@ namespace BerldChess.Model
         }
 
         [XmlIgnore]
-        public Color DarkSquare { get; set; } = Color.FromArgb(186, 85, 70);
+        public Color BoardDarkSquare { get; set; } = Color.FromArgb(140, 162, 173);
 
         [XmlIgnore]
-        public Color LightSquare { get; set; } = Color.FromArgb(240, 216, 191);
+        public Color BoardLightSquare { get; set; } = Color.FromArgb(222, 227, 230);
 
-        [XmlElement("DarkSquare")]
-        public int DarkSquareAsArgb
+        [XmlElement("BoardDarkSquare")]
+        public int BoardDarkSquareAsArgb
         {
             get
             {
-                return DarkSquare.ToArgb();
+                return BoardDarkSquare.ToArgb();
             }
             set
             {
-                DarkSquare = Color.FromArgb(value);
+                BoardDarkSquare = Color.FromArgb(value);
             }
         }
 
-        [XmlElement("LightSquare")]
-        public int LightSquareAsArgb
+        [XmlElement("BoardLightSquare")]
+        public int BoardLightSquareAsArgb
         {
             get
             {
-                return LightSquare.ToArgb();
+                return BoardLightSquare.ToArgb();
             }
             set
             {
-                LightSquare = Color.FromArgb(value);
+                BoardLightSquare = Color.FromArgb(value);
+            }
+        }
+
+        [XmlIgnore]
+        public Color EngineDarkSquare { get; set; } = Color.FromArgb(186, 85, 70);
+
+        [XmlIgnore]
+        public Color EngineLightSquare { get; set; } = Color.FromArgb(240, 216, 191);
+
+        [XmlElement("EngineDarkSquare")]
+        public int EngineDarkSquareAsArgb
+        {
+            get
+            {
+                return EngineDarkSquare.ToArgb();
+            }
+            set
+            {
+                EngineDarkSquare = Color.FromArgb(value);
+            }
+        }
+
+        [XmlElement("EngineLightSquare")]
+        public int EngineLightSquareAsArgb
+        {
+            get
+            {
+                return EngineLightSquare.ToArgb();
+            }
+            set
+            {
+                EngineLightSquare = Color.FromArgb(value);
             }
         }
 

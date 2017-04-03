@@ -10,14 +10,14 @@ namespace BerldChess.ViewModel
     {
         #region Fields
 
-        public const string EngineArgsFN = "engineArgs.txt";
-        public const string ConfigFileName = "config.txt";
+        public const string EngineArgumentsFileName = "engineArgs.txt";
+        public const string ConfigurationFileName = "config.txt";
 
         #endregion
 
         #region Properties
 
-        public int NavIndex { get; set; }
+        public int NavigationIndex { get; set; }
         public Engine Engine { get; set; }
         public ChessGame Game { get; set; }
         public List<ChessPosition> PositionHistory { get; set; }
@@ -28,15 +28,15 @@ namespace BerldChess.ViewModel
 
         public FormMainViewModel()
         {
-            string[] engineArgs = null;
-
-            NavIndex = 0;
+            NavigationIndex = 0;
             PositionHistory = new List<ChessPosition>();
             Engine = new Engine("engine.exe");
 
-            if (File.Exists(EngineArgsFN))
+            string[] engineArgs = null;
+
+            if (File.Exists(EngineArgumentsFileName))
             {
-                engineArgs = File.ReadAllLines(EngineArgsFN);
+                engineArgs = File.ReadAllLines(EngineArgumentsFileName);
 
                 for (int i = 0; i < engineArgs.Length; i++)
                 {

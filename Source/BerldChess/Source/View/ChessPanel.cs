@@ -66,6 +66,10 @@ namespace BerldChess.View
 
         public bool IsFlipped { get; set; } = false;
         public bool DisplayGridBorders { get; set; } = false;
+
+        public Color DarkSquare { get; set; }
+        public Color LightSquare { get; set; }
+
         public ChessGame Game { get; set; } = null;
         public List<Point> HighlighedSquares { get; set; } = new List<Point>();
 
@@ -184,8 +188,8 @@ namespace BerldChess.View
             Color evenSquare;
             Color oddSquare;
 
-            evenSquare = Color.FromArgb(222, 227, 230);
-            oddSquare = Color.FromArgb(140, 162, 173);
+            evenSquare = LightSquare;
+            oddSquare = DarkSquare;
 
             g.SmoothingMode = SmoothingMode.Default;
 

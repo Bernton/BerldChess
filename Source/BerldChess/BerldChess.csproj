@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="Source\Model\ChessFont.cs" />
     <Compile Include="Source\Model\ChessPosition.cs" />
+    <Compile Include="Source\Model\Extensions.cs" />
     <Compile Include="Source\Model\Recognizer.cs" />
     <Compile Include="Source\Model\SerializedInfo.cs" />
     <Compile Include="Source\ViewModel\FormMainViewModel.cs" />
@@ -111,6 +112,12 @@
       <DependentUpon>FormSquareColorDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Source\View\PieceImageProvider.cs" />
+    <Compile Include="Source\View\BoardSettingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source\View\BoardSettingDialog.Designer.cs">
+      <DependentUpon>BoardSettingDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Source\View\PieceSelectionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +152,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\FormSquareColorDialog.resx">
       <DependentUpon>FormSquareColorDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source\View\BoardSettingDialog.resx">
+      <DependentUpon>BoardSettingDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\PieceSelectionDialog.resx">
       <DependentUpon>PieceSelectionDialog.cs</DependentUpon>
@@ -210,6 +220,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Sounds\WAV\Castling.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Back.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\FastBack.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\FastForward.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Forward.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
