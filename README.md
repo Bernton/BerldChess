@@ -1,7 +1,7 @@
 # BerldChess
 Tool for playing and analyzing chess games.
 
-![alt tag](https://raw.githubusercontent.com/Bernton/BerldChess/master/Images/BerldChess_1_2_0.png)
+![alt tag](https://raw.githubusercontent.com/Bernton/BerldChess/master/Images/BerldChess_UI.PNG)
 
 Important:
 
