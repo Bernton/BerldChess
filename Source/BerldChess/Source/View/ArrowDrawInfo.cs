@@ -6,9 +6,9 @@ namespace BerldChess.View
     public class ArrowDrawInfo
     {
         public Arrow Arrow { get; set; }
-        public Point[] Positions { get; set; }
+        public PointF[] Positions { get; set; }
 
-        public int Length
+        public float Length
         {
             get
             {
@@ -21,9 +21,9 @@ namespace BerldChess.View
             }
         }
 
-        private int GetDistance(int a, int b)
+        private float GetDistance(float a, float b)
         {
-            return (int)Math.Sqrt(a * a + b * b);
+            return (float)Math.Sqrt(a * a + b * b);
         }
     }
 }

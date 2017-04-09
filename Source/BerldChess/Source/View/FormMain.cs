@@ -19,6 +19,7 @@ using System.Linq;
 using System.Media;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using WindowsInput;
@@ -29,13 +30,16 @@ namespace BerldChess.View
     {
         #region Fields
 
+        private double _defaultSizeFactor = 0.9775;
         private bool _isMoveTry = false;
         private bool _isAutoPlay = false;
+        private bool _totalChartView = false;
         private volatile bool _evaluationEnabled = true;
         private volatile bool _updateAfterAnimation = false;
         private int _pvOneReference;
         private int _engineTime = 300;
         private int _animationTime = 300;
+        private int _shownOnNonTotal = 25;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
         private InfoType[] _columnOrder;
         private Random _random = new Random();
@@ -80,7 +84,7 @@ namespace BerldChess.View
                 {
                     Name = "Default",
                     FontFamily = "",
-                    SizeFactor = 1.05,
+                    SizeFactor = _defaultSizeFactor,
                     IsUnicode = false,
                     PieceCharacters = ""
                 });
@@ -147,7 +151,7 @@ namespace BerldChess.View
             _chessPanel.Game = _vm.Game;
             _chessPanel.Select();
             _chessPanel.PieceMoved += OnPieceMoved;
-            _splitContainerMain.Panel1.Controls.Add(_chessPanel);
+            _splitContainerBoard.Panel1.Controls.Add(_chessPanel);
         }
 
         #endregion
@@ -346,7 +350,7 @@ namespace BerldChess.View
                             _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
                         }
 
-                        if (_evaluationEnabled && _vm.PositionHistory.Count > 1 && _vm.PositionHistory.Count > _vm.NavigationIndex)
+                        if (_evaluationEnabled && _vm.PositionHistory.Count > 0 && _vm.PositionHistory.Count > _vm.NavigationIndex)
                         {
                             int depth = int.Parse(evaluation[InfoType.Depth]);
 
@@ -388,7 +392,7 @@ namespace BerldChess.View
                         return;
                     }
 
-                    if (multiPv == 1 || (!isMate && _pvOneReference - centipawn < 150) || _chessPanel.Arrows.Count < 3)
+                    if (multiPv == 1 || (!isMate && _pvOneReference - centipawn < 85) || _chessPanel.Arrows.Count < 3)
                     {
                         if (multiPv == 1)
                         {
@@ -546,6 +550,7 @@ namespace BerldChess.View
                 if (_vm.Game.IsCheckmated(ChessPlayer.Black) || _vm.Game.IsCheckmated(ChessPlayer.White))
                 {
                     _labelEvaluation.Text = "Checkmate";
+                    _vm.PositionHistory[_vm.PositionHistory.Count - 1].Evaluation = _vm.Game.IsCheckmated(ChessPlayer.White) ? -120 : 120;
                 }
                 else if (_vm.Game.IsStalemated(ChessPlayer.Black) || _vm.Game.IsStalemated(ChessPlayer.White))
                 {
@@ -668,6 +673,8 @@ namespace BerldChess.View
 
         private void OnMenuItemLoadFenClick(object sender, EventArgs e)
         {
+            _evaluationEnabled = false;
+
             string input = Interaction.InputBox("Enter Position FEN:", "BerldChess - FEN");
 
             if (input == "")
@@ -703,6 +710,8 @@ namespace BerldChess.View
             _vm.PositionHistory.Add(new ChessPosition(input));
             _chessPanel.HighlighedSquares.Clear();
             _vm.NavigationIndex = 0;
+
+            _evaluationEnabled = true;
 
             if (_menuItemLocalMode.Checked)
             {
@@ -779,7 +788,7 @@ namespace BerldChess.View
 
         private void OnMenuItemHideOutputCheckedChanged(object sender, EventArgs e)
         {
-            _splitContainerMain.Panel2Collapsed = _menuItemHideOutput.Checked;
+            _splitContainerBoard.Panel2Collapsed = _menuItemHideOutput.Checked;
         }
 
         private void OnMenuItemLocalModeCheckedChanged(object sender, EventArgs e)
@@ -800,6 +809,7 @@ namespace BerldChess.View
 
         private void OnMenuItemNewClick(object sender, EventArgs e)
         {
+            _evaluationEnabled = false;
             _isAutoPlay = false;
             _timeSinceLastMove.Reset();
             _computerPlayer = ChessPlayer.None;
@@ -817,6 +827,9 @@ namespace BerldChess.View
             _chessPanel.HighlighedSquares.Clear();
             _vm.PositionHistory.Add(new ChessPosition(_vm.Game.GetFen()));
             _vm.NavigationIndex = 0;
+
+            _evaluationEnabled = true;
+
             _vm.Engine.Query("ucinewgame");
 
             if (_menuItemLocalMode.Checked)
@@ -949,6 +962,50 @@ namespace BerldChess.View
             }
         }
 
+        private void OnMenuItemDepthAnalysisClick(object sender, EventArgs e)
+        {
+            string input = Interaction.InputBox("Enter Depth:", "BerldChess - Depth Analysis");
+            int depth;
+
+            if (int.TryParse(input, out depth))
+            {
+                if (depth > 60)
+                {
+                    depth = 60;
+                }
+
+                if (_vm.PositionHistory.Count > 0)
+                {
+                    CancellationTokenSource source = new CancellationTokenSource();
+                    Task anaylsisTask = new Task(() =>
+                    {
+                        for (int i = _vm.PositionHistory.Count - 1; i >= 0; i--)
+                        {
+                            Invoke((MethodInvoker)delegate
+                            {
+                                Navigate(i);
+                            });
+
+                            while (_vm.PositionHistory[i].EvaluationDepth < depth)
+                            {
+                                Thread.Sleep(100);
+
+                                if (source.Token.IsCancellationRequested)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                    });
+
+                    anaylsisTask.Start();
+
+                    MessageBox.Show(this, "Analysing to depth " + depth + "\n\n Press OK to cancel.", "Depth Analysis", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    source.Cancel();
+                }
+            }
+        }
+
         private void OnMenuItemCheatModeCheckedChanged(object sender, EventArgs e)
         {
             foreach (ToolStripDropDownItem item in _menuItemCheatMode.DropDownItems)
@@ -1002,19 +1059,31 @@ namespace BerldChess.View
         private void OnPanelEvaluationChartPaint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.SmoothingMode = SmoothingMode.HighSpeed;
             g.TextRenderingHint = TextRenderingHint.AntiAlias;
+
             Pen gridPen = new Pen(_panelEvaluationChart.ForeColor.OperateAll(200, !SerializedInfo.Instance.DarkMode), 1);
             Pen middleLinePen = new Pen(_panelEvaluationChart.ForeColor.OperateAll(120, !SerializedInfo.Instance.DarkMode), 1);
-            Pen chartLinePen = new Pen(_panelEvaluationChart.ForeColor, 1);
+            Pen chartBorderPen = new Pen(_panelEvaluationChart.ForeColor, 1);
 
-            Font font = new Font("Segoe UI", 10);
+            Font labelFont = new Font("Segoe UI", 10);
+
             SolidBrush fontBrush = new SolidBrush(_panelEvaluationChart.ForeColor);
-            int chartYMiddle = Round(_panelEvaluationChart.Height / 2.0);
+            SolidBrush chartLightBrush = new SolidBrush(Color.White);
+            SolidBrush chartDarkBrush = new SolidBrush(Color.FromArgb(69, 66, 63));
 
             int peak;
-            double highestValue = _vm.PositionHistory.Max(c => c.Evaluation);
-            double lowestValue = _vm.PositionHistory.Min(c => c.Evaluation);
+            float chartYMiddle = _panelEvaluationChart.Height / 2.0F;
+
+            List<ChessPosition> positions = _vm.PositionHistory.ToList();
+
+            if(!_totalChartView && positions.Count > _shownOnNonTotal)
+            {
+                positions.RemoveRange(0, positions.Count - _shownOnNonTotal);
+            }
+
+            double highestValue = positions.Max(c => c.Evaluation);
+            double lowestValue = positions.Min(c => c.Evaluation);
 
             if (highestValue > Math.Abs(lowestValue))
             {
@@ -1034,9 +1103,9 @@ namespace BerldChess.View
             {
                 peak = 3;
             }
-            else if (peak > 10)
+            else if (peak > 8)
             {
-                peak = 10;
+                peak = 8;
             }
 
             int rowCount = peak * 2;
@@ -1047,12 +1116,12 @@ namespace BerldChess.View
 
             for (int i = 1; i < rowCount; i++)
             {
-                g.DrawLine(gridPen, 0, Round(yPart * i), _panelEvaluationChart.Width, Round(yPart * i));
+                g.DrawLine(gridPen, 0, (float)(yPart * i), _panelEvaluationChart.Width, (float)(yPart * i));
             }
 
             for (int i = 1; i < lineCount; i++)
             {
-                g.DrawLine(gridPen, Round(xPart * i), 0, Round(xPart * i), _panelEvaluationChart.Height);
+                g.DrawLine(gridPen, (float)(xPart * i), 0, (float)(xPart * i), _panelEvaluationChart.Height);
             }
 
             for (int i = 1; i <= lineCount; i++)
@@ -1062,14 +1131,19 @@ namespace BerldChess.View
                     continue;
                 }
 
-                int valueX = (int)((_vm.PositionHistory.Count - 1) / (double)lineCount * i);
+                int valueX = (int)((positions.Count - 1) / (double)lineCount * i);
+
+                if(!_totalChartView && _vm.PositionHistory.Count > _shownOnNonTotal)
+                {
+                    valueX += _vm.PositionHistory.Count - _shownOnNonTotal;
+                }
 
                 if (valueX > 2 || i == lineCount)
                 {
-                    string output = valueX.ToString();
-                    int offSet = (int)((g.MeasureString(output, font).Width) / lineCount * i);
+                    string text = valueX.ToString();
+                    float offSet = g.MeasureString(text, labelFont).Width / lineCount * i;
 
-                    g.DrawString(output, font, fontBrush, (_panelEvaluationChart.Width / lineCount * i) - offSet, _panelEvaluationChart.Height - font.Size * 2);
+                    g.DrawString(text, labelFont, fontBrush, ((float)_panelEvaluationChart.Width / lineCount * i) - offSet, _panelEvaluationChart.Height - labelFont.Size * 2);
                 }
             }
 
@@ -1086,48 +1160,72 @@ namespace BerldChess.View
                 }
 
                 int valueY = peak - i;
-                string output = valueY.ToString();
+                string text = valueY.ToString("+0;-0");
+                float offSet = g.MeasureString(text, labelFont).Height / 2F;
 
-                int offSet = Round(g.MeasureString(output, font).Height * 1.1 / 2);
-
-                g.DrawString(output, font, fontBrush, font.Size / 2, Round(_panelEvaluationChart.Height / (double)rowCount * i) - offSet);
+                g.DrawString(text, labelFont, fontBrush, labelFont.Size / 2, Round(_panelEvaluationChart.Height / (double)rowCount * i) - offSet);
             }
 
             g.DrawLine(middleLinePen, 0, chartYMiddle, _panelEvaluationChart.Width, chartYMiddle);
 
-            double upperBound = 10;
-            double lowerBound = -9.7;
-
             double yUnitLength = _panelEvaluationChart.Height / (double)rowCount;
-            double xUnitLength = (double)_panelEvaluationChart.Width / (_vm.PositionHistory.Count - 1);
+            double xUnitLength = (double)_panelEvaluationChart.Width / positions.Count;
 
             if (peak != 0)
             {
-                for (int i = 0; i < _vm.PositionHistory.Count - 1; i++)
+                for (int i = 0; i < positions.Count; i++)
                 {
-                    double startValue = _vm.PositionHistory[i].Evaluation;
-                    double endValue = _vm.PositionHistory[i + 1].Evaluation;
+                    double evaluation = positions[i].Evaluation;
 
-                    if (startValue > upperBound)
-                    {
-                        startValue = upperBound;
-                    }
-                    else if (startValue < lowerBound)
-                    {
-                        startValue = lowerBound;
-                    }
+                    float x = (float)(i * xUnitLength);
+                    float y;
 
-                    if (endValue > upperBound)
-                    {
-                        endValue = upperBound;
-                    }
-                    else if (endValue < lowerBound)
-                    {
-                        endValue = lowerBound;
-                    }
+                    float height = (float)Math.Abs((evaluation * yUnitLength));
+                    float width = (float)((i + 1) * xUnitLength - i * xUnitLength);
 
-                    g.DrawLine(chartLinePen, Round(i * xUnitLength), -Round(startValue * yUnitLength) + chartYMiddle, Round((i + 1) * xUnitLength), -Round(endValue * yUnitLength) + chartYMiddle);
+                    if (evaluation >= 0)
+                    {
+                        y = chartYMiddle - (float)(evaluation * yUnitLength);
+                        g.FillRectangle(chartLightBrush, x, y, width, height);
+                        g.DrawRectangle(chartBorderPen, x, y, width, height);
+                    }
+                    else
+                    {
+                        y = chartYMiddle;
+                        g.FillRectangle(chartDarkBrush, x, y, width, height);
+                        g.DrawRectangle(chartBorderPen, x, y, width, height);
+                    }
                 }
+            }
+        }
+
+        private void OnPanelEvaluationChartMouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (_vm.PositionHistory.Count > 0)
+                {
+                    double xUnitLength;
+                    int navIndex;
+
+                    if (!_totalChartView && _vm.PositionHistory.Count > _shownOnNonTotal)
+                    {
+                        xUnitLength = (double)_panelEvaluationChart.Width / _shownOnNonTotal;
+                        navIndex = (int)(e.X / xUnitLength) + (_vm.PositionHistory.Count - _shownOnNonTotal);
+                    }
+                    else
+                    {
+                        xUnitLength = (double)_panelEvaluationChart.Width / _vm.PositionHistory.Count;
+                        navIndex = (int)(e.X / xUnitLength);
+                    }
+
+                    Navigate(navIndex);
+                }
+            }
+            else if(e.Button == MouseButtons.Right)
+            {
+                _totalChartView = !_totalChartView;
+                _panelEvaluationChart.Invalidate();
             }
         }
 
@@ -1139,6 +1237,11 @@ namespace BerldChess.View
         private void OnDataGridViewMovesCellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             Navigate(e.RowIndex * 2 + e.ColumnIndex + 1);
+        }
+
+        private void OnTableLayoutPanelModulesResize(object sender, EventArgs e)
+        {
+            _tableLayoutPanelModules.Height = Round(_tableLayoutPanelModules.Width * 1.942196);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -1155,6 +1258,8 @@ namespace BerldChess.View
                 if (e.KeyCode == key)
                 {
                     menuItem.PerformClick();
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
                 }
             }
         }
@@ -1182,11 +1287,11 @@ namespace BerldChess.View
                     controls[i].ForeColor = Color.Black;
                 }
 
-                if(controls[i] is DataGridView)
+                if (controls[i] is DataGridView)
                 {
                     DataGridView grid = (DataGridView)controls[i];
 
-                    if(darkMode)
+                    if (darkMode)
                     {
                         grid.BorderStyle = BorderStyle.Fixed3D;
                         grid.BackgroundColor = Color.FromArgb(49, 46, 43);
@@ -1255,7 +1360,7 @@ namespace BerldChess.View
                     else
                     {
                         _chessPanel.PieceFontFamily = "";
-                        _chessPanel.PieceSizeFactor = 1.05;
+                        _chessPanel.PieceSizeFactor = _defaultSizeFactor;
                     }
 
                     _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
@@ -1264,7 +1369,7 @@ namespace BerldChess.View
                     _menuItemHideOutput.Checked = SerializedInfo.Instance.HideOutput;
                     _menuItemHideArrows.Checked = SerializedInfo.Instance.HideArrows;
 
-                    _splitContainerMain.Panel2Collapsed = _menuItemHideOutput.Checked;
+                    _splitContainerBoard.Panel2Collapsed = _menuItemHideOutput.Checked;
 
                     _chessPanel.DisplayGridBorders = SerializedInfo.Instance.DisplayGridBorder;
                     _menuItemFlipBoard.Checked = SerializedInfo.Instance.BoardFlipped;
@@ -1573,7 +1678,7 @@ namespace BerldChess.View
 
             int difference = reference - centiPawn;
 
-            double relativeDiff = difference / 70.0;
+            double relativeDiff = difference / 45.0;
 
             if (relativeDiff > 2)
             {
