@@ -163,6 +163,11 @@ namespace BerldChess.View
                         }
 
                         _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], (int)(_fieldSize * PieceSizeFactor), (int)(_fieldSize * PieceSizeFactor));
+
+                        if (i != 0 && i != 1 && i != 2 && i != 7 && i != 8 && i != 6)
+                        {
+                            _scaledPieceImages[i] = CropTransparentBorders(_scaledPieceImages[i]);
+                        }
                     }
                 }
 
@@ -335,7 +340,7 @@ namespace BerldChess.View
                 {
                     float arrowThickness = (float)((drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension));
 
-                    if(drawInfo[i].Length / _fieldSize > 1.45)
+                    if (drawInfo[i].Length / _fieldSize > 1.45)
                     {
                         arrowThickness -= 0.85F;
                     }
@@ -382,11 +387,8 @@ namespace BerldChess.View
                 absX = _movingPoint.X - (float)(_fieldSize / 2.0);
                 absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
 
-                if (PieceFontFamily != "")
-                {
-                    absX += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Width) / 2);
-                    absY += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Height) / 2);
-                }
+                absX += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Width) / 2);
+                absY += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Height) / 2);
 
                 g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())], absX, absY);
             }

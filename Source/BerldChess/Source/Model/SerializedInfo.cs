@@ -30,15 +30,15 @@ namespace BerldChess.Model
         #region Fields
 
         private bool _localMode;
-        private bool _hideOutput;
+        private bool _hideOutput = true;
         private bool _hideArrows;
         private bool _boardFlipped;
         private bool _displayGridBorder;
-        private bool _isMaximized;
+        private bool _isMaximized = true;
         private bool _cheatMode;
-        private bool _sound;
-        private int _engineTime;
-        private Rectangle _bounds;
+        private bool _sound = true;
+        private int _engineTime = 1000;
+        private Rectangle? _bounds = null;
         private int _multiPV = 250;
         private int _animTime = 300;
         private List<ChessFont> _chessFonts = new List<ChessFont>();
@@ -46,11 +46,19 @@ namespace BerldChess.Model
         private bool _autoCheck = false;
         private bool _darkMode = false;
         private int _clickDelay = 120;
-        private double _sizeFactor = 0.9;
+        private double _sizeFactor = 1;
 
         #endregion
 
         #region Properties
+
+        public ChessFont SelectedChessFont
+        {
+            get
+            {
+               return _chessFonts[_selectedFontIndex];
+            }
+        }
 
         public bool DarkMode
         {
@@ -325,7 +333,7 @@ namespace BerldChess.Model
             }
         }
 
-        public Rectangle Bounds
+        public Rectangle? Bounds
         {
             get
             {

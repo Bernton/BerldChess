@@ -1,4 +1,5 @@
 ﻿using BerldChess.Model;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,7 +18,7 @@ namespace BerldChess.View
 
         public PieceSelectionDialog(List<ChessFont> chessFonts, int selectedIndex)
         {
-            if(selectedIndex < 0)
+            if (selectedIndex < 0)
             {
                 selectedIndex = 0;
             }
@@ -117,7 +118,7 @@ namespace BerldChess.View
             {
                 _textBoxFontChars.Font = new Font(_comboBoxFont.Text, _textBoxFontChars.Font.Size);
 
-                if(_chessFonts[_listBoxConfigs.SelectedIndex].PieceCharacters == "")
+                if (_chessFonts[_listBoxConfigs.SelectedIndex].PieceCharacters == "")
                 {
                     _textBoxFontChars.Text = (string)_textBoxFontChars.Tag;
                 }
@@ -162,10 +163,22 @@ namespace BerldChess.View
             double factor;
             ChessFont newFont = new ChessFont();
 
-            if (_listBoxConfigs.Items.Contains(_textBoxName.Text))
+            string name = _textBoxName.Text;
+
+            while (_listBoxConfigs.Items.Contains(name))
             {
                 MessageBox.Show(this, "Can't have 2 font configurations with the same name.", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+
+                string input = Interaction.InputBox("Enter new name:", "BerldChess - Name");
+
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return;
+                }
+                else
+                {
+                    name = input;
+                }
             }
 
             if (double.TryParse(_textBoxSizeFactor.Text, out factor))

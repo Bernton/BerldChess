@@ -30,16 +30,17 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private double _defaultSizeFactor = 0.9775;
         private bool _isMoveTry = false;
         private bool _isAutoPlay = false;
         private bool _totalChartView = false;
-        private volatile bool _evaluationEnabled = true;
+        private volatile bool _plyListEvalutionEnabled = true;
         private volatile bool _updateAfterAnimation = false;
-        private int _pvOneReference;
+        private int _mainPvReference;
         private int _engineTime = 300;
         private int _animationTime = 300;
-        private int _shownOnNonTotal = 25;
+        private const int CentipawnTolerance = 85;
+        private const int ChartShownPlies = 25;
+        private const double DefaultSizeFactor = 0.82;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
         private InfoType[] _columnOrder;
         private Random _random = new Random();
@@ -65,37 +66,28 @@ namespace BerldChess.View
             SetDoubleBuffered(_panelEvaluationChart);
             SetDoubleBuffered(_dataGridViewMoves);
 
-            InitializeWindow();
             InitializeViewModel();
             InitializeChessBoard();
+            InitializeFormAndControls();
 
-            foreach (Control control in GetAll(this))
+            DeserializeInfo();
+            LoadInfo();
+
+            InitializeEvaluationGrid();
+            InitializeEngine();
+
+            if (_menuItemCheatMode.Checked)
             {
-                control.Tag = control.BackColor;
+                Recognizer.SearchBoard(SerializedInfo.Instance.EngineLightSquare, SerializedInfo.Instance.EngineDarkSquare);
             }
+        }
 
-            Tag = BackColor;
+        #endregion
 
-            LoadXml();
+        #region Initialization Methods
 
-            if (SerializedInfo.Instance.ChessFonts.Count == 0)
-            {
-                SerializedInfo.Instance.ChessFonts.Add(new ChessFont
-                {
-                    Name = "Default",
-                    FontFamily = "",
-                    SizeFactor = _defaultSizeFactor,
-                    IsUnicode = false,
-                    PieceCharacters = ""
-                });
-            }
-
-            _pieceDialog = new PieceSelectionDialog(SerializedInfo.Instance.ChessFonts, SerializedInfo.Instance.SelectedFontIndex);
-            _pieceDialog.FontSelected += OnDialogFontSelected;
-
-            _boardDialog = new BoardSettingDialog();
-            _boardDialog.BoardSettingAltered += OnBoardSettingAltered;
-
+        private void InitializeEvaluationGrid()
+        {
             _columnOrder = new InfoType[]
             {
                 InfoType.MultiPV,
@@ -107,35 +99,39 @@ namespace BerldChess.View
                 InfoType.PV
             };
 
-            ResetDataGridViewColumns(_columnOrder);
-            ResetDataGridViewRows(SerializedInfo.Instance.MultiPV);
-
-            _vm.Engine.Query($"setoption name MultiPV value {SerializedInfo.Instance.MultiPV}");
-            _vm.Engine.Query("stop");
-            _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
-
-            Recognizer.SearchBoard(SerializedInfo.Instance.EngineLightSquare, SerializedInfo.Instance.EngineDarkSquare);
+            ResetEvaluationGridColumns(_columnOrder);
+            ResetEvaluationGridRows(SerializedInfo.Instance.MultiPV);
         }
 
-        #endregion
+        private void InitializeEngine()
+        {
+            _vm.Engine.Query($"setoption name MultiPV value {SerializedInfo.Instance.MultiPV}");
+            _vm.Engine.Query("ucinewgame");
+            _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
+            _vm.Engine.Query("go infinite");
+        }
 
-        #region Initialization Methods
-
-        private void InitializeWindow()
+        private void InitializeFormAndControls()
         {
             Icon = Resources.PawnRush;
-            Text = string.Format("BerldChess Version {0}", Assembly.GetEntryAssembly().GetName().Version.ToString(3));
+            Text = string.Format("BerldChess Version {0}", Assembly.GetEntryAssembly().GetName().Version.ToString(2));
 
             _movePlayer.Load();
             _capturePlayer.Load();
             _castlingPlayer.Load();
             _illegalPlayer.Load();
+
+            Tag = BackColor;
+
+            foreach (Control control in GetAllChildControls(this))
+            {
+                control.Tag = control.BackColor;
+            }
         }
 
         private void InitializeViewModel()
         {
             _vm = new FormMainViewModel();
-            _vm.PositionHistory.Add(new ChessPosition(_vm.Game.GetFen()));
             _vm.Engine.EvaluationReceived += OnEvaluationReceived;
             _vm.Engine.EngineStopped += OnEngineStopped;
         }
@@ -160,60 +156,57 @@ namespace BerldChess.View
 
         private void OnEngineStopped()
         {
+            if (InvokeRequired)
+            {
+                Invoke((Action)OnEngineStopped);
+                return;
+            }
+
             EmptyEvaluation();
+
             _chessPanel.Arrows.Clear();
             _chessPanel.Invalidate();
 
-            _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
+            bool finishedPosition = false;
+            string evaluationText = null;
 
             if (_vm.Game.IsCheckmated(_vm.Game.WhoseTurn))
             {
-                Invoke((MethodInvoker)delegate
-                {
-                    _labelEvaluation.Text = "Checkmate";
-                    _labelEvaluation.ForeColor = _menuItemNew.ForeColor;
-                });
-
-                EmptyEvaluation();
+                evaluationText = "Checkmate";
+                finishedPosition = true;
             }
             else if (_vm.Game.IsStalemated(_vm.Game.WhoseTurn))
             {
-                Invoke((MethodInvoker)delegate
-                {
-                    _labelEvaluation.Text = "Stalemate";
-                    _labelEvaluation.ForeColor = _menuItemNew.ForeColor;
-                });
-
-                EmptyEvaluation();
+                evaluationText = "Stalemate";
+                finishedPosition = true;
             }
             else if (_vm.Game.IsDraw())
             {
-                if (IsHandleCreated)
-                {
-                    Invoke((MethodInvoker)delegate
-                    {
-                        _labelEvaluation.Text = "Draw";
-                        _labelEvaluation.ForeColor = _menuItemNew.ForeColor;
-                    });
+                evaluationText = "Draw";
+                finishedPosition = true;
+            }
 
-                    EmptyEvaluation();
-                }
+            if (finishedPosition)
+            {
+                _labelEvaluation.Text = evaluationText;
+                _labelEvaluation.ForeColor = _menuItemNew.ForeColor;
             }
             else
             {
+                _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
                 _vm.Engine.Query("go infinite");
-                _evaluationEnabled = true;
+                _plyListEvalutionEnabled = true;
             }
         }
 
         private void OnDialogFontSelected()
         {
-            ChessFont font = SerializedInfo.Instance.ChessFonts[SerializedInfo.Instance.SelectedFontIndex];
+            ChessFont currentFont = SerializedInfo.Instance.SelectedChessFont;
 
-            _chessPanel.IsUnicodeFont = font.IsUnicode;
-            _chessPanel.ChessFontChars = font.PieceCharacters;
-            _chessPanel.PieceSizeFactor = font.SizeFactor;
-            _chessPanel.PieceFontFamily = font.FontFamily;
+            _chessPanel.IsUnicodeFont = currentFont.IsUnicode;
+            _chessPanel.ChessFontChars = currentFont.PieceCharacters;
+            _chessPanel.PieceSizeFactor = currentFont.SizeFactor;
+            _chessPanel.PieceFontFamily = currentFont.FontFamily;
         }
 
         private void OnBoardSettingAltered()
@@ -221,358 +214,194 @@ namespace BerldChess.View
             _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
             _chessPanel.LightSquare = SerializedInfo.Instance.BoardLightSquare;
             _chessPanel.DisplayGridBorders = SerializedInfo.Instance.DisplayGridBorder;
-            SetDarkMode(this, SerializedInfo.Instance.DarkMode);
             _chessPanel.Invalidate();
+
+            SetDarkMode(this, SerializedInfo.Instance.DarkMode);
         }
 
         private void OnEvaluationReceived(Evaluation evaluation)
         {
-            if (!IsHandleCreated)
+            if (!IsHandleCreated || IsDisposed)
             {
                 return;
             }
 
             try
             {
-                int multiPv = int.Parse(evaluation[InfoType.MultiPV]);
-
-                Invoke((MethodInvoker)delegate
+                if (InvokeRequired)
                 {
-                    if (_columnOrder.Length != _dataGridViewEvaluation.Columns.Count)
-                    {
-                        ResetDataGridViewColumns(_columnOrder);
-                        ResetDataGridViewRows(SerializedInfo.Instance.MultiPV);
-                    }
-
-                    for (int i = 0; i < evaluation.Types.Length; i++)
-                    {
-                        int columnIndex = -1;
-
-                        for (int iOrder = 0; iOrder < _columnOrder.Length; iOrder++)
-                        {
-                            if (_columnOrder[iOrder] == evaluation.Types[i])
-                            {
-                                columnIndex = iOrder;
-                                break;
-                            }
-                        }
-
-                        if (columnIndex != -1)
-                        {
-                            if (_dataGridViewEvaluation.Rows.Count >= multiPv)
-                            {
-                                _dataGridViewEvaluation.Rows[multiPv - 1].Cells[columnIndex].Value = GetFormattedEngineInfo(evaluation.Types[i], evaluation[i]);
-                            }
-                        }
-                    }
-
-                    bool isMate = false;
-                    string pawnValue = evaluation[InfoType.Score];
-                    int mateNumber = -1;
-                    int centipawn = -20000;
-
-                    if (!int.TryParse(pawnValue.Substring(3), out centipawn))
-                    {
-                        if (!int.TryParse(pawnValue.Substring(3, pawnValue.IndexOf(' ', 3) - 3), out centipawn))
-                        {
-                            if (int.TryParse(pawnValue.Substring(5, pawnValue.IndexOf(' ', 5) - 5), out centipawn))
-                            {
-                                isMate = true;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("Can't convert score.");
-                            }
-                        }
-                    }
-
-                    if (isMate)
-                    {
-                        mateNumber = centipawn;
-
-                        if (centipawn > 0)
-                        {
-                            centipawn += 12000 + Math.Abs(multiPv - SerializedInfo.Instance.MultiPV) * 25;
-                        }
-                        else
-                        {
-                            centipawn -= 12000 - Math.Abs(multiPv - SerializedInfo.Instance.MultiPV) * 25;
-                        }
-                    }
-
-                    if (multiPv == 1)
-                    {
-                        double whiteEvaluation;
-
-                        if (isMate)
-                        {
-                            if (mateNumber > 0)
-                            {
-                                _labelEvaluation.Text = $"Mate in {mateNumber}";
-                                _labelEvaluation.ForeColor = Color.Green;
-
-                            }
-                            else
-                            {
-                                _labelEvaluation.Text = $"Mated in {Math.Abs(mateNumber)}";
-                                _labelEvaluation.ForeColor = Color.Red;
-                            }
-
-                            if (_vm.Game.WhoseTurn == ChessPlayer.Black && mateNumber > 0 || _vm.Game.WhoseTurn == ChessPlayer.White && mateNumber < 0)
-                            {
-                                whiteEvaluation = -120;
-                            }
-                            else
-                            {
-                                whiteEvaluation = 120;
-                            }
-                        }
-                        else
-                        {
-                            if (_vm.Game.WhoseTurn == ChessPlayer.Black)
-                            {
-                                whiteEvaluation = -(centipawn / 100.0);
-                            }
-                            else
-                            {
-                                whiteEvaluation = centipawn / 100.0;
-                            }
-
-                            if (whiteEvaluation == 0)
-                            {
-                                _labelEvaluation.Text = " 0.00";
-                            }
-                            else
-                            {
-                                _labelEvaluation.Text = whiteEvaluation.ToString("+0.00;-0.00");
-                            }
-
-                            _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
-                        }
-
-                        if (_evaluationEnabled && _vm.PositionHistory.Count > 0 && _vm.PositionHistory.Count > _vm.NavigationIndex)
-                        {
-                            int depth = int.Parse(evaluation[InfoType.Depth]);
-
-                            if (depth >= _vm.PositionHistory[_vm.NavigationIndex].EvaluationDepth)
-                            {
-                                _vm.PositionHistory[_vm.NavigationIndex].Evaluation = whiteEvaluation;
-                                _vm.PositionHistory[_vm.NavigationIndex].EvaluationDepth = depth;
-
-                                int cellIndex = _vm.NavigationIndex - 1;
-                                int rowIndex = cellIndex / 2;
-                                int columnIndex = cellIndex % 2;
-
-                                if (cellIndex >= 0 && _dataGridViewMoves.Rows.Count > rowIndex && _dataGridViewMoves.Rows[rowIndex].Cells.Count > columnIndex)
-                                {
-                                    string formatEvaluation;
-
-                                    if (isMate)
-                                    {
-                                        formatEvaluation = "#";
-                                    }
-                                    else if (whiteEvaluation == 0)
-                                    {
-                                        formatEvaluation = " 0.00";
-                                    }
-                                    else
-                                    {
-                                        formatEvaluation = whiteEvaluation.ToString("+0.00;-0.00");
-                                    }
-
-                                    string currentValue = (string)_dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value;
-                                    _dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value = $"{currentValue.Substring(0, currentValue.IndexOf('(') + 1)}{formatEvaluation} D{depth})";
-                                }
-                            }
-                        }
-                    }
-
-                    if (_menuItemHideArrows.Checked)
-                    {
-                        return;
-                    }
-
-                    if (multiPv == 1 || (!isMate && _pvOneReference - centipawn < 85) || _chessPanel.Arrows.Count < 3)
-                    {
-                        if (multiPv == 1)
-                        {
-                            _pvOneReference = centipawn;
-                        }
-
-                        if (_chessPanel.Arrows.Count < multiPv)
-                        {
-                            _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 0.9, GetReferenceColor(centipawn, _pvOneReference)));
-                        }
-                        else
-                        {
-                            _chessPanel.Arrows[multiPv - 1].Move = (evaluation[InfoType.PV]).Substring(0, 4);
-                            _chessPanel.Arrows[multiPv - 1].Color = GetReferenceColor(centipawn, _pvOneReference);
-                        }
-
-                        if (multiPv == 1)
-                        {
-                            _chessPanel.Arrows[multiPv - 1].Color = Color.DarkBlue;
-                        }
-                    }
-                    else
-                    {
-                        if (_chessPanel.Arrows.Count >= multiPv)
-                        {
-                            _chessPanel.Arrows.RemoveRange(multiPv, _chessPanel.Arrows.Count - multiPv);
-                        }
-                    }
-                });
+                    Invoke((Action)(() => { ProcessEvaluation(evaluation); }));
+                }
+                else
+                {
+                    ProcessEvaluation(evaluation);
+                }
             }
-            catch (ObjectDisposedException ex)
-            {
-                Debug.WriteLine(ex.ToString());
-            }
+            catch (ObjectDisposedException) { }
         }
 
         private void OnPieceMoved(object sender, FigureMovedEventArgs e)
         {
-            BoardPosition startPosition = new BoardPosition((ChessFile)e.Position.X, Invert(e.Position.Y - 1, 7));
-            BoardPosition endPosition = new BoardPosition((ChessFile)e.NewPosition.X, Invert(e.NewPosition.Y - 1, 7));
-            ChessPiece movingPiece = _vm.Game.GetPieceAt(startPosition);
-
-            char promotion = 'q';
-
-            if (_vm.Game.WhoseTurn != _computerPlayer)
-            {
-                if (movingPiece is Pawn && startPosition.Rank == (movingPiece.Owner == ChessPlayer.White ? 7 : 2) && endPosition.Rank == (movingPiece.Owner == ChessPlayer.White ? 8 : 1))
-                {
-                    PromotionDialog dialog = new PromotionDialog(movingPiece.Owner);
-                    dialog.ShowDialog();
-
-                    promotion = dialog.PromotionCharacter;
-                }
-            }
+            BoardPosition sourcePosition = new BoardPosition((ChessFile)e.Position.X, Invert(e.Position.Y - 1, 7));
+            BoardPosition destinationPosition = new BoardPosition((ChessFile)e.NewPosition.X, Invert(e.NewPosition.Y - 1, 7));
+            ChessPiece movingPiece = _vm.Game.GetPieceAt(sourcePosition);
 
             if (movingPiece == null)
             {
                 return;
             }
 
-            Move move = new Move(startPosition, endPosition, movingPiece.Owner, promotion);
-            MoveType moveType;
+            char promotion = CheckPromotion(sourcePosition, destinationPosition, movingPiece);
+            Move move = new Move(sourcePosition, destinationPosition, movingPiece.Owner, promotion);
 
-            if (_vm.Game.IsValidMove(move))
-            {
-                if (_isMoveTry)
-                {
-                    Recognizer.UpdateBoardImage();
-                    _isMoveTry = false;
-                }
-
-                ReadOnlyCollection<Move> legalMoves = _vm.Game.GetValidMoves(_vm.Game.WhoseTurn);
-
-                if (_menuItemLocalMode.Checked)
-                {
-                    _chessPanel.IsFlipped = !_chessPanel.IsFlipped;
-                    _chessPanel.Invalidate();
-                }
-
-                moveType = _vm.Game.ApplyMove(move, true);
-
-                if (_menuItemSound.Checked)
-                {
-                    if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].IsCapture)
-                    {
-                        _capturePlayer.Play();
-                    }
-                    else if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].Castling != CastlingType.None)
-                    {
-                        _castlingPlayer.Play();
-                    }
-                    else
-                    {
-                        _movePlayer.Play();
-                    }
-                }
-
-                _chessPanel.HighlighedSquares.Clear();
-                _chessPanel.HighlighedSquares.Add(e.Position);
-                _chessPanel.HighlighedSquares.Add(e.NewPosition);
-
-                if (_vm.NavigationIndex != _vm.PositionHistory.Count - 1)
-                {
-                    int countCache = _vm.PositionHistory.Count;
-
-                    _vm.PositionHistory.RemoveRange(_vm.NavigationIndex + 1, _vm.PositionHistory.Count - _vm.NavigationIndex - 1);
-
-                    for (int i = countCache - 2; i >= _vm.NavigationIndex; i--)
-                    {
-                        if (i % 2 == 0)
-                        {
-                            _dataGridViewMoves.Rows.RemoveAt(i / 2);
-                        }
-                        else
-                        {
-                            _dataGridViewMoves.Rows[i / 2].Cells[1].Value = "";
-                        }
-                    }
-                }
-
-                _evaluationEnabled = false;
-
-                _vm.PositionHistory.Add(new ChessPosition(_vm.Game.GetFen(), 0.0, move.ToString("")));
-
-                int count = _vm.PositionHistory.Count;
-                string displayEval = _labelEvaluation.Text;
-
-                if (displayEval.Substring(0, 4) == "Mate")
-                {
-                    displayEval = "#";
-                }
-
-                if (count % 2 == 0)
-                {
-                    DataGridViewRow row = new DataGridViewRow();
-                    DataGridViewTextBoxCell whiteMove = new DataGridViewTextBoxCell();
-                    DataGridViewTextBoxCell blackMove = new DataGridViewTextBoxCell();
-
-                    whiteMove.Value = (count / 2) + ". " + GetFormattedMove(move, moveType, legalMoves) + "\n(" + displayEval + ")";
-
-                    row.Cells.Add(whiteMove);
-                    row.Cells.Add(blackMove);
-
-                    row.Height = 40;
-                    _dataGridViewMoves.Rows.Add(row);
-                }
-                else
-                {
-                    _dataGridViewMoves.Rows[count / 2 - 1].Cells[1].Value = GetFormattedMove(move, moveType, legalMoves) + "\n(" + displayEval + ")";
-                }
-
-                _vm.NavigationIndex++;
-                SelectMovesCell(_vm.NavigationIndex);
-
-                if (_vm.Game.IsCheckmated(ChessPlayer.Black) || _vm.Game.IsCheckmated(ChessPlayer.White))
-                {
-                    _labelEvaluation.Text = "Checkmate";
-                    _vm.PositionHistory[_vm.PositionHistory.Count - 1].Evaluation = _vm.Game.IsCheckmated(ChessPlayer.White) ? -120 : 120;
-                }
-                else if (_vm.Game.IsStalemated(ChessPlayer.Black) || _vm.Game.IsStalemated(ChessPlayer.White))
-                {
-                    _labelEvaluation.Text = "Stalemate";
-                }
-                else if (_vm.Game.IsDraw())
-                {
-                    _labelEvaluation.Text = "Draw";
-                }
-
-                _timeSinceLastMove.Restart();
-
-                _vm.Engine.RequestStop();
-                _chessPanel.Invalidate();
-            }
-            else
+            if (!_vm.Game.IsValidMove(move))
             {
                 if (!_isMoveTry && _menuItemSound.Checked)
                 {
                     _illegalPlayer.Play();
                 }
+
+                return;
             }
+
+            if (_isMoveTry)
+            {
+                Recognizer.UpdateBoardImage();
+                _isMoveTry = false;
+            }
+
+            _plyListEvalutionEnabled = false;
+
+            ReadOnlyCollection<Move> validMoves = _vm.Game.GetValidMoves(_vm.Game.WhoseTurn);
+            MoveType moveType = _vm.Game.ApplyMove(move, true);
+
+            PlayMoveSound();
+
+            _chessPanel.HighlighedSquares.Clear();
+            _chessPanel.HighlighedSquares.Add(e.Position);
+            _chessPanel.HighlighedSquares.Add(e.NewPosition);
+
+            UpdatePlyList(move.ToString(""));
+            UpdateMoveGrid(validMoves, move, moveType);
+
+            if (_vm.Game.IsCheckmated(_vm.Game.WhoseTurn))
+            {
+                _labelEvaluation.Text = "Checkmate";
+                _vm.LatestPly.Evaluation = _vm.Game.IsCheckmated(ChessPlayer.White) ? -120 : 120;
+            }
+            else if (_vm.Game.IsStalemated(_vm.Game.WhoseTurn))
+            {
+                _labelEvaluation.Text = "Stalemate";
+            }
+            else if (_vm.Game.IsDraw())
+            {
+                _labelEvaluation.Text = "Draw";
+            }
+
+            _timeSinceLastMove.Restart();
+
+            if (_menuItemLocalMode.Checked)
+            {
+                _chessPanel.IsFlipped = !_chessPanel.IsFlipped;
+                _chessPanel.Invalidate();
+            }
+
+            _chessPanel.Invalidate();
+            _vm.Engine.RequestStop();
+        }
+
+        private void UpdatePlyList(string moveString)
+        {
+            if (_vm.NavigationIndex != _vm.PlyList.Count - 1)
+            {
+                _vm.PlyList.RemoveRange(_vm.NavigationIndex + 1, _vm.PlyList.Count - _vm.NavigationIndex - 1);
+            }
+
+            _vm.PlyList.Add(new ChessPly(_vm.Game.GetFen(), 0.0, moveString));
+            _vm.NavigationIndex++;
+        }
+
+        private void UpdateMoveGrid(ReadOnlyCollection<Move> validMoves, Move move, MoveType moveType)
+        {
+            int cellCount = _dataGridViewMoves.GetCellCount(DataGridViewElementStates.None);
+
+            for (int i = cellCount - 2; i >= _vm.NavigationIndex; i--)
+            {
+                if (i % 2 == 0)
+                {
+                    _dataGridViewMoves.Rows.RemoveAt(i / 2);
+                }
+                else
+                {
+                    _dataGridViewMoves.Rows[i / 2].Cells[1].Value = "";
+                }
+            }
+
+            int plyCount = _vm.PlyList.Count;
+            string formattedEvaluation = _labelEvaluation.Text;
+
+            if (formattedEvaluation.Substring(0, 4) == "Mate")
+            {
+                formattedEvaluation = "#";
+            }
+
+            if (plyCount % 2 == 0)
+            {
+                DataGridViewRow row = new DataGridViewRow();
+                DataGridViewTextBoxCell whiteMove = new DataGridViewTextBoxCell();
+                DataGridViewTextBoxCell blackMove = new DataGridViewTextBoxCell();
+
+                whiteMove.Value = (plyCount / 2) + ". " + GetFormattedMove(move, moveType, validMoves) + "\n(" + formattedEvaluation + ")";
+
+                row.Cells.Add(whiteMove);
+                row.Cells.Add(blackMove);
+
+                row.Height = 40;
+                _dataGridViewMoves.Rows.Add(row);
+            }
+            else
+            {
+                _dataGridViewMoves.Rows[plyCount / 2 - 1].Cells[1].Value = GetFormattedMove(move, moveType, validMoves) + "\n(" + formattedEvaluation + ")";
+            }
+
+            SelectMovesCell(_vm.NavigationIndex);
+        }
+
+        private void PlayMoveSound()
+        {
+            if (_menuItemSound.Checked)
+            {
+                if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].IsCapture)
+                {
+                    _capturePlayer.Play();
+                }
+                else if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].Castling != CastlingType.None)
+                {
+                    _castlingPlayer.Play();
+                }
+                else
+                {
+                    _movePlayer.Play();
+                }
+            }
+        }
+
+        private char CheckPromotion(BoardPosition source, BoardPosition destination, ChessPiece movingPiece)
+        {
+            if (_vm.Game.WhoseTurn != _computerPlayer)
+            {
+                if (movingPiece is Pawn &&
+                    source.Rank == (movingPiece.Owner == ChessPlayer.White ? 7 : 2) &&
+                    destination.Rank == (movingPiece.Owner == ChessPlayer.White ? 8 : 1))
+                {
+                    PromotionDialog dialog = new PromotionDialog(movingPiece.Owner);
+                    dialog.ShowDialog();
+
+                    return dialog.PromotionCharacter;
+                }
+            }
+
+            return 'q';
         }
 
         private void OnFormMainLoad(object sender, EventArgs e)
@@ -673,7 +502,7 @@ namespace BerldChess.View
 
         private void OnMenuItemLoadFenClick(object sender, EventArgs e)
         {
-            _evaluationEnabled = false;
+            _plyListEvalutionEnabled = false;
 
             string input = Interaction.InputBox("Enter Position FEN:", "BerldChess - FEN");
 
@@ -682,19 +511,11 @@ namespace BerldChess.View
                 return;
             }
 
-            _isAutoPlay = false;
-            _timeSinceLastMove.Reset();
-            _computerPlayer = ChessPlayer.None;
-            _timerEngine.Enabled = false;
-
-            Recognizer.UpdateBoardImage();
-
-            bool wasFinished = IsFinishedPosition();
+            ChessGame gameFromFen;
 
             try
             {
-                _vm.Game = new ChessGame(input);
-
+                gameFromFen = new ChessGame(input);
             }
             catch (Exception ex)
             {
@@ -704,36 +525,7 @@ namespace BerldChess.View
                 return;
             }
 
-            _chessPanel.Game = _vm.Game;
-            _vm.PositionHistory.Clear();
-
-            _vm.PositionHistory.Add(new ChessPosition(input));
-            _chessPanel.HighlighedSquares.Clear();
-            _vm.NavigationIndex = 0;
-
-            _evaluationEnabled = true;
-
-            if (_menuItemLocalMode.Checked)
-            {
-                _chessPanel.IsFlipped = !(_vm.Game.WhoseTurn == ChessPlayer.White);
-            }
-            else
-            {
-                _chessPanel.IsFlipped = _menuItemFlipBoard.Checked;
-            }
-
-
-            if (wasFinished)
-            {
-                OnEngineStopped();
-            }
-            else
-            {
-                _vm.Engine.RequestStop();
-            }
-
-            _chessPanel.Invalidate();
-
+            ResetGame(gameFromFen);
         }
 
         private void OnMenuItemBackClick(object sender, EventArgs e)
@@ -746,7 +538,7 @@ namespace BerldChess.View
 
         private void OnMenuItemForwardClick(object sender, EventArgs e)
         {
-            if (_vm.NavigationIndex != _vm.PositionHistory.Count - 1)
+            if (_vm.NavigationIndex != _vm.PlyList.Count - 1)
             {
                 Navigate(_vm.NavigationIndex + 1);
             }
@@ -759,12 +551,12 @@ namespace BerldChess.View
 
         private void OnMenuItemLatestClick(object sender, EventArgs e)
         {
-            Navigate(_vm.PositionHistory.Count - 1);
+            Navigate(_vm.PlyList.Count - 1);
         }
 
         private void OnFormMainClosing(object sender, FormClosingEventArgs e)
         {
-            SaveXml();
+            SerializeInfo();
             _vm.Engine.Dispose();
         }
 
@@ -809,48 +601,7 @@ namespace BerldChess.View
 
         private void OnMenuItemNewClick(object sender, EventArgs e)
         {
-            _evaluationEnabled = false;
-            _isAutoPlay = false;
-            _timeSinceLastMove.Reset();
-            _computerPlayer = ChessPlayer.None;
-            _timerEngine.Enabled = false;
-
-            Recognizer.UpdateBoardImage();
-
-            bool wasFinished = IsFinishedPosition();
-
-            _vm.Game = new ChessGame();
-
-            _chessPanel.Game = _vm.Game;
-            _vm.PositionHistory.Clear();
-            _dataGridViewMoves.Rows.Clear();
-            _chessPanel.HighlighedSquares.Clear();
-            _vm.PositionHistory.Add(new ChessPosition(_vm.Game.GetFen()));
-            _vm.NavigationIndex = 0;
-
-            _evaluationEnabled = true;
-
-            _vm.Engine.Query("ucinewgame");
-
-            if (_menuItemLocalMode.Checked)
-            {
-                _chessPanel.IsFlipped = !(_vm.Game.WhoseTurn == ChessPlayer.White);
-            }
-            else
-            {
-                _chessPanel.IsFlipped = _menuItemFlipBoard.Checked;
-            }
-
-            if (wasFinished)
-            {
-                OnEngineStopped();
-            }
-            else
-            {
-                _vm.Engine.RequestStop();
-            }
-
-            _chessPanel.Invalidate();
+            ResetGame(new ChessGame());
         }
 
         private void OnMenuItemComputerMoveClick(object sender, EventArgs e)
@@ -957,7 +708,7 @@ namespace BerldChess.View
                     _vm.Engine.Query($"position fen {_vm.Game.GetFen()}");
 
                     _chessPanel.Invalidate();
-                    ResetDataGridViewRows(multiPV);
+                    ResetEvaluationGridRows(multiPV);
                 }
             }
         }
@@ -974,19 +725,19 @@ namespace BerldChess.View
                     depth = 60;
                 }
 
-                if (_vm.PositionHistory.Count > 0)
+                if (_vm.PlyList.Count > 0)
                 {
                     CancellationTokenSource source = new CancellationTokenSource();
                     Task anaylsisTask = new Task(() =>
                     {
-                        for (int i = _vm.PositionHistory.Count - 1; i >= 0; i--)
+                        for (int i = _vm.PlyList.Count - 1; i >= 0; i--)
                         {
                             Invoke((MethodInvoker)delegate
                             {
                                 Navigate(i);
                             });
 
-                            while (_vm.PositionHistory[i].EvaluationDepth < depth)
+                            while (_vm.PlyList[i].EvaluationDepth < depth)
                             {
                                 Thread.Sleep(100);
 
@@ -1035,7 +786,7 @@ namespace BerldChess.View
 
         private void OnMenuItemCopyFenClick(object sender, EventArgs e)
         {
-            Clipboard.SetText(_vm.PositionHistory[_vm.NavigationIndex].FEN);
+            Clipboard.SetText(_vm.CurrentPly.FEN);
         }
 
         private void OnMenuItemClickDelayClick(object sender, EventArgs e)
@@ -1059,7 +810,7 @@ namespace BerldChess.View
         private void OnPanelEvaluationChartPaint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.HighSpeed;
+            g.SmoothingMode = SmoothingMode.Default;
             g.TextRenderingHint = TextRenderingHint.AntiAlias;
 
             Pen gridPen = new Pen(_panelEvaluationChart.ForeColor.OperateAll(200, !SerializedInfo.Instance.DarkMode), 1);
@@ -1075,11 +826,11 @@ namespace BerldChess.View
             int peak;
             float chartYMiddle = _panelEvaluationChart.Height / 2.0F;
 
-            List<ChessPosition> positions = _vm.PositionHistory.ToList();
+            List<ChessPly> positions = _vm.PlyList.ToList();
 
-            if(!_totalChartView && positions.Count > _shownOnNonTotal)
+            if (!_totalChartView && positions.Count > ChartShownPlies)
             {
-                positions.RemoveRange(0, positions.Count - _shownOnNonTotal);
+                positions.RemoveRange(0, positions.Count - ChartShownPlies);
             }
 
             double highestValue = positions.Max(c => c.Evaluation);
@@ -1124,6 +875,8 @@ namespace BerldChess.View
                 g.DrawLine(gridPen, (float)(xPart * i), 0, (float)(xPart * i), _panelEvaluationChart.Height);
             }
 
+            float lineWidth = (float)_panelEvaluationChart.Width / lineCount;
+
             for (int i = 1; i <= lineCount; i++)
             {
                 if (i % 3 != 0)
@@ -1133,9 +886,9 @@ namespace BerldChess.View
 
                 int valueX = (int)((positions.Count - 1) / (double)lineCount * i);
 
-                if(!_totalChartView && _vm.PositionHistory.Count > _shownOnNonTotal)
+                if (!_totalChartView && _vm.PlyList.Count > ChartShownPlies)
                 {
-                    valueX += _vm.PositionHistory.Count - _shownOnNonTotal;
+                    valueX += _vm.PlyList.Count - ChartShownPlies;
                 }
 
                 if (valueX > 2 || i == lineCount)
@@ -1143,7 +896,12 @@ namespace BerldChess.View
                     string text = valueX.ToString();
                     float offSet = g.MeasureString(text, labelFont).Width / lineCount * i;
 
-                    g.DrawString(text, labelFont, fontBrush, ((float)_panelEvaluationChart.Width / lineCount * i) - offSet, _panelEvaluationChart.Height - labelFont.Size * 2);
+                    if (i == lineCount)
+                    {
+                        offSet += lineWidth * 0.15F;
+                    }
+
+                    g.DrawString(text, labelFont, fontBrush, lineWidth * i - offSet, _panelEvaluationChart.Height - labelFont.Size * 2.25F);
                 }
             }
 
@@ -1169,7 +927,7 @@ namespace BerldChess.View
             g.DrawLine(middleLinePen, 0, chartYMiddle, _panelEvaluationChart.Width, chartYMiddle);
 
             double yUnitLength = _panelEvaluationChart.Height / (double)rowCount;
-            double xUnitLength = (double)_panelEvaluationChart.Width / positions.Count;
+            double xUnitLength = (double)(_panelEvaluationChart.Width - 3) / positions.Count;
 
             if (peak != 0)
             {
@@ -1203,26 +961,26 @@ namespace BerldChess.View
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (_vm.PositionHistory.Count > 0)
+                if (_vm.PlyList.Count > 0)
                 {
                     double xUnitLength;
                     int navIndex;
 
-                    if (!_totalChartView && _vm.PositionHistory.Count > _shownOnNonTotal)
+                    if (!_totalChartView && _vm.PlyList.Count > ChartShownPlies)
                     {
-                        xUnitLength = (double)_panelEvaluationChart.Width / _shownOnNonTotal;
-                        navIndex = (int)(e.X / xUnitLength) + (_vm.PositionHistory.Count - _shownOnNonTotal);
+                        xUnitLength = (double)_panelEvaluationChart.Width / ChartShownPlies;
+                        navIndex = (int)(e.X / xUnitLength) + (_vm.PlyList.Count - ChartShownPlies);
                     }
                     else
                     {
-                        xUnitLength = (double)_panelEvaluationChart.Width / _vm.PositionHistory.Count;
+                        xUnitLength = (double)_panelEvaluationChart.Width / _vm.PlyList.Count;
                         navIndex = (int)(e.X / xUnitLength);
                     }
 
                     Navigate(navIndex);
                 }
             }
-            else if(e.Button == MouseButtons.Right)
+            else if (e.Button == MouseButtons.Right)
             {
                 _totalChartView = !_totalChartView;
                 _panelEvaluationChart.Invalidate();
@@ -1236,7 +994,16 @@ namespace BerldChess.View
 
         private void OnDataGridViewMovesCellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            Navigate(e.RowIndex * 2 + e.ColumnIndex + 1);
+            int navigationIndex = e.RowIndex * 2 + e.ColumnIndex + 1;
+
+            if (navigationIndex >= _vm.PlyList.Count)
+            {
+                Navigate(_vm.PlyList.Count - 1, false);
+            }
+            else
+            {
+                Navigate(e.RowIndex * 2 + e.ColumnIndex + 1);
+            }
         }
 
         private void OnTableLayoutPanelModulesResize(object sender, EventArgs e)
@@ -1268,9 +1035,259 @@ namespace BerldChess.View
 
         #region Other Methods
 
+        private void ProcessEvaluation(Evaluation evaluation)
+        {
+            int multiPV = int.Parse(evaluation[InfoType.MultiPV]);
+            bool isMainPV = multiPV == 1;
+
+            FillEvaluationGrid(multiPV, evaluation);
+
+            bool isMate;
+            int centipawn;
+            int mateValue = -1;
+            string pawnValue = evaluation[InfoType.Score];
+
+            ProcessPawnValue(pawnValue, out centipawn, out isMate);
+
+            if (isMate)
+            {
+                mateValue = centipawn;
+                int mateCentipawn = 12000 + Math.Abs(multiPV - SerializedInfo.Instance.MultiPV) * 20;
+
+                if (mateValue > 0)
+                {
+                    centipawn = mateCentipawn;
+                }
+                else
+                {
+                    centipawn = -mateCentipawn;
+                }
+            }
+
+            if (isMainPV)
+            {
+                double whitePawnEvaluation;
+
+                if (isMate)
+                {
+                    if (mateValue > 0)
+                    {
+                        _labelEvaluation.Text = $"Mate in {mateValue}";
+                        _labelEvaluation.ForeColor = Color.Green;
+                    }
+                    else
+                    {
+                        _labelEvaluation.Text = $"Mated in {Math.Abs(mateValue)}";
+                        _labelEvaluation.ForeColor = Color.Red;
+                    }
+
+                    if (_vm.Game.WhoseTurn == ChessPlayer.Black && mateValue > 0 || _vm.Game.WhoseTurn == ChessPlayer.White && mateValue < 0)
+                    {
+                        whitePawnEvaluation = -120;
+                    }
+                    else
+                    {
+                        whitePawnEvaluation = 120;
+                    }
+                }
+                else
+                {
+                    if (_vm.Game.WhoseTurn == ChessPlayer.Black)
+                    {
+                        whitePawnEvaluation = -(centipawn / 100.0);
+                    }
+                    else
+                    {
+                        whitePawnEvaluation = centipawn / 100.0;
+                    }
+
+                    if (whitePawnEvaluation == 0)
+                    {
+                        _labelEvaluation.Text = " 0.00";
+                    }
+                    else
+                    {
+                        _labelEvaluation.Text = whitePawnEvaluation.ToString("+0.00;-0.00");
+                    }
+
+                    _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
+                }
+
+                if (_plyListEvalutionEnabled && _vm.PlyList.Count > 0 && _vm.PlyList.Count > _vm.NavigationIndex)
+                {
+                    int depth = int.Parse(evaluation[InfoType.Depth]);
+
+                    if (depth >= _vm.CurrentPly.EvaluationDepth)
+                    {
+                        _vm.CurrentPly.Evaluation = whitePawnEvaluation;
+                        _vm.CurrentPly.EvaluationDepth = depth;
+
+                        UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                    }
+                }
+            }
+
+            if (_menuItemHideArrows.Checked)
+            {
+                return;
+            }
+
+            if (isMainPV || (!isMate && _mainPvReference - centipawn < CentipawnTolerance) || _chessPanel.Arrows.Count < 3)
+            {
+                if (isMainPV)
+                {
+                    _mainPvReference = centipawn;
+                }
+
+                if (_chessPanel.Arrows.Count < multiPV)
+                {
+                    _chessPanel.Arrows.Add(new Arrow((evaluation[InfoType.PV]).Substring(0, 4), 0.9, GetReferenceColor(centipawn, _mainPvReference)));
+                }
+                else
+                {
+                    _chessPanel.Arrows[multiPV - 1].Move = (evaluation[InfoType.PV]).Substring(0, 4);
+                    _chessPanel.Arrows[multiPV - 1].Color = GetReferenceColor(centipawn, _mainPvReference);
+                }
+
+                if (isMainPV)
+                {
+                    _chessPanel.Arrows[multiPV - 1].Color = Color.DarkBlue;
+                }
+            }
+            else
+            {
+                if (_chessPanel.Arrows.Count >= multiPV)
+                {
+                    _chessPanel.Arrows.RemoveRange(multiPV, _chessPanel.Arrows.Count - multiPV);
+                }
+            }
+        }
+
+        private void UpdateMoveGridCell(bool isMate, double whitePawnEvaluation, int depth)
+        {
+            int cellIndex = _vm.NavigationIndex - 1;
+            int rowIndex = cellIndex / 2;
+            int columnIndex = cellIndex % 2;
+
+            if (cellIndex >= 0 && _dataGridViewMoves.Rows.Count > rowIndex && _dataGridViewMoves.Rows[rowIndex].Cells.Count > columnIndex)
+            {
+                string formatEvaluation;
+
+                if (isMate)
+                {
+                    formatEvaluation = "#";
+                }
+                else if (whitePawnEvaluation == 0)
+                {
+                    formatEvaluation = " 0.00";
+                }
+                else
+                {
+                    formatEvaluation = whitePawnEvaluation.ToString("+0.00;-0.00");
+                }
+
+                string currentValue = (string)_dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value;
+                _dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value = $"{currentValue.Substring(0, currentValue.IndexOf('(') + 1)}{formatEvaluation} D{depth})";
+            }
+        }
+
+        private void ProcessPawnValue(string pawnValue, out int centipawn, out bool isMate)
+        {
+            isMate = false;
+
+            if (!int.TryParse(pawnValue.Substring(3), out centipawn))
+            {
+                if (!int.TryParse(pawnValue.Substring(3, pawnValue.IndexOf(' ', 3) - 3), out centipawn))
+                {
+                    if (int.TryParse(pawnValue.Substring(5, pawnValue.IndexOf(' ', 5) - 5), out centipawn))
+                    {
+                        isMate = true;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Invalid pawn value format.");
+                    }
+                }
+            }
+        }
+
+        private void FillEvaluationGrid(int multiPV, Evaluation evaluation)
+        {
+            for (int iType = 0; iType < evaluation.Types.Length; iType++)
+            {
+                int columnIndex = -1;
+
+                for (int iOrder = 0; iOrder < _columnOrder.Length; iOrder++)
+                {
+                    if (_columnOrder[iOrder] == evaluation.Types[iType])
+                    {
+                        columnIndex = iOrder;
+                        break;
+                    }
+                }
+
+                if (columnIndex != -1)
+                {
+                    if (_dataGridViewEvaluation.Rows.Count >= multiPV)
+                    {
+                        _dataGridViewEvaluation.Rows[multiPV - 1].Cells[columnIndex].Value = GetFormattedEngineInfo(evaluation.Types[iType], evaluation[iType]);
+                    }
+                }
+            }
+        }
+
+        private void ResetGame(ChessGame newGame)
+        {
+            bool wasFinished = IsFinishedPosition();
+
+            _plyListEvalutionEnabled = false;
+            _isAutoPlay = false;
+            _timerEngine.Enabled = false;
+
+            _timeSinceLastMove.Reset();
+            _computerPlayer = ChessPlayer.None;
+
+            if (_menuItemCheatMode.Checked)
+            {
+                Recognizer.UpdateBoardImage();
+            }
+
+            _vm.Game = newGame;
+            _vm.PlyList.Clear();
+            _vm.PlyList.Add(new ChessPly(_vm.Game.GetFen()));
+            _vm.NavigationIndex = 0;
+
+            _chessPanel.Game = _vm.Game;
+            _chessPanel.HighlighedSquares.Clear();
+
+            _dataGridViewMoves.Rows.Clear();
+
+            _vm.Engine.Query("ucinewgame");
+
+            if (wasFinished)
+            {
+                OnEngineStopped();
+            }
+            else
+            {
+                _vm.Engine.RequestStop();
+            }
+
+            if (_menuItemLocalMode.Checked)
+            {
+                _chessPanel.IsFlipped = !(_vm.Game.WhoseTurn == ChessPlayer.White);
+            }
+            else
+            {
+                _chessPanel.IsFlipped = _menuItemFlipBoard.Checked;
+            }
+
+            _chessPanel.Invalidate();
+        }
+
         private void SetDarkMode(Control control, bool darkMode)
         {
-            List<Control> controls = GetAll(control).ToList();
+            List<Control> controls = GetAllChildControls(control).ToList();
             controls.Add(this);
             List<ToolStripMenuItem> menuItems = GetMenuItems(_menuStripMain).ToList();
 
@@ -1327,14 +1344,14 @@ namespace BerldChess.View
             }
         }
 
-        public IEnumerable<Control> GetAll(Control control)
+        public IEnumerable<Control> GetAllChildControls(Control control)
         {
             var controls = control.Controls.Cast<Control>();
 
-            return controls.SelectMany(ctrl => GetAll(ctrl)).Concat(controls);
+            return controls.SelectMany(ctrl => GetAllChildControls(ctrl)).Concat(controls);
         }
 
-        private void LoadXml()
+        private void DeserializeInfo()
         {
             try
             {
@@ -1345,42 +1362,6 @@ namespace BerldChess.View
 
                     SerializedInfo.Instance = (SerializedInfo)serializer.Deserialize(fileStream);
                     fileStream.Dispose();
-
-                    Bounds = SerializedInfo.Instance.Bounds;
-
-                    _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
-
-                    if (SerializedInfo.Instance.ChessFonts.Count > 0 &&
-                        SerializedInfo.Instance.SelectedFontIndex > 0 &&
-                        SerializedInfo.Instance.SelectedFontIndex <
-                        SerializedInfo.Instance.ChessFonts.Count)
-                    {
-                        OnDialogFontSelected();
-                    }
-                    else
-                    {
-                        _chessPanel.PieceFontFamily = "";
-                        _chessPanel.PieceSizeFactor = _defaultSizeFactor;
-                    }
-
-                    _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
-                    _chessPanel.LightSquare = SerializedInfo.Instance.BoardLightSquare;
-
-                    _menuItemHideOutput.Checked = SerializedInfo.Instance.HideOutput;
-                    _menuItemHideArrows.Checked = SerializedInfo.Instance.HideArrows;
-
-                    _splitContainerBoard.Panel2Collapsed = _menuItemHideOutput.Checked;
-
-                    _chessPanel.DisplayGridBorders = SerializedInfo.Instance.DisplayGridBorder;
-                    _menuItemFlipBoard.Checked = SerializedInfo.Instance.BoardFlipped;
-                    _menuItemLocalMode.Checked = SerializedInfo.Instance.LocalMode;
-                    _menuItemCheatMode.Checked = SerializedInfo.Instance.CheatMode;
-                    _menuItemCheckAuto.Checked = SerializedInfo.Instance.AutoCheck;
-                    _engineTime = SerializedInfo.Instance.EngineTime;
-                    _menuItemSound.Checked = SerializedInfo.Instance.Sound;
-                    _animationTime = SerializedInfo.Instance.AnimationTime;
-
-                    SetDarkMode(this, SerializedInfo.Instance.DarkMode);
                 }
             }
             catch (Exception ex)
@@ -1388,11 +1369,71 @@ namespace BerldChess.View
                 File.Delete(FormMainViewModel.ConfigurationFileName);
                 Debug.WriteLine(ex.ToString());
             }
+        }
+
+        private void LoadInfo()
+        {
+            if (SerializedInfo.Instance.Bounds != null)
+            {
+                Bounds = (Rectangle)SerializedInfo.Instance.Bounds;
+            }
+
+            _chessPanel.PieceSizeFactor = SerializedInfo.Instance.PieceSizeFactor;
+
+            if (SerializedInfo.Instance.ChessFonts.Count > 0 &&
+                SerializedInfo.Instance.SelectedFontIndex > 0 &&
+                SerializedInfo.Instance.SelectedFontIndex <
+                SerializedInfo.Instance.ChessFonts.Count)
+            {
+                OnDialogFontSelected();
+            }
+            else
+            {
+                _chessPanel.PieceFontFamily = "";
+                _chessPanel.PieceSizeFactor = DefaultSizeFactor;
+            }
+
+            _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
+            _chessPanel.LightSquare = SerializedInfo.Instance.BoardLightSquare;
+
+            _menuItemHideOutput.Checked = SerializedInfo.Instance.HideOutput;
+            _menuItemHideArrows.Checked = SerializedInfo.Instance.HideArrows;
+
+            _splitContainerBoard.Panel2Collapsed = _menuItemHideOutput.Checked;
+
+            _chessPanel.DisplayGridBorders = SerializedInfo.Instance.DisplayGridBorder;
+            _menuItemFlipBoard.Checked = SerializedInfo.Instance.BoardFlipped;
+            _menuItemLocalMode.Checked = SerializedInfo.Instance.LocalMode;
+            _menuItemCheatMode.Checked = SerializedInfo.Instance.CheatMode;
+            _menuItemCheckAuto.Checked = SerializedInfo.Instance.AutoCheck;
+            _engineTime = SerializedInfo.Instance.EngineTime;
+            _menuItemSound.Checked = SerializedInfo.Instance.Sound;
+            _animationTime = SerializedInfo.Instance.AnimationTime;
+
+            SetDarkMode(this, SerializedInfo.Instance.DarkMode);
+
+            if (SerializedInfo.Instance.ChessFonts.Count == 0)
+            {
+                SerializedInfo.Instance.ChessFonts.Add(new ChessFont
+                {
+                    Name = "Default",
+                    FontFamily = "",
+                    SizeFactor = DefaultSizeFactor,
+                    IsUnicode = false,
+                    PieceCharacters = ""
+                });
+            }
+
+            _pieceDialog = new PieceSelectionDialog(SerializedInfo.Instance.ChessFonts, SerializedInfo.Instance.SelectedFontIndex);
+            _pieceDialog.FontSelected += OnDialogFontSelected;
+
+            _boardDialog = new BoardSettingDialog();
+            _boardDialog.BoardSettingAltered += OnBoardSettingAltered;
 
             _chessPanel.Invalidate();
         }
 
-        private void SaveXml()
+        private void SerializeInfo()
         {
             try
             {
@@ -1436,7 +1477,7 @@ namespace BerldChess.View
             }
         }
 
-        private void ResetDataGridViewRows(int newRowCount)
+        private void ResetEvaluationGridRows(int newRowCount)
         {
             _dataGridViewEvaluation.Rows.Clear();
 
@@ -1456,7 +1497,7 @@ namespace BerldChess.View
             }
         }
 
-        private void ResetDataGridViewColumns(InfoType[] columns)
+        private void ResetEvaluationGridColumns(InfoType[] columns)
         {
             _dataGridViewEvaluation.Rows.Clear();
             _dataGridViewEvaluation.Columns.Clear();
@@ -1554,51 +1595,54 @@ namespace BerldChess.View
             return formatMove;
         }
 
-        private void Navigate(int navIndex)
+        private void Navigate(int navigation, bool validate = true)
         {
-            if (navIndex != _vm.NavigationIndex && navIndex < _vm.PositionHistory.Count)
+            if (validate)
             {
-                SelectMovesCell(navIndex);
-
-                _isAutoPlay = false;
-                _timeSinceLastMove.Reset();
-                _computerPlayer = ChessPlayer.None;
-                _timerEngine.Enabled = false;
-
-                bool wasFinished = IsFinishedPosition();
-
-                _chessPanel.HighlighedSquares.Clear();
-                _vm.Game = new ChessGame(_vm.PositionHistory[navIndex].FEN);
-                _chessPanel.Game = _vm.Game;
-
-                string previousMove = _vm.PositionHistory[navIndex].Move;
-
-                if (previousMove != null)
+                if (navigation == _vm.NavigationIndex || navigation >= _vm.PlyList.Count)
                 {
-                    Point[] squareLocations = _chessPanel.GetRelPositionsFromMoveString(previousMove);
-
-                    _chessPanel.HighlighedSquares.AddRange(squareLocations);
+                    return;
                 }
+            }
 
+            bool wasFinished = IsFinishedPosition();
+            _plyListEvalutionEnabled = false;
+            _isAutoPlay = false;
+            _timerEngine.Enabled = false;
 
-                _evaluationEnabled = false;
+            _timeSinceLastMove.Reset();
+            _computerPlayer = ChessPlayer.None;
 
-                _vm.NavigationIndex = navIndex;
+            _vm.NavigationIndex = navigation;
 
-                if (_menuItemLocalMode.Checked)
-                {
-                    _chessPanel.IsFlipped = _vm.NavigationIndex % 2 != 0;
-                    _chessPanel.Invalidate();
-                }
+            _vm.Game = new ChessGame(_vm.CurrentPly.FEN);
 
-                if (wasFinished)
-                {
-                    OnEngineStopped();
-                }
-                else
-                {
-                    _vm.Engine.RequestStop();
-                }
+            _chessPanel.Game = _vm.Game;
+            _chessPanel.HighlighedSquares.Clear();
+
+            string currentMoveString = _vm.CurrentPly.Move;
+
+            if (!string.IsNullOrEmpty(currentMoveString))
+            {
+                Point[] squareLocations = _chessPanel.GetRelPositionsFromMoveString(currentMoveString);
+                _chessPanel.HighlighedSquares.AddRange(squareLocations);
+            }
+
+            SelectMovesCell(navigation);
+
+            if (_menuItemLocalMode.Checked)
+            {
+                _chessPanel.IsFlipped = _vm.NavigationIndex % 2 == 1;
+                _chessPanel.Invalidate();
+            }
+
+            if (wasFinished)
+            {
+                OnEngineStopped();
+            }
+            else
+            {
+                _vm.Engine.RequestStop();
             }
         }
 

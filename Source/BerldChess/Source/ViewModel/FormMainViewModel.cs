@@ -20,7 +20,37 @@ namespace BerldChess.ViewModel
         public int NavigationIndex { get; set; }
         public Engine Engine { get; set; }
         public ChessGame Game { get; set; }
-        public List<ChessPosition> PositionHistory { get; set; }
+        public List<ChessPly> PlyList { get; set; }
+
+        public ChessPly LatestPly
+        {
+            get
+            {
+                if(PlyList.Count > 0)
+                {
+                    return PlyList[PlyList.Count - 1];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public ChessPly CurrentPly
+        {
+            get
+            {
+                if(PlyList.Count > 0)
+                {
+                    return PlyList[NavigationIndex];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         #endregion
 
@@ -29,7 +59,7 @@ namespace BerldChess.ViewModel
         public FormMainViewModel()
         {
             NavigationIndex = 0;
-            PositionHistory = new List<ChessPosition>();
+            PlyList = new List<ChessPly>();
             Engine = new Engine("engine.exe");
 
             string[] engineArgs = null;
@@ -44,9 +74,8 @@ namespace BerldChess.ViewModel
                 }
             }
 
-            Engine.Query("ucinewgame");
-            Engine.Query("go infinite");
             Game = new ChessGame();
+            PlyList.Add(new ChessPly(Game.GetFen()));
         }
 
         #endregion
