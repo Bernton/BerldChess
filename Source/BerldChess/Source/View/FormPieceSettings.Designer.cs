@@ -1,6 +1,6 @@
 ﻿namespace BerldChess.View
 {
-    partial class PieceSelectionDialog
+    partial class FormPieceSettings
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PieceSelectionDialog));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPieceSettings));
             this._checkBoxUnicodeFont = new System.Windows.Forms.CheckBox();
             this._comboBoxFont = new System.Windows.Forms.ComboBox();
             this._buttonApply = new System.Windows.Forms.Button();
@@ -38,18 +38,22 @@
             this._labelSize = new System.Windows.Forms.Label();
             this._buttonRemove = new System.Windows.Forms.Button();
             this._labelConfigs = new System.Windows.Forms.Label();
-            this._listBoxConfigs = new System.Windows.Forms.ListBox();
+            this._listBoxSettings = new System.Windows.Forms.ListBox();
             this._textBoxName = new System.Windows.Forms.TextBox();
             this._labelName = new System.Windows.Forms.Label();
             this._buttonAddNew = new System.Windows.Forms.Button();
             this.labelFontFamily = new System.Windows.Forms.Label();
+            this._panelSettings = new System.Windows.Forms.Panel();
+            this._panelFontSettings = new System.Windows.Forms.Panel();
+            this._panelSettings.SuspendLayout();
+            this._panelFontSettings.SuspendLayout();
             this.SuspendLayout();
             // 
             // _checkBoxUnicodeFont
             // 
             this._checkBoxUnicodeFont.AutoSize = true;
             this._checkBoxUnicodeFont.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._checkBoxUnicodeFont.Location = new System.Drawing.Point(271, 181);
+            this._checkBoxUnicodeFont.Location = new System.Drawing.Point(8, 70);
             this._checkBoxUnicodeFont.Name = "_checkBoxUnicodeFont";
             this._checkBoxUnicodeFont.Size = new System.Drawing.Size(130, 24);
             this._checkBoxUnicodeFont.TabIndex = 0;
@@ -61,7 +65,7 @@
             // 
             this._comboBoxFont.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._comboBoxFont.FormattingEnabled = true;
-            this._comboBoxFont.Location = new System.Drawing.Point(271, 147);
+            this._comboBoxFont.Location = new System.Drawing.Point(8, 36);
             this._comboBoxFont.Name = "_comboBoxFont";
             this._comboBoxFont.Size = new System.Drawing.Size(306, 28);
             this._comboBoxFont.TabIndex = 3;
@@ -70,7 +74,7 @@
             // _buttonApply
             // 
             this._buttonApply.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonApply.Location = new System.Drawing.Point(271, 343);
+            this._buttonApply.Location = new System.Drawing.Point(11, 310);
             this._buttonApply.Name = "_buttonApply";
             this._buttonApply.Size = new System.Drawing.Size(100, 30);
             this._buttonApply.TabIndex = 5;
@@ -81,7 +85,7 @@
             // _textBoxFontChars
             // 
             this._textBoxFontChars.Font = new System.Drawing.Font("Segoe UI", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._textBoxFontChars.Location = new System.Drawing.Point(271, 235);
+            this._textBoxFontChars.Location = new System.Drawing.Point(8, 124);
             this._textBoxFontChars.Multiline = true;
             this._textBoxFontChars.Name = "_textBoxFontChars";
             this._textBoxFontChars.Size = new System.Drawing.Size(312, 91);
@@ -93,7 +97,7 @@
             // 
             this._labelFontChars.AutoSize = true;
             this._labelFontChars.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelFontChars.Location = new System.Drawing.Point(268, 215);
+            this._labelFontChars.Location = new System.Drawing.Point(5, 104);
             this._labelFontChars.Name = "_labelFontChars";
             this._labelFontChars.Size = new System.Drawing.Size(316, 17);
             this._labelFontChars.TabIndex = 7;
@@ -102,7 +106,7 @@
             // _textBoxSizeFactor
             // 
             this._textBoxSizeFactor.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._textBoxSizeFactor.Location = new System.Drawing.Point(458, 76);
+            this._textBoxSizeFactor.Location = new System.Drawing.Point(198, 43);
             this._textBoxSizeFactor.Name = "_textBoxSizeFactor";
             this._textBoxSizeFactor.Size = new System.Drawing.Size(58, 27);
             this._textBoxSizeFactor.TabIndex = 8;
@@ -112,7 +116,7 @@
             // 
             this._labelSize.AutoSize = true;
             this._labelSize.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelSize.Location = new System.Drawing.Point(267, 85);
+            this._labelSize.Location = new System.Drawing.Point(7, 46);
             this._labelSize.Name = "_labelSize";
             this._labelSize.Size = new System.Drawing.Size(39, 20);
             this._labelSize.TabIndex = 9;
@@ -121,7 +125,7 @@
             // _buttonRemove
             // 
             this._buttonRemove.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonRemove.Location = new System.Drawing.Point(483, 343);
+            this._buttonRemove.Location = new System.Drawing.Point(223, 310);
             this._buttonRemove.Name = "_buttonRemove";
             this._buttonRemove.Size = new System.Drawing.Size(100, 30);
             this._buttonRemove.TabIndex = 10;
@@ -141,19 +145,19 @@
             // 
             // _listBoxConfigs
             // 
-            this._listBoxConfigs.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._listBoxConfigs.FormattingEnabled = true;
-            this._listBoxConfigs.ItemHeight = 25;
-            this._listBoxConfigs.Location = new System.Drawing.Point(12, 43);
-            this._listBoxConfigs.Name = "_listBoxConfigs";
-            this._listBoxConfigs.Size = new System.Drawing.Size(239, 329);
-            this._listBoxConfigs.TabIndex = 12;
-            this._listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.OnListBoxConfigsSelectedIndexChanged);
+            this._listBoxSettings.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._listBoxSettings.FormattingEnabled = true;
+            this._listBoxSettings.ItemHeight = 25;
+            this._listBoxSettings.Location = new System.Drawing.Point(12, 43);
+            this._listBoxSettings.Name = "_listBoxConfigs";
+            this._listBoxSettings.Size = new System.Drawing.Size(239, 329);
+            this._listBoxSettings.TabIndex = 12;
+            this._listBoxSettings.SelectedIndexChanged += new System.EventHandler(this.OnListBoxConfigsSelectedIndexChanged);
             // 
             // _textBoxName
             // 
             this._textBoxName.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._textBoxName.Location = new System.Drawing.Point(458, 43);
+            this._textBoxName.Location = new System.Drawing.Point(198, 10);
             this._textBoxName.Name = "_textBoxName";
             this._textBoxName.Size = new System.Drawing.Size(119, 27);
             this._textBoxName.TabIndex = 13;
@@ -163,7 +167,7 @@
             // 
             this._labelName.AutoSize = true;
             this._labelName.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelName.Location = new System.Drawing.Point(267, 46);
+            this._labelName.Location = new System.Drawing.Point(7, 13);
             this._labelName.Name = "_labelName";
             this._labelName.Size = new System.Drawing.Size(165, 20);
             this._labelName.TabIndex = 14;
@@ -172,7 +176,7 @@
             // _buttonAddNew
             // 
             this._buttonAddNew.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonAddNew.Location = new System.Drawing.Point(377, 343);
+            this._buttonAddNew.Location = new System.Drawing.Point(117, 310);
             this._buttonAddNew.Name = "_buttonAddNew";
             this._buttonAddNew.Size = new System.Drawing.Size(100, 30);
             this._buttonAddNew.TabIndex = 15;
@@ -184,38 +188,58 @@
             // 
             this.labelFontFamily.AutoSize = true;
             this.labelFontFamily.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFontFamily.Location = new System.Drawing.Point(268, 127);
+            this.labelFontFamily.Location = new System.Drawing.Point(5, 16);
             this.labelFontFamily.Name = "labelFontFamily";
             this.labelFontFamily.Size = new System.Drawing.Size(73, 17);
             this.labelFontFamily.TabIndex = 16;
             this.labelFontFamily.Text = "Font Family";
             // 
-            // PieceSelectionDialog
+            // _panelSettings
+            // 
+            this._panelSettings.Controls.Add(this._panelFontSettings);
+            this._panelSettings.Controls.Add(this._labelName);
+            this._panelSettings.Controls.Add(this._buttonAddNew);
+            this._panelSettings.Controls.Add(this._buttonApply);
+            this._panelSettings.Controls.Add(this._textBoxName);
+            this._panelSettings.Controls.Add(this._textBoxSizeFactor);
+            this._panelSettings.Controls.Add(this._buttonRemove);
+            this._panelSettings.Controls.Add(this._labelSize);
+            this._panelSettings.Location = new System.Drawing.Point(257, 31);
+            this._panelSettings.Name = "_panelSettings";
+            this._panelSettings.Size = new System.Drawing.Size(338, 353);
+            this._panelSettings.TabIndex = 17;
+            // 
+            // _panelFontSettings
+            // 
+            this._panelFontSettings.Controls.Add(this.labelFontFamily);
+            this._panelFontSettings.Controls.Add(this._labelFontChars);
+            this._panelFontSettings.Controls.Add(this._checkBoxUnicodeFont);
+            this._panelFontSettings.Controls.Add(this._textBoxFontChars);
+            this._panelFontSettings.Controls.Add(this._comboBoxFont);
+            this._panelFontSettings.Location = new System.Drawing.Point(0, 76);
+            this._panelFontSettings.Name = "_panelFontSettings";
+            this._panelFontSettings.Size = new System.Drawing.Size(338, 228);
+            this._panelFontSettings.TabIndex = 18;
+            // 
+            // FormPieceSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(595, 384);
-            this.Controls.Add(this.labelFontFamily);
-            this.Controls.Add(this._buttonAddNew);
-            this.Controls.Add(this._labelName);
-            this.Controls.Add(this._textBoxName);
-            this.Controls.Add(this._listBoxConfigs);
+            this.Controls.Add(this._panelSettings);
+            this.Controls.Add(this._listBoxSettings);
             this.Controls.Add(this._labelConfigs);
-            this.Controls.Add(this._buttonRemove);
-            this.Controls.Add(this._labelSize);
-            this.Controls.Add(this._textBoxSizeFactor);
-            this.Controls.Add(this._labelFontChars);
-            this.Controls.Add(this._textBoxFontChars);
-            this.Controls.Add(this._buttonApply);
-            this.Controls.Add(this._comboBoxFont);
-            this.Controls.Add(this._checkBoxUnicodeFont);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "PieceSelectionDialog";
+            this.Name = "FormPieceSettings";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Piece Settings";
+            this._panelSettings.ResumeLayout(false);
+            this._panelSettings.PerformLayout();
+            this._panelFontSettings.ResumeLayout(false);
+            this._panelFontSettings.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -232,10 +256,12 @@
         private System.Windows.Forms.Label _labelSize;
         private System.Windows.Forms.Button _buttonRemove;
         private System.Windows.Forms.Label _labelConfigs;
-        private System.Windows.Forms.ListBox _listBoxConfigs;
+        private System.Windows.Forms.ListBox _listBoxSettings;
         private System.Windows.Forms.TextBox _textBoxName;
         private System.Windows.Forms.Label _labelName;
         private System.Windows.Forms.Button _buttonAddNew;
         private System.Windows.Forms.Label labelFontFamily;
+        private System.Windows.Forms.Panel _panelSettings;
+        private System.Windows.Forms.Panel _panelFontSettings;
     }
 }

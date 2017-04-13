@@ -255,6 +255,56 @@ namespace BerldChess.View
                 }
             }
 
+            if (Game.IsInCheck(Game.WhoseTurn))
+            {
+                char king = Game.WhoseTurn == ChessPlayer.White ? 'K' : 'k';
+                bool kingFound = false;
+
+                for (int y = 0; y < _board.Length; y++)
+                {
+                    for (int x = 0; x < _board.Length; x++)
+                    {
+                        if(_board[y][x] == null)
+                        {
+                            continue;
+                        }
+
+                        if(_board[y][x].GetFENLetter() == king)
+                        {
+                            SolidBrush checkedWarn = new SolidBrush(Color.FromArgb(70, 255, 104, 84));
+
+                            int widthCorrection = 0;
+                            int heightCorrection = 0;
+
+                            if (x == Game.BoardWidth - 1 && !IsFlipped || x == 0 && IsFlipped)
+                            {
+                                widthCorrection = 1;
+                            }
+
+                            if (y == Game.BoardWidth - 1 && !IsFlipped || y == 0 && IsFlipped)
+                            {
+                                heightCorrection = 1;
+                            }
+
+                            if(IsFlipped)
+                            {
+                                x = Invert(Game.BoardHeight - 1, x);
+                                y = Invert(Game.BoardHeight - 1, y);
+                            }
+
+                            g.FillRectangle(checkedWarn, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + widthCorrection, xLinePositions[y + 1] - xLinePositions[y] + heightCorrection);
+                            kingFound = true;
+                            break;
+                        }
+                    }
+
+                    if(kingFound)
+                    {
+                        break;
+                    }
+                }
+            }
+
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             if (DisplayGridBorders)

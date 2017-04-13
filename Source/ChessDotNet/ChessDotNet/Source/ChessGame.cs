@@ -9,34 +9,6 @@ namespace ChessDotNet
 {
     public class ChessGame
     {
-        bool _drawn = false;
-        string _drawReason = null;
-        ChessPlayer _resigned = ChessPlayer.None;
-
-        public bool DrawClaimed
-        {
-            get
-            {
-                return _drawn;
-            }
-        }
-
-        public string DrawReason
-        {
-            get
-            {
-                return _drawReason;
-            }
-        }
-
-        public ChessPlayer Resigned
-        {
-            get
-            {
-                return _resigned;
-            }
-        }
-
         protected virtual int[] AllowedFenPartsLength
         {
             get
@@ -95,11 +67,11 @@ namespace ChessDotNet
 
         protected bool fiftyMoves = false;
 
-        public virtual bool DrawCanBeClaimed
+        public virtual bool IsDraw
         {
             get
             {
-                return Is3Fold() || !HasSufficientMaterial() || fiftyMoves || IsCheckmated(WhoseTurn) || IsStalemated(WhoseTurn);
+                return Is3Fold() || !HasSufficientMaterial() || fiftyMoves || IsStalemated(WhoseTurn);
             }
         }
 
@@ -112,7 +84,7 @@ namespace ChessDotNet
 
         private bool Is3Fold()
         {
-            if(_positions.Count < 3)
+            if (_positions.Count < 3)
             {
                 return false;
             }
@@ -123,11 +95,11 @@ namespace ChessDotNet
             {
                 for (int i = checkedI + 1; i < _positions.Count; i++)
                 {
-                    if(_positions[checkedI] == _positions[i])
+                    if (_positions[checkedI] == _positions[i])
                     {
                         sameCount++;
 
-                        if(sameCount > 2)
+                        if (sameCount > 2)
                         {
                             return true;
                         }
@@ -737,6 +709,34 @@ namespace ChessDotNet
             return IsValidMove(move, validateCheck, true);
         }
 
+        public bool CheckIfDraw(ref DrawReason drawReason)
+        {
+            bool isDraw = true;
+
+            if (IsStalemated(WhoseTurn))
+            {
+                drawReason = DrawReason.Stalemate;
+            }
+            else if (!HasSufficientMaterial())
+            {
+                drawReason = DrawReason.InsufficientMaterial;
+            }
+            else if (Is3Fold())
+            {
+                drawReason = DrawReason.Repetition;
+            }
+            else if (fiftyMoves)
+            {
+                drawReason = DrawReason.FiftyMoveRule;
+            }
+            else
+            {
+                isDraw = false;
+            }
+
+            return isDraw;
+        }
+
         protected virtual bool IsValidMove(Move move, bool validateCheck, bool careAboutWhoseTurnItIs)
         {
             ChessUtility.ThrowIfNull(move, "move");
@@ -1032,11 +1032,6 @@ namespace ChessDotNet
             return IsCheckmated(ChessUtility.GetOpponentOf(player));
         }
 
-        public virtual bool IsDraw()
-        {
-            return DrawCanBeClaimed;
-        }
-
         public virtual bool WouldBeInCheckAfter(Move move, ChessPlayer player)
         {
             ChessUtility.ThrowIfNull(move, "move");
@@ -1060,17 +1055,6 @@ namespace ChessDotNet
             ChessGame copy = new ChessGame(gcd);
             copy.ApplyMove(move, true);
             return copy.IsInCheck(player);
-        }
-
-        public void ClaimDraw(string reason)
-        {
-            _drawn = true;
-            _drawReason = reason;
-        }
-
-        public void Resign(ChessPlayer player)
-        {
-            _resigned = player;
         }
     }
 }

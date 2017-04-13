@@ -1,6 +1,6 @@
 ﻿namespace BerldChess.View
 {
-    partial class PromotionDialog
+    partial class FormPromotion
     {
         /// <summary>
         /// Required designer variable.

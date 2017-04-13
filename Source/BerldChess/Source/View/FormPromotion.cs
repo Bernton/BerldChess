@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace BerldChess.View
 {
-    public partial class PromotionDialog : Form
+    public partial class FormPromotion : Form
     {
         #region Fields
 
@@ -31,7 +31,7 @@ namespace BerldChess.View
 
         #region Constructors
 
-        public PromotionDialog(ChessPlayer owner)
+        public FormPromotion(ChessPlayer owner)
         {
             InitializeComponent();
             Icon = Resources.PawnRush;

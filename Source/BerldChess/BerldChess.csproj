@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Extensions.cs" />
     <Compile Include="Source\Model\ChessFont.cs" />
     <Compile Include="Source\Model\ChessPosition.cs" />
     <Compile Include="Source\Model\Extensions.cs" />
@@ -105,11 +106,11 @@
     <Compile Include="Source\View\FormPgnLoader.Designer.cs">
       <DependentUpon>FormPgnLoader.cs</DependentUpon>
     </Compile>
-    <Compile Include="Source\View\FormSquareColorDialog.cs">
+    <Compile Include="Source\View\FormSquareColor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Source\View\FormSquareColorDialog.Designer.cs">
-      <DependentUpon>FormSquareColorDialog.cs</DependentUpon>
+    <Compile Include="Source\View\FormSquareColor.Designer.cs">
+      <DependentUpon>FormSquareColor.cs</DependentUpon>
     </Compile>
     <Compile Include="Source\View\PieceImageProvider.cs" />
     <Compile Include="Source\View\BoardSettingDialog.cs">
@@ -118,17 +119,17 @@
     <Compile Include="Source\View\BoardSettingDialog.Designer.cs">
       <DependentUpon>BoardSettingDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Source\View\PieceSelectionDialog.cs">
+    <Compile Include="Source\View\FormPieceSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Source\View\PieceSelectionDialog.Designer.cs">
-      <DependentUpon>PieceSelectionDialog.cs</DependentUpon>
+    <Compile Include="Source\View\FormPieceSettings.Designer.cs">
+      <DependentUpon>FormPieceSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="Source\View\PromotionDialog.cs">
+    <Compile Include="Source\View\FormPromotion.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Source\View\PromotionDialog.Designer.cs">
-      <DependentUpon>PromotionDialog.cs</DependentUpon>
+    <Compile Include="Source\View\FormPromotion.Designer.cs">
+      <DependentUpon>FormPromotion.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Source\View\ChessPanel.resx">
       <DependentUpon>ChessPanel.cs</DependentUpon>
@@ -150,17 +151,17 @@
     <EmbeddedResource Include="Source\View\FormPgnLoader.resx">
       <DependentUpon>FormPgnLoader.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Source\View\FormSquareColorDialog.resx">
-      <DependentUpon>FormSquareColorDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Source\View\FormSquareColor.resx">
+      <DependentUpon>FormSquareColor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\BoardSettingDialog.resx">
       <DependentUpon>BoardSettingDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Source\View\PieceSelectionDialog.resx">
-      <DependentUpon>PieceSelectionDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Source\View\FormPieceSettings.resx">
+      <DependentUpon>FormPieceSettings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Source\View\PromotionDialog.resx">
-      <DependentUpon>PromotionDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Source\View\FormPromotion.resx">
+      <DependentUpon>FormPromotion.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

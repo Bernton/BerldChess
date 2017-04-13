@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace BerldChess.View
 {
-    public partial class FormSquareColorDialog : Form
+    public partial class FormSquareColor : Form
     {
         #region Fields
 
@@ -22,7 +22,7 @@ namespace BerldChess.View
 
         #region Constructors
 
-        public FormSquareColorDialog(Bitmap[] images)
+        public FormSquareColor(Bitmap[] images)
         {
             if (images == null)
             {
