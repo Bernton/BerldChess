@@ -131,7 +131,7 @@
             this._buttonRemove.TabIndex = 10;
             this._buttonRemove.Text = "Remove";
             this._buttonRemove.UseVisualStyleBackColor = true;
-            this._buttonRemove.Click += new System.EventHandler(this.OnButtonCloseClick);
+            this._buttonRemove.Click += new System.EventHandler(this.OnButtonRemoveClick);
             // 
             // _labelConfigs
             // 
@@ -139,17 +139,17 @@
             this._labelConfigs.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelConfigs.Location = new System.Drawing.Point(8, 15);
             this._labelConfigs.Name = "_labelConfigs";
-            this._labelConfigs.Size = new System.Drawing.Size(151, 21);
+            this._labelConfigs.Size = new System.Drawing.Size(104, 21);
             this._labelConfigs.TabIndex = 11;
-            this._labelConfigs.Text = "Font Configurations:";
+            this._labelConfigs.Text = "Font Settings:";
             // 
-            // _listBoxConfigs
+            // _listBoxSettings
             // 
             this._listBoxSettings.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._listBoxSettings.FormattingEnabled = true;
             this._listBoxSettings.ItemHeight = 25;
             this._listBoxSettings.Location = new System.Drawing.Point(12, 43);
-            this._listBoxSettings.Name = "_listBoxConfigs";
+            this._listBoxSettings.Name = "_listBoxSettings";
             this._listBoxSettings.Size = new System.Drawing.Size(239, 329);
             this._listBoxSettings.TabIndex = 12;
             this._listBoxSettings.SelectedIndexChanged += new System.EventHandler(this.OnListBoxConfigsSelectedIndexChanged);
@@ -169,9 +169,9 @@
             this._labelName.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelName.Location = new System.Drawing.Point(7, 13);
             this._labelName.Name = "_labelName";
-            this._labelName.Size = new System.Drawing.Size(165, 20);
+            this._labelName.Size = new System.Drawing.Size(127, 20);
             this._labelName.TabIndex = 14;
-            this._labelName.Text = "Name of Configuration:";
+            this._labelName.Text = "Name of Settings:";
             // 
             // _buttonAddNew
             // 

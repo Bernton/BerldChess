@@ -42,6 +42,7 @@ namespace BerldChess.Model
         private int _multiPV = 250;
         private int _animTime = 300;
         private List<ChessFont> _chessFonts = new List<ChessFont>();
+        private EngineList _engineList = new EngineList();
         private int _selectedFontIndex = 0;
         private bool _autoCheck = false;
         private bool _darkMode = false;
@@ -51,6 +52,19 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public EngineList EngineList
+        {
+            get
+            {
+                return _engineList;
+            }
+
+            set
+            {
+                _engineList = value;
+            }
+        }
 
         public ChessFont SelectedChessFont
         {

@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BestMoveFound.cs" />
     <Compile Include="Evaluation.cs" />
     <Compile Include="EvaluationReceived.cs" />
     <Compile Include="InfoType.cs" />

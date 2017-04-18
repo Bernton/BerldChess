@@ -10,7 +10,6 @@ namespace BerldChess.ViewModel
     {
         #region Fields
 
-        public const string EngineArgumentsFileName = "engineArgs.txt";
         public const string ConfigurationFileName = "config.txt";
 
         #endregion
@@ -60,19 +59,6 @@ namespace BerldChess.ViewModel
         {
             NavigationIndex = 0;
             PlyList = new List<ChessPly>();
-            Engine = new Engine("engine.exe");
-
-            string[] engineArgs = null;
-
-            if (File.Exists(EngineArgumentsFileName))
-            {
-                engineArgs = File.ReadAllLines(EngineArgumentsFileName);
-
-                for (int i = 0; i < engineArgs.Length; i++)
-                {
-                    Engine.Query(engineArgs[i]);
-                }
-            }
 
             Game = new ChessGame();
             PlyList.Add(new ChessPly(Game.GetFen()));

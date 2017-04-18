@@ -512,7 +512,7 @@ namespace BerldChess.View
 
                 if (!_movingPieceIndex.Equals(destination))
                 {
-                    PieceMoved?.Invoke(this, new FigureMovedEventArgs(_movingPieceIndex, destination));
+                    PieceMoved?.Invoke(this, new PieceMovedEventArgs(_movingPieceIndex, destination));
                 }
 
                 _movingPieceIndex = new Point(-1, -1);

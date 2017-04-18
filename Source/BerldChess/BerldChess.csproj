@@ -81,6 +81,8 @@
     <Compile Include="Source\Extensions.cs" />
     <Compile Include="Source\Model\ChessFont.cs" />
     <Compile Include="Source\Model\ChessPosition.cs" />
+    <Compile Include="Source\Model\EngineList.cs" />
+    <Compile Include="Source\Model\EngineSetting.cs" />
     <Compile Include="Source\Model\Extensions.cs" />
     <Compile Include="Source\Model\Recognizer.cs" />
     <Compile Include="Source\Model\SerializedInfo.cs" />
@@ -92,6 +94,12 @@
     </Compile>
     <Compile Include="Source\View\FigureMovedEventArgs.cs" />
     <Compile Include="Source\View\FigureMovedEventHandler.cs" />
+    <Compile Include="Source\View\FormEngineSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source\View\FormEngineSettings.Designer.cs">
+      <DependentUpon>FormEngineSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Source\View\FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -133,6 +141,9 @@
     </Compile>
     <EmbeddedResource Include="Source\View\ChessPanel.resx">
       <DependentUpon>ChessPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source\View\FormEngineSettings.resx">
+      <DependentUpon>FormEngineSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

@@ -146,7 +146,7 @@ namespace BerldChess.View
             }
         }
 
-        private void OnButtonCloseClick(object sender, EventArgs e)
+        private void OnButtonRemoveClick(object sender, EventArgs e)
         {
             int selected = _listBoxSettings.SelectedIndex;
 

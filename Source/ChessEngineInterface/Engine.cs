@@ -10,30 +10,36 @@ namespace ChessEngineInterface
     {
         #region Fields
 
-        private long _currentIndex = 0;
-        private volatile string _currentOutput;
         private Process _engine;
         private StreamWriter _writer;
-        private AutoResetEvent _isreadyEvent;
-        private AutoResetEvent _stoppedEvent;
+        private AutoResetEvent _autoResetEvent;
+        private string[] _infoTypeNames;
+        private List<string> _options = new List<string>();
 
         #endregion
 
         #region Properties
 
         public int TimeoutDuration { get; set; } = 1000;
-        public string Description { get; private set; } = "";
+
         public string ExecutablePath { get; } = "";
+        public string Name { get; private set; }
+        public string Author { get; private set; }
+        public string Description { get; private set; } = "";
+
+        public string[] Options
+        {
+            get
+            {
+                return _options.ToArray();
+            }
+        }
 
         public bool IsReady
         {
             get
             {
-                _isreadyEvent.Reset();
-
-                Query("isready");
-
-                return _isreadyEvent.WaitOne(TimeoutDuration);
+                return IsResponding("isready");
             }
         }
 
@@ -41,45 +47,44 @@ namespace ChessEngineInterface
 
         #region Events
 
-        public event OutputReceived OutputDataReceived;
-        public event OutputInfoReceived OutputDataInfoReceived;
+        public event BestMoveFound BestMoveFound;
         public event EvaluationReceived EvaluationReceived;
-        public event Action EngineStopped;
+        public event OutputInfoReceived OutputDataInfoReceived;
 
         #endregion
 
         #region Constructors
 
-        public Engine(string exectuablePath)
+        public Engine(string executablePath)
         {
-            if (string.IsNullOrWhiteSpace(exectuablePath))
+            if (string.IsNullOrWhiteSpace(executablePath))
             {
-                throw new ArgumentException($"Parameter '{nameof(exectuablePath)}' must not be null or empty");
+                throw new ArgumentException($"Parameter '{nameof(executablePath)}' must not be null or white space");
             }
 
-            FileInfo exectuableInfo = new FileInfo(exectuablePath);
+            FileInfo executable = new FileInfo(executablePath);
 
-            if (!exectuableInfo.Exists)
+            if (!executable.Exists)
             {
                 throw new ArgumentException("Given path doesn't exist");
             }
 
-            if (exectuableInfo.Extension != ".exe")
+            if (executable.Extension != ".exe")
             {
                 throw new ArgumentException("Given path doesn't lead to an executable file '.exe'");
             }
 
-            ExecutablePath = exectuablePath;
-            _currentOutput = string.Empty;
-            _isreadyEvent = new AutoResetEvent(false);
-            _stoppedEvent = new AutoResetEvent(false);
+            ExecutablePath = executablePath;
+
+            _autoResetEvent = new AutoResetEvent(false);
+            _infoTypeNames = Enum.GetNames(typeof(InfoType));
+
+            for (int i = 0; i < _infoTypeNames.Length; i++)
+            {
+                _infoTypeNames[i] = _infoTypeNames[i].ToLowerInvariant();
+            }
 
             InitializeEngine();
-
-            if (!IsReady)
-            {
-                throw new ArgumentException("Given executable not compatible or not responding");
-            }
         }
 
         #endregion
@@ -97,6 +102,14 @@ namespace ChessEngineInterface
             _writer.Flush();
         }
 
+        private bool IsResponding(string query)
+        {
+            _autoResetEvent.Reset();
+            Console.WriteLine("query trig");
+            Query(query);
+            return _autoResetEvent.WaitOne(TimeoutDuration);
+        }
+
         private void InitializeEngine()
         {
             _engine = new Process();
@@ -110,126 +123,153 @@ namespace ChessEngineInterface
             _engine.BeginOutputReadLine();
 
             _writer = _engine.StandardInput;
-            _writer.WriteLine("uci");
         }
 
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            if (e.Data == null)
+            if (string.IsNullOrWhiteSpace(e.Data))
             {
                 return;
             }
 
-            if (Description == "")
-            {
-                Description = e.Data;
-                return;
-            }
+            string command;
+            string[] output;
 
             if (e.Data.Contains(" "))
             {
-                string typeIdentifier = e.Data.Substring(0, e.Data.IndexOf(' '));
+                int indexOfSpace = e.Data.IndexOf(' ');
+                command = e.Data.Substring(0, indexOfSpace);
 
-                bool validIdentifier = false;
-                string[] names = Enum.GetNames(typeof(OutputType));
+                string data = e.Data.Substring(indexOfSpace + 1);
 
-                for (int i = 0; i < names.Length; i++)
+                if (data.Contains(" "))
                 {
-                    if (names[i].ToLowerInvariant() == typeIdentifier)
-                    {
-                        validIdentifier = true;
-                        break;
-                    }
+                    output = data.Split(' ');
                 }
-
-                if (validIdentifier)
+                else
                 {
-                    typeIdentifier = e.Data.Substring(0, e.Data.IndexOf(' '));
-                    string data = e.Data.Substring(e.Data.IndexOf(' ') + 1);
+                    output = new string[1];
+                    output[0] = data;
+                }
+            }
+            else
+            {
+                command = e.Data;
+                output = null;
+            }
 
-                    if (typeIdentifier == "bestmove")
+            switch (command)
+            {
+                case "id":
+
+                    switch (output[0])
                     {
-                        EngineStopped?.Invoke();
+                        case "name":
+                            Name = e.Data.Substring(8);
+                            break;
+
+                        case "author":
+                            Author = e.Data.Substring(10);
+                            break;
                     }
 
-                    if (OutputDataReceived != null)
+                    break;
+
+                case "uciok":
+
+                    Debug.WriteLine("uciok trig");
+                    _autoResetEvent.Set();
+                    break;
+
+                case "readyok":
+
+                    _autoResetEvent.Set();
+                    break;
+
+                case "bestmove":
+
+                    BestMoveFound?.Invoke(e.Data.Substring(9));
+                    break;
+
+                case "copyregistration":
+                    break;
+
+                case "registration":
+                    break;
+
+                case "info":
+
+                    string[] infoComponents = output;
+
+                    List<InfoType> types = new List<InfoType>();
+                    List<string> values = new List<string>();
+
+                    bool isCurrMove = true;
+
+                    for (int i = 0; i < infoComponents.Length; i++)
                     {
-                        OutputDataReceived(data, (OutputType)Enum.Parse(typeof(OutputType), typeIdentifier, true));
-                    }
-
-                    if (typeIdentifier == "info")
-                    {
-                        string[] infoComponents = data.Split(' ');
-                        string[] infoTypeNames = Enum.GetNames(typeof(InfoType));
-
-                        List<InfoType> types = new List<InfoType>();
-                        List<string> values = new List<string>();
-
-                        bool isCurrMove = true;
-
-                        for (int i = 0; i < infoComponents.Length; i++)
+                        if (infoComponents[i] == "pv")
                         {
-                            if (infoComponents[i] == "pv")
+                            isCurrMove = false;
+                            break;
+                        }
+                    }
+
+                    int currentType = -1;
+                    string currentInfoData = "";
+
+                    for (int i = 0; i < infoComponents.Length; i++)
+                    {
+                        bool infoType = false;
+
+                        for (int typeI = 0; typeI < _infoTypeNames.Length; typeI++)
+                        {
+                            if (infoComponents[i] == _infoTypeNames[typeI])
                             {
-                                isCurrMove = false;
+                                OutputDataInfoReceived?.Invoke(isCurrMove, currentInfoData, (InfoType)currentType);
+
+                                if (!isCurrMove)
+                                {
+                                    types.Add((InfoType)currentType);
+                                    values.Add(currentInfoData);
+                                }
+
+                                currentType = typeI;
+                                currentInfoData = "";
+                                infoType = true;
                                 break;
                             }
                         }
 
-                        int currentType = -1;
-                        string currentInfoData = "";
-
-                        for (int i = 0; i < infoComponents.Length; i++)
+                        if (!infoType)
                         {
-                            bool infoType = false;
-
-                            for (int typeI = 0; typeI < infoTypeNames.Length; typeI++)
-                            {
-                                if (infoComponents[i] == infoTypeNames[typeI].ToLowerInvariant())
-                                {
-                                    if (i != 0)
-                                    {
-                                        OutputDataInfoReceived?.Invoke(_currentIndex, isCurrMove, currentInfoData, (InfoType)currentType);
-
-                                        if (!isCurrMove)
-                                        {
-                                            types.Add((InfoType)currentType);
-                                            values.Add(currentInfoData);
-                                        }
-                                    }
-
-                                    currentType = typeI;
-                                    currentInfoData = "";
-                                    infoType = true;
-                                    break;
-                                }
-                            }
-
-                            if (!infoType)
-                            {
-                                currentInfoData += $"{infoComponents[i]} ";
-                            }
-                        }
-
-                        OutputDataInfoReceived?.Invoke(_currentIndex, isCurrMove, currentInfoData, (InfoType)currentType);
-
-                        if (!isCurrMove)
-                        {
-                            types.Add((InfoType)currentType);
-                            values.Add(currentInfoData);
-
-                            Evaluation evaluation = new Evaluation(types.ToArray(), values.ToArray());
-                            EvaluationReceived?.Invoke(evaluation);
+                            currentInfoData += $"{infoComponents[i]} ";
                         }
                     }
 
-                    _currentIndex++;
-                }
-            }
+                    OutputDataInfoReceived?.Invoke(isCurrMove, currentInfoData, (InfoType)currentType);
 
-            if (e.Data == "readyok")
-            {
-                _isreadyEvent.Set();
+                    if (!isCurrMove)
+                    {
+                        types.Add((InfoType)currentType);
+                        values.Add(currentInfoData);
+
+                        Evaluation evaluation = new Evaluation(types.ToArray(), values.ToArray());
+                        EvaluationReceived?.Invoke(evaluation);
+                    }
+
+                    break;
+
+                case "option":
+
+                    string option = e.Data.Substring(12);
+
+                    if (!_options.Contains(option))
+                    {
+                        _options.Add(e.Data.Substring(12));
+                    }
+
+                    break;
             }
         }
 

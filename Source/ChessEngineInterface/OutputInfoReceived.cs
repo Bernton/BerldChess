@@ -1,4 +1,4 @@
 ﻿namespace ChessEngineInterface
 {
-    public delegate void OutputInfoReceived(long index, bool isCurrMoveInfo, string data, InfoType infoType);
+    public delegate void OutputInfoReceived(bool isCurrMoveInfo, string data, InfoType infoType);
 }
