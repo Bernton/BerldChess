@@ -52,7 +52,7 @@ namespace BerldChess.View
             EngineSetting setting = _engineList.Settings[index];
 
             _textBoxName.Text = setting.Name;
-            _textBoxArguments.Text = string.Join("\n", setting.Arguments);
+            _textBoxArguments.Text = string.Join(Environment.NewLine, setting.Arguments);
             _comboBoxPath.Text = setting.ExecutablePath;
 
             _engineList.SelectedIndex = index;
@@ -84,7 +84,7 @@ namespace BerldChess.View
             }
 
             setting.ExecutablePath = _comboBoxPath.Text;
-            setting.Arguments = _textBoxArguments.Text.Split('\n');
+            setting.Arguments = _textBoxArguments.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
             EngineSelected?.Invoke();
         }

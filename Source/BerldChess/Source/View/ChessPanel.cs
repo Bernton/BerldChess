@@ -35,6 +35,7 @@ namespace BerldChess.View
         #region Properties
 
         public double PieceSizeFactor { get; set; } = 1;
+        public bool Gradient { get; set; } = true;
 
         public bool IsUnicodeFont { get; set; }
 
@@ -264,12 +265,12 @@ namespace BerldChess.View
                 {
                     for (int x = 0; x < _board.Length; x++)
                     {
-                        if(_board[y][x] == null)
+                        if (_board[y][x] == null)
                         {
                             continue;
                         }
 
-                        if(_board[y][x].GetFENLetter() == king)
+                        if (_board[y][x].GetFENLetter() == king)
                         {
                             SolidBrush checkedWarn = new SolidBrush(Color.FromArgb(70, 255, 104, 84));
 
@@ -286,7 +287,7 @@ namespace BerldChess.View
                                 heightCorrection = 1;
                             }
 
-                            if(IsFlipped)
+                            if (IsFlipped)
                             {
                                 x = Invert(Game.BoardHeight - 1, x);
                                 y = Invert(Game.BoardHeight - 1, y);
@@ -298,7 +299,7 @@ namespace BerldChess.View
                         }
                     }
 
-                    if(kingFound)
+                    if (kingFound)
                     {
                         break;
                     }
@@ -543,6 +544,12 @@ namespace BerldChess.View
 
         #region Other Methods
 
+        public void InvalidateRender()
+        {
+            _renderImages = true;
+            Invalidate();
+        }
+
         private Bitmap[] GetPiecesFromFontFamily(string fontFamily, double fieldSize)
         {
             if (fieldSize == 0)
@@ -614,22 +621,30 @@ namespace BerldChess.View
                 fontSize = (int)_fieldSize;
             }
 
-            if (fontSize < minFontSize)
+            for (int i = 0; i < pieceImages.Length; i++)
             {
-                for (int i = 0; i < pieceImages.Length; i++)
+                Bitmap originalImage = null;
+
+                if (fontSize < minFontSize)
                 {
-                    Bitmap originalImage = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
+                    originalImage = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
                     pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, minFontSize, characters[i]));
-                    pieceImages[i] = FillTransparentSectors(pieceImages[i]);
-                    pieceImages[i] = ResizeImage(pieceImages[i], originalImage.Width, originalImage.Height);
                 }
-            }
-            else
-            {
-                for (int i = 0; i < pieceImages.Length; i++)
+                else
                 {
                     pieceImages[i] = CropTransparentBorders(GetCharacterImage(fontFamily, fontSize, characters[i]));
-                    pieceImages[i] = FillTransparentSectors(pieceImages[i]);
+                }
+
+                pieceImages[i] = FillTransparentSectors(pieceImages[i]);
+
+                if (Gradient)
+                {
+                    pieceImages[i] = GradientBitmap(pieceImages[i], i <= 5);
+                }
+
+                if (fontSize < minFontSize)
+                {
+                    pieceImages[i] = ResizeImage(pieceImages[i], originalImage.Width, originalImage.Height);
                 }
             }
 
@@ -725,6 +740,58 @@ namespace BerldChess.View
             }
 
             return filledImage;
+        }
+
+        private Bitmap GradientBitmap(Bitmap image, bool whiteMode)
+        {
+            unsafe
+            {
+                BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                byte* pointer = (byte*)data.Scan0;
+
+                for (int y = 0; y < image.Height; y++)
+                {
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        int diffValue = (int)(255 * (y / (double)image.Height * 0.075));
+
+                        pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
+
+                        if (pointer[3] == 255)
+                        {
+                            for (int i = 0; i < 3; i++)
+                            {
+                                if (whiteMode)
+                                {
+                                    int value = pointer[i] - diffValue;
+
+                                    if (value < 0)
+                                    {
+                                        value = 0;
+                                    }
+
+                                    pointer[i] = (byte)value;
+                                }
+                                else
+                                {
+                                    int value = pointer[i] + (int)(diffValue * 1.5);
+
+                                    if (value > 255)
+                                    {
+                                        value = 255;
+                                    }
+
+                                    pointer[i] = (byte)value;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                image.UnlockBits(data);
+            }
+
+            return image;
         }
 
         public Bitmap CropTransparentBorders(Bitmap image)

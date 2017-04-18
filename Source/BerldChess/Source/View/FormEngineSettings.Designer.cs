@@ -96,9 +96,9 @@
             // _textBoxName
             // 
             this._textBoxName.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._textBoxName.Location = new System.Drawing.Point(466, 46);
+            this._textBoxName.Location = new System.Drawing.Point(405, 46);
             this._textBoxName.Name = "_textBoxName";
-            this._textBoxName.Size = new System.Drawing.Size(109, 27);
+            this._textBoxName.Size = new System.Drawing.Size(170, 27);
             this._textBoxName.TabIndex = 20;
             // 
             // _labelPath
@@ -107,7 +107,7 @@
             this._labelPath.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelPath.Location = new System.Drawing.Point(261, 87);
             this._labelPath.Name = "_labelPath";
-            this._labelPath.Size = new System.Drawing.Size(131, 20);
+            this._labelPath.Size = new System.Drawing.Size(132, 20);
             this._labelPath.TabIndex = 22;
             this._labelPath.Text = "Path to Executable";
             // 

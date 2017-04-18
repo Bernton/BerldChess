@@ -36,6 +36,7 @@
             this._buttonLightSquare = new System.Windows.Forms.Button();
             this._buttonApply = new System.Windows.Forms.Button();
             this._checkBoxDarkMode = new System.Windows.Forms.CheckBox();
+            this._checkBoxGradient = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // _checkBoxGridBorder
@@ -93,7 +94,7 @@
             // _buttonApply
             // 
             this._buttonApply.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonApply.Location = new System.Drawing.Point(23, 137);
+            this._buttonApply.Location = new System.Drawing.Point(23, 166);
             this._buttonApply.Name = "_buttonApply";
             this._buttonApply.Size = new System.Drawing.Size(129, 33);
             this._buttonApply.TabIndex = 20;
@@ -113,11 +114,24 @@
             this._checkBoxDarkMode.UseVisualStyleBackColor = true;
             this._checkBoxDarkMode.CheckedChanged += new System.EventHandler(this.OnCheckBoxDarkModeCheckedChanged);
             // 
+            // _checkBoxGradient
+            // 
+            this._checkBoxGradient.AutoSize = true;
+            this._checkBoxGradient.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._checkBoxGradient.Location = new System.Drawing.Point(184, 172);
+            this._checkBoxGradient.Name = "_checkBoxGradient";
+            this._checkBoxGradient.Size = new System.Drawing.Size(85, 24);
+            this._checkBoxGradient.TabIndex = 22;
+            this._checkBoxGradient.Text = "Gradient";
+            this._checkBoxGradient.UseVisualStyleBackColor = true;
+            this._checkBoxGradient.CheckedChanged += new System.EventHandler(this._checkBoxGradient_CheckedChanged);
+            // 
             // BoardSettingDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(310, 182);
+            this.ClientSize = new System.Drawing.Size(310, 211);
+            this.Controls.Add(this._checkBoxGradient);
             this.Controls.Add(this._checkBoxDarkMode);
             this.Controls.Add(this._buttonApply);
             this.Controls.Add(this._buttonLightSquare);
@@ -148,5 +162,6 @@
         private System.Windows.Forms.Button _buttonLightSquare;
         private System.Windows.Forms.Button _buttonApply;
         private System.Windows.Forms.CheckBox _checkBoxDarkMode;
+        private System.Windows.Forms.CheckBox _checkBoxGradient;
     }
 }

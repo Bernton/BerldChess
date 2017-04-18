@@ -34,6 +34,7 @@ namespace BerldChess.Model
         private bool _hideArrows;
         private bool _boardFlipped;
         private bool _displayGridBorder;
+        private bool _gradient = true;
         private bool _isMaximized = true;
         private bool _cheatMode;
         private bool _sound = true;
@@ -52,6 +53,19 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public bool Gradient
+        {
+            get
+            {
+                return _gradient;
+            }
+
+            set
+            {
+                _gradient = value;
+            }
+        }
 
         public EngineList EngineList
         {

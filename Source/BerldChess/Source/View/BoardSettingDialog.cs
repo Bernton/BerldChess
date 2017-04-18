@@ -11,6 +11,7 @@ namespace BerldChess.View
     {
         private Color _initialDarkSquare;
         private Color _initialLightSquare;
+        private bool _inititalGradient;
         private bool _initialGrid;
         private bool _initialDarkMode;
         private bool _applied = false;
@@ -74,6 +75,7 @@ namespace BerldChess.View
             {
                 SerializedInfo.Instance.BoardDarkSquare = _initialDarkSquare;
                 SerializedInfo.Instance.BoardLightSquare = _initialLightSquare;
+                SerializedInfo.Instance.Gradient = _inititalGradient;
                 SerializedInfo.Instance.DisplayGridBorder = _initialGrid;
                 SerializedInfo.Instance.DarkMode = _initialDarkMode;
                 BoardSettingAltered?.Invoke();
@@ -88,18 +90,26 @@ namespace BerldChess.View
         {
             _initialDarkSquare = SerializedInfo.Instance.BoardDarkSquare;
             _initialLightSquare = SerializedInfo.Instance.BoardLightSquare;
+            _inititalGradient = SerializedInfo.Instance.Gradient;
             _initialGrid = SerializedInfo.Instance.DisplayGridBorder;
             _initialDarkMode = SerializedInfo.Instance.DarkMode;
 
             _buttonDarkSquare.BackColor = _initialDarkSquare;
             _buttonLightSquare.BackColor = _initialLightSquare;
             _checkBoxGridBorder.Checked = _initialGrid;
+            _checkBoxGradient.Checked = _inititalGradient;
             _checkBoxDarkMode.Checked = _initialDarkMode;
         }
 
         private void OnCheckBoxDarkModeCheckedChanged(object sender, EventArgs e)
         {
             SerializedInfo.Instance.DarkMode = _checkBoxDarkMode.Checked;
+            BoardSettingAltered?.Invoke();
+        }
+
+        private void _checkBoxGradient_CheckedChanged(object sender, EventArgs e)
+        {
+            SerializedInfo.Instance.Gradient = _checkBoxGradient.Checked;
             BoardSettingAltered?.Invoke();
         }
 
