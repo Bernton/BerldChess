@@ -277,6 +277,8 @@ namespace BerldChess.View
             _chessPanel.ChessFontChars = currentFont.PieceCharacters;
             _chessPanel.PieceSizeFactor = currentFont.SizeFactor;
             _chessPanel.PieceFontFamily = currentFont.FontFamily;
+
+            _chessPanel.InvalidateRender();
         }
 
         private void OnBoardSettingAltered()
@@ -1594,9 +1596,27 @@ namespace BerldChess.View
             {
                 SerializedInfo.Instance.ChessFonts.Add(new ChessFont
                 {
-                    Name = "Default",
-                    FontFamily = "",
+                    Name = "Default1",
+                    FontFamily = "Default1",
                     SizeFactor = DefaultSizeFactor,
+                    IsUnicode = false,
+                    PieceCharacters = ""
+                });
+
+                SerializedInfo.Instance.ChessFonts.Add(new ChessFont
+                {
+                    Name = "Default2",
+                    FontFamily = "Default2",
+                    SizeFactor = 1,
+                    IsUnicode = false,
+                    PieceCharacters = ""
+                });
+
+                SerializedInfo.Instance.ChessFonts.Add(new ChessFont
+                {
+                    Name = "Default3",
+                    FontFamily = "Default3",
+                    SizeFactor = 0.9,
                     IsUnicode = false,
                     PieceCharacters = ""
                 });

@@ -124,8 +124,14 @@
   <data name="Castling" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Sounds\WAV\Castling.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ChessPiecesSprite" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Pieces\ChessPiecesSprite.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ChessPiecesSprite1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Images\Pieces\ChessPiecesSprite1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ChessPiecesSprite2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Images\Pieces\ChessPiecesSprite2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ChessPiecesSprite3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Images\Pieces\ChessPiecesSprite3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Ilegal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Sounds\WAV\Ilegal.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

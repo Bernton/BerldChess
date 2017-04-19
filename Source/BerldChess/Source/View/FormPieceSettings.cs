@@ -66,8 +66,8 @@ namespace BerldChess.View
                 index = 0;
             }
 
-            _panelFontSettings.Enabled = index != 0;
-            _textBoxName.Enabled = index != 0;
+            _panelFontSettings.Enabled = index > 2;
+            _textBoxName.Enabled = index > 2;
 
             ChessFont font = _chessFonts[index];
 

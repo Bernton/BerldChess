@@ -245,6 +245,21 @@
   <ItemGroup>
     <None Include="Resources\Images\Forward.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Pieces\ChessPiecesSprite1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Pieces\ChessPiecesSprite2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Pieces\ChessPiecesSprite3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Pieces\ChessPiecesSprite4.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Images\Pieces\ChessPiecesSprite4.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

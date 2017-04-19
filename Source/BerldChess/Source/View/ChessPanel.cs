@@ -1,4 +1,5 @@
-﻿using ChessDotNet;
+﻿using BerldChess.Properties;
+using ChessDotNet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -145,16 +146,27 @@ namespace BerldChess.View
 
             if (_renderImages)
             {
-                if (PieceFontFamily != "")
-                {
-                    _scaledPieceImages = GetPiecesFromFontFamily(_pieceFontFamily, _fieldSize);
+                _scaledPieceImages = new Bitmap[12];
 
-                    if (_scaledPieceImages == null)
-                    {
-                        return;
-                    }
+                bool defaultFont = false;
+
+                if (PieceFontFamily == "" || PieceFontFamily == "Default1")
+                {
+                    PieceImageProvider.Inititalize(Resources.ChessPiecesSprite1, 0);
+                    defaultFont = true;
                 }
-                else
+                else if (PieceFontFamily == "Default2")
+                {
+                    PieceImageProvider.Inititalize(Resources.ChessPiecesSprite2, 1);
+                    defaultFont = true;
+                }
+                else if (PieceFontFamily == "Default3")
+                {
+                    PieceImageProvider.Inititalize(Resources.ChessPiecesSprite3, 2);
+                    defaultFont = true;
+                }
+
+                if (defaultFont)
                 {
                     for (int i = 0; i < _scaledPieceImages.Length; i++)
                     {
@@ -164,11 +176,23 @@ namespace BerldChess.View
                         }
 
                         _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i], (int)(_fieldSize * PieceSizeFactor), (int)(_fieldSize * PieceSizeFactor));
+                    }
+                }
+                else
+                {
+                    _scaledPieceImages = GetPiecesFromFontFamily(_pieceFontFamily, _fieldSize);
 
-                        if (i != 0 && i != 1 && i != 2 && i != 7 && i != 8 && i != 6)
-                        {
-                            _scaledPieceImages[i] = CropTransparentBorders(_scaledPieceImages[i]);
-                        }
+                    if (_scaledPieceImages == null)
+                    {
+                        return;
+                    }
+                }
+
+                if(Gradient)
+                {
+                    for (int i = 0; i < _scaledPieceImages.Length; i++)
+                    {
+                        _scaledPieceImages[i] = GradientBitmap(_scaledPieceImages[i]);
                     }
                 }
 
@@ -637,11 +661,6 @@ namespace BerldChess.View
 
                 pieceImages[i] = FillTransparentSectors(pieceImages[i]);
 
-                if (Gradient)
-                {
-                    pieceImages[i] = GradientBitmap(pieceImages[i], i <= 5);
-                }
-
                 if (fontSize < minFontSize)
                 {
                     pieceImages[i] = ResizeImage(pieceImages[i], originalImage.Width, originalImage.Height);
@@ -742,18 +761,20 @@ namespace BerldChess.View
             return filledImage;
         }
 
-        private Bitmap GradientBitmap(Bitmap image, bool whiteMode)
+        private Bitmap GradientBitmap(Bitmap image)
         {
             unsafe
             {
                 BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
                 byte* pointer = (byte*)data.Scan0;
 
+                int startingPoint = (int)(image.Width * 0.4);
+
                 for (int y = 0; y < image.Height; y++)
                 {
-                    for (int x = 0; x < image.Width; x++)
+                    for (int x = startingPoint; x < image.Width; x++)
                     {
-                        int diffValue = (int)(255 * (y / (double)image.Height * 0.075));
+                        int diffValue = (int)(255 * ((x - startingPoint) / (double)image.Width * 0.225));
 
                         pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
 
@@ -761,28 +782,14 @@ namespace BerldChess.View
                         {
                             for (int i = 0; i < 3; i++)
                             {
-                                if (whiteMode)
+                                int value = pointer[i] - diffValue;
+
+                                if (value < 0)
                                 {
-                                    int value = pointer[i] - diffValue;
-
-                                    if (value < 0)
-                                    {
-                                        value = 0;
-                                    }
-
-                                    pointer[i] = (byte)value;
+                                    value = 0;
                                 }
-                                else
-                                {
-                                    int value = pointer[i] + (int)(diffValue * 1.5);
 
-                                    if (value > 255)
-                                    {
-                                        value = 255;
-                                    }
-
-                                    pointer[i] = (byte)value;
-                                }
+                                pointer[i] = (byte)value;
                             }
                         }
                     }

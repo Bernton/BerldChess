@@ -4,35 +4,43 @@ using System.Drawing;
 
 namespace BerldChess.View
 {
-    public class PieceImageProvider
+    public static class PieceImageProvider
     {
+        private static int _id = -1;
+
         public static Bitmap[] PieceImages { get; set; }
 
         public const int ColorCount = 2;
         public const int PieceCount = 6;
 
-        static PieceImageProvider()
+        public static void Inititalize(Bitmap sprite, int id)
         {
+            if (_id == id)
+            {
+                return;
+            }
+
+            _id = id;
+
             PieceImages = new Bitmap[12];
 
-            double pieceImageWidth = Resources.ChessPiecesSprite.Width / (double)PieceCount;
-            double pieceImageHeight = Resources.ChessPiecesSprite.Height / (double)ColorCount;
+            double pieceImageWidth = sprite.Width / (double)PieceCount;
+            double pieceImageHeight = sprite.Height / (double)ColorCount;
 
-            int roundedWidth = Round(pieceImageWidth);
-            int roundedHeight = Round(pieceImageHeight);
+            int roundedWidth = (int)Math.Ceiling(pieceImageWidth);
+            int roundedHeight = (int)Math.Ceiling(pieceImageHeight);
 
             int x;
             int y;
-
 
             for (int colorI = 0; colorI < 2; colorI++)
             {
                 for (int pieceI = 0; pieceI < 6; pieceI++)
                 {
-                    x = Round(pieceI * pieceImageWidth);
-                    y = Round(colorI * pieceImageHeight);
+                    x = (int)Math.Ceiling(pieceI * pieceImageWidth);
+                    y = (int)Math.Ceiling(colorI * pieceImageHeight);
 
-                    PieceImages[colorI * 6 + pieceI] = CropImage(Resources.ChessPiecesSprite, new Rectangle(x, y, roundedWidth, roundedHeight));
+                    PieceImages[colorI * 6 + pieceI] = CropImage(sprite, new Rectangle(x, y, roundedWidth, roundedHeight));
                 }
             }
         }
@@ -72,10 +80,14 @@ namespace BerldChess.View
 
         private static Bitmap CropImage(Bitmap source, Rectangle section)
         {
-            Bitmap bitmap = new Bitmap(section.Width, section.Height);
-            Graphics g = Graphics.FromImage(bitmap);
-            g.DrawImage(source, 0, 0, section, GraphicsUnit.Pixel);
-            return bitmap;
+            Bitmap croppedImage = new Bitmap(section.Width, section.Height);
+            Graphics g = Graphics.FromImage(croppedImage);
+            Rectangle src = new Rectangle(section.X, section.Y, section.Width, section.Height);
+            Rectangle dst = new Rectangle(0, 0, section.Height, section.Width);
+            g.DrawImage(source, dst, src, GraphicsUnit.Pixel);
+            g.Dispose();
+
+            return croppedImage;
         }
 
         private static int Round(double value)
