@@ -37,13 +37,14 @@
             this._buttonApply = new System.Windows.Forms.Button();
             this._checkBoxDarkMode = new System.Windows.Forms.CheckBox();
             this._checkBoxGradient = new System.Windows.Forms.CheckBox();
+            this._checkBoxHighlightBorder = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // _checkBoxGridBorder
             // 
             this._checkBoxGridBorder.AutoSize = true;
             this._checkBoxGridBorder.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._checkBoxGridBorder.Location = new System.Drawing.Point(184, 120);
+            this._checkBoxGridBorder.Location = new System.Drawing.Point(164, 120);
             this._checkBoxGridBorder.Name = "_checkBoxGridBorder";
             this._checkBoxGridBorder.Size = new System.Drawing.Size(105, 24);
             this._checkBoxGridBorder.TabIndex = 0;
@@ -94,7 +95,7 @@
             // _buttonApply
             // 
             this._buttonApply.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonApply.Location = new System.Drawing.Point(23, 166);
+            this._buttonApply.Location = new System.Drawing.Point(12, 190);
             this._buttonApply.Name = "_buttonApply";
             this._buttonApply.Size = new System.Drawing.Size(129, 33);
             this._buttonApply.TabIndex = 20;
@@ -106,7 +107,7 @@
             // 
             this._checkBoxDarkMode.AutoSize = true;
             this._checkBoxDarkMode.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._checkBoxDarkMode.Location = new System.Drawing.Point(184, 146);
+            this._checkBoxDarkMode.Location = new System.Drawing.Point(164, 146);
             this._checkBoxDarkMode.Name = "_checkBoxDarkMode";
             this._checkBoxDarkMode.Size = new System.Drawing.Size(102, 24);
             this._checkBoxDarkMode.TabIndex = 21;
@@ -118,19 +119,32 @@
             // 
             this._checkBoxGradient.AutoSize = true;
             this._checkBoxGradient.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._checkBoxGradient.Location = new System.Drawing.Point(184, 172);
+            this._checkBoxGradient.Location = new System.Drawing.Point(164, 172);
             this._checkBoxGradient.Name = "_checkBoxGradient";
             this._checkBoxGradient.Size = new System.Drawing.Size(85, 24);
             this._checkBoxGradient.TabIndex = 22;
             this._checkBoxGradient.Text = "Gradient";
             this._checkBoxGradient.UseVisualStyleBackColor = true;
-            this._checkBoxGradient.CheckedChanged += new System.EventHandler(this._checkBoxGradient_CheckedChanged);
+            this._checkBoxGradient.CheckedChanged += new System.EventHandler(this.OnCheckBoxGradientCheckedChanged);
+            // 
+            // _checkBoxHighlightBorder
+            // 
+            this._checkBoxHighlightBorder.AutoSize = true;
+            this._checkBoxHighlightBorder.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._checkBoxHighlightBorder.Location = new System.Drawing.Point(164, 199);
+            this._checkBoxHighlightBorder.Name = "_checkBoxHighlightBorder";
+            this._checkBoxHighlightBorder.Size = new System.Drawing.Size(139, 24);
+            this._checkBoxHighlightBorder.TabIndex = 23;
+            this._checkBoxHighlightBorder.Text = "Border Highlight";
+            this._checkBoxHighlightBorder.UseVisualStyleBackColor = true;
+            this._checkBoxHighlightBorder.CheckedChanged += new System.EventHandler(this.OnCheckBoxHighlightBorderCheckedChanged);
             // 
             // BoardSettingDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(310, 211);
+            this.ClientSize = new System.Drawing.Size(310, 237);
+            this.Controls.Add(this._checkBoxHighlightBorder);
             this.Controls.Add(this._checkBoxGradient);
             this.Controls.Add(this._checkBoxDarkMode);
             this.Controls.Add(this._buttonApply);
@@ -163,5 +177,6 @@
         private System.Windows.Forms.Button _buttonApply;
         private System.Windows.Forms.CheckBox _checkBoxDarkMode;
         private System.Windows.Forms.CheckBox _checkBoxGradient;
+        private System.Windows.Forms.CheckBox _checkBoxHighlightBorder;
     }
 }

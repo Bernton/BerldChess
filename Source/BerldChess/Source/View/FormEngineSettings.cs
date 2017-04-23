@@ -22,28 +22,67 @@ namespace BerldChess.View
             _engineList = engineList;
 
             InitializeComponent();
+            _radioButtonDisabled.Tag = 0;
+            _radioButtonAnalysis.Tag = 1;
+            _radioButtonCompetitive.Tag = 2;
+
             _listBoxSettings.SetDoubleBuffered();
-            UpdateList(_engineList.SelectedIndex);
+            UpdateListsAndComboBoxes(_engineList.SelectedIndex1);
 
             for (int i = engineList.LastPaths.Count - 1; i >= 0; i--)
             {
                 _comboBoxPath.Items.Add(engineList.LastPaths[i]);
             }
+
+            switch (SerializedInfo.Instance.EngineMode)
+            {
+                case EngineMode.Disabled:
+                    _radioButtonDisabled.Checked = true;
+                    break;
+                case EngineMode.Analysis:
+                    _radioButtonAnalysis.Checked = true;
+                    break;
+                case EngineMode.Competitive:
+                    _radioButtonCompetitive.Checked = true;
+                    break;
+            }
         }
 
-        private void UpdateList(int initialSelect)
+        private void UpdateListsAndComboBoxes(int initialSelect)
         {
             _listBoxSettings.Items.Clear();
+            _comboBoxEngine1.Items.Clear();
+            _comboBoxEngine2.Items.Clear();
 
             for (int i = 0; i < _engineList.Settings.Count; i++)
             {
                 _listBoxSettings.Items.Add(_engineList.Settings[i].Name);
+                _comboBoxEngine1.Items.Add(_engineList.Settings[i].Name);
+                _comboBoxEngine2.Items.Add(_engineList.Settings[i].Name);
             }
 
             if (initialSelect != -1)
             {
                 _listBoxSettings.SelectedIndex = initialSelect;
                 OpenEngineConfig(initialSelect);
+            }
+
+            TrySelect(_comboBoxEngine1, SerializedInfo.Instance.EngineList.SelectedIndex1);
+            TrySelect(_comboBoxEngine2, SerializedInfo.Instance.EngineList.SelectedIndex2);
+        }
+
+        private void TrySelect(ComboBox comboBox, int selectedIndex)
+        {
+            if (comboBox.Items.Count > 0)
+            {
+                if(selectedIndex < comboBox.Items.Count && selectedIndex >= 0)
+                {
+                    comboBox.SelectedIndex = selectedIndex;
+                }
+                else
+                {
+                    comboBox.SelectedIndex = 0;
+                }
             }
         }
 
@@ -54,15 +93,12 @@ namespace BerldChess.View
             _textBoxName.Text = setting.Name;
             _textBoxArguments.Text = string.Join(Environment.NewLine, setting.Arguments);
             _comboBoxPath.Text = setting.ExecutablePath;
-
-            _engineList.SelectedIndex = index;
-            EngineSelected?.Invoke();
         }
 
         private void OnButtonApplyClick(object sender, EventArgs e)
         {
             string name = _textBoxName.Text;
-            EngineSetting setting = _engineList.SelectedSetting;
+            EngineSetting setting = _engineList.Settings[_listBoxSettings.SelectedIndex];
 
             if(setting == null)
             {
@@ -80,7 +116,7 @@ namespace BerldChess.View
             if(nameChanged)
             {
                 setting.Name = name;
-                UpdateList(_listBoxSettings.SelectedIndex);
+                UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
             }
 
             setting.ExecutablePath = _comboBoxPath.Text;
@@ -124,12 +160,9 @@ namespace BerldChess.View
             setting.Arguments = _textBoxArguments.Text.Split('\n');
 
             _engineList.Settings.Add(setting);
-            _engineList.SelectedIndex = _engineList.Settings.Count - 1;
 
             _listBoxSettings.Items.Add(setting.Name);
             _listBoxSettings.SelectedIndex = _listBoxSettings.Items.Count - 1;
-
-            EngineSelected?.Invoke();
         }
 
         private void OnButtonRemoveClick(object sender, EventArgs e)
@@ -140,11 +173,75 @@ namespace BerldChess.View
 
             _listBoxSettings.Items.RemoveAt(selected);
             _listBoxSettings.SelectedIndex = selected - 1;
+
+            EngineSelected?.Invoke();
         }
 
         private void OnListBoxSettingsSelectedIndexChanged(object sender, EventArgs e)
         {
             OpenEngineConfig(_listBoxSettings.SelectedIndex);
+        }
+
+        private void SetUIToEngineMode(EngineMode mode)
+        {
+            switch (mode)
+            {
+                case EngineMode.Disabled:
+
+                    _comboBoxEngine1.Visible = false;
+                    _comboBoxEngine2.Visible = false;
+                    _labelEngine1.Visible = false;
+                    _labelEngine2.Visible = false;
+
+                    break;
+
+                case EngineMode.Analysis:
+
+                    _comboBoxEngine1.Visible = true;
+                    _labelEngine1.Text = "Analysis Engine";
+                    _labelEngine1.Visible = true;
+
+                    _comboBoxEngine2.Visible = false;
+                    _labelEngine2.Visible = false;
+
+                    break;
+
+                case EngineMode.Competitive:
+
+                    _comboBoxEngine1.Visible = true;
+                    _labelEngine1.Text = "Engine 1";
+                    _labelEngine1.Visible = true;
+
+                    _comboBoxEngine2.Visible = true;
+                    _labelEngine2.Visible = true;
+
+                    break;
+            }
+        }
+
+        private void RadioButtonCheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton radioButton = (RadioButton)sender;
+
+            if (radioButton.Checked && radioButton.Tag != null)
+            {
+                SetUIToEngineMode((EngineMode)(int)radioButton.Tag);
+
+                SerializedInfo.Instance.EngineMode = (EngineMode)(int)radioButton.Tag;
+                EngineSelected?.Invoke();
+            }
+        }
+
+        private void OnComboBoxEngine1SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SerializedInfo.Instance.EngineList.SelectedIndex1 = _comboBoxEngine1.SelectedIndex;
+            EngineSelected?.Invoke();
+        }
+
+        private void OnComboBoxEngine2SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SerializedInfo.Instance.EngineList.SelectedIndex2 = _comboBoxEngine2.SelectedIndex;
+            EngineSelected?.Invoke();
         }
     }
 }

@@ -2,8 +2,8 @@
 {
     public enum ChessPlayer
     {
-        Black,
         White,
+        Black,
         None
     }
 }

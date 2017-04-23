@@ -82,6 +82,7 @@
     <Compile Include="Source\Model\ChessFont.cs" />
     <Compile Include="Source\Model\ChessPosition.cs" />
     <Compile Include="Source\Model\EngineList.cs" />
+    <Compile Include="Source\Model\EngineMode.cs" />
     <Compile Include="Source\Model\EngineSetting.cs" />
     <Compile Include="Source\Model\Extensions.cs" />
     <Compile Include="Source\Model\Recognizer.cs" />

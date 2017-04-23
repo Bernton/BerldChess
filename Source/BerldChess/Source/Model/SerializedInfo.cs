@@ -47,12 +47,39 @@ namespace BerldChess.Model
         private int _selectedFontIndex = 0;
         private bool _autoCheck = false;
         private bool _darkMode = false;
+        private bool _borderHighlight = false;
         private int _clickDelay = 120;
         private double _sizeFactor = 1;
+        private EngineMode _engineMode = EngineMode.Disabled;
 
         #endregion
 
         #region Properties
+
+        public bool BorderHighlight
+        {
+            get
+            {
+                return _borderHighlight;
+            }
+            set
+            {
+                _borderHighlight = value;
+            }
+        }
+
+        public EngineMode EngineMode
+        {
+            get
+            {
+                return _engineMode;
+            }
+
+            set
+            {
+                _engineMode = value;
+            }
+        }
 
         public bool Gradient
         {

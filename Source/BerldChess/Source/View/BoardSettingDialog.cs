@@ -14,6 +14,7 @@ namespace BerldChess.View
         private bool _inititalGradient;
         private bool _initialGrid;
         private bool _initialDarkMode;
+        private bool _initialHighlightBorder;
         private bool _applied = false;
 
         public event Action BoardSettingAltered;
@@ -78,6 +79,7 @@ namespace BerldChess.View
                 SerializedInfo.Instance.Gradient = _inititalGradient;
                 SerializedInfo.Instance.DisplayGridBorder = _initialGrid;
                 SerializedInfo.Instance.DarkMode = _initialDarkMode;
+                SerializedInfo.Instance.BorderHighlight = _initialHighlightBorder;
                 BoardSettingAltered?.Invoke();
             }
             else
@@ -93,6 +95,7 @@ namespace BerldChess.View
             _inititalGradient = SerializedInfo.Instance.Gradient;
             _initialGrid = SerializedInfo.Instance.DisplayGridBorder;
             _initialDarkMode = SerializedInfo.Instance.DarkMode;
+            _initialHighlightBorder = SerializedInfo.Instance.BorderHighlight;
 
             _buttonDarkSquare.BackColor = _initialDarkSquare;
             _buttonLightSquare.BackColor = _initialLightSquare;
@@ -107,9 +110,15 @@ namespace BerldChess.View
             BoardSettingAltered?.Invoke();
         }
 
-        private void _checkBoxGradient_CheckedChanged(object sender, EventArgs e)
+        private void OnCheckBoxGradientCheckedChanged(object sender, EventArgs e)
         {
             SerializedInfo.Instance.Gradient = _checkBoxGradient.Checked;
+            BoardSettingAltered?.Invoke();
+        }
+
+        private void OnCheckBoxHighlightBorderCheckedChanged(object sender, EventArgs e)
+        {
+            SerializedInfo.Instance.BorderHighlight = _checkBoxHighlightBorder.Checked;
             BoardSettingAltered?.Invoke();
         }
 

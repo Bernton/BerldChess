@@ -40,6 +40,14 @@
             this._buttonAddNew = new System.Windows.Forms.Button();
             this._buttonApply = new System.Windows.Forms.Button();
             this._buttonRemove = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this._radioButtonDisabled = new System.Windows.Forms.RadioButton();
+            this._radioButtonAnalysis = new System.Windows.Forms.RadioButton();
+            this._radioButtonCompetitive = new System.Windows.Forms.RadioButton();
+            this._comboBoxEngine1 = new System.Windows.Forms.ComboBox();
+            this._comboBoxEngine2 = new System.Windows.Forms.ComboBox();
+            this._labelEngine1 = new System.Windows.Forms.Label();
+            this._labelEngine2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // _listBoxSettings
@@ -153,11 +161,105 @@
             this._buttonRemove.UseVisualStyleBackColor = true;
             this._buttonRemove.Click += new System.EventHandler(this.OnButtonRemoveClick);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(9, 387);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(101, 21);
+            this.label1.TabIndex = 26;
+            this.label1.Text = "Engine Mode";
+            // 
+            // _radioButtonDisabled
+            // 
+            this._radioButtonDisabled.AutoSize = true;
+            this._radioButtonDisabled.Location = new System.Drawing.Point(24, 417);
+            this._radioButtonDisabled.Name = "_radioButtonDisabled";
+            this._radioButtonDisabled.Size = new System.Drawing.Size(88, 25);
+            this._radioButtonDisabled.TabIndex = 27;
+            this._radioButtonDisabled.TabStop = true;
+            this._radioButtonDisabled.Text = "Disabled";
+            this._radioButtonDisabled.UseVisualStyleBackColor = true;
+            this._radioButtonDisabled.CheckedChanged += new System.EventHandler(this.RadioButtonCheckedChanged);
+            // 
+            // _radioButtonAnalysis
+            // 
+            this._radioButtonAnalysis.AutoSize = true;
+            this._radioButtonAnalysis.Location = new System.Drawing.Point(24, 448);
+            this._radioButtonAnalysis.Name = "_radioButtonAnalysis";
+            this._radioButtonAnalysis.Size = new System.Drawing.Size(85, 25);
+            this._radioButtonAnalysis.TabIndex = 28;
+            this._radioButtonAnalysis.TabStop = true;
+            this._radioButtonAnalysis.Text = "Analysis";
+            this._radioButtonAnalysis.UseVisualStyleBackColor = true;
+            this._radioButtonAnalysis.CheckedChanged += new System.EventHandler(this.RadioButtonCheckedChanged);
+            // 
+            // _radioButtonCompetitive
+            // 
+            this._radioButtonCompetitive.AutoSize = true;
+            this._radioButtonCompetitive.Location = new System.Drawing.Point(24, 479);
+            this._radioButtonCompetitive.Name = "_radioButtonCompetitive";
+            this._radioButtonCompetitive.Size = new System.Drawing.Size(112, 25);
+            this._radioButtonCompetitive.TabIndex = 29;
+            this._radioButtonCompetitive.TabStop = true;
+            this._radioButtonCompetitive.Text = "Competitive";
+            this._radioButtonCompetitive.UseVisualStyleBackColor = true;
+            this._radioButtonCompetitive.CheckedChanged += new System.EventHandler(this.RadioButtonCheckedChanged);
+            // 
+            // _comboBoxEngine1
+            // 
+            this._comboBoxEngine1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._comboBoxEngine1.FormattingEnabled = true;
+            this._comboBoxEngine1.Location = new System.Drawing.Point(265, 414);
+            this._comboBoxEngine1.Name = "_comboBoxEngine1";
+            this._comboBoxEngine1.Size = new System.Drawing.Size(310, 29);
+            this._comboBoxEngine1.TabIndex = 30;
+            this._comboBoxEngine1.SelectedIndexChanged += new System.EventHandler(this.OnComboBoxEngine1SelectedIndexChanged);
+            // 
+            // _comboBoxEngine2
+            // 
+            this._comboBoxEngine2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._comboBoxEngine2.FormattingEnabled = true;
+            this._comboBoxEngine2.Location = new System.Drawing.Point(265, 473);
+            this._comboBoxEngine2.Name = "_comboBoxEngine2";
+            this._comboBoxEngine2.Size = new System.Drawing.Size(310, 29);
+            this._comboBoxEngine2.TabIndex = 31;
+            this._comboBoxEngine2.SelectedIndexChanged += new System.EventHandler(this.OnComboBoxEngine2SelectedIndexChanged);
+            // 
+            // _labelEngine1
+            // 
+            this._labelEngine1.AutoSize = true;
+            this._labelEngine1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelEngine1.Location = new System.Drawing.Point(262, 390);
+            this._labelEngine1.Name = "_labelEngine1";
+            this._labelEngine1.Size = new System.Drawing.Size(70, 21);
+            this._labelEngine1.TabIndex = 32;
+            this._labelEngine1.Text = "Engine 1";
+            // 
+            // _labelEngine2
+            // 
+            this._labelEngine2.AutoSize = true;
+            this._labelEngine2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelEngine2.Location = new System.Drawing.Point(262, 450);
+            this._labelEngine2.Name = "_labelEngine2";
+            this._labelEngine2.Size = new System.Drawing.Size(70, 21);
+            this._labelEngine2.TabIndex = 33;
+            this._labelEngine2.Text = "Engine 2";
+            // 
             // FormEngineSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 385);
+            this.ClientSize = new System.Drawing.Size(591, 515);
+            this.Controls.Add(this._labelEngine2);
+            this.Controls.Add(this._labelEngine1);
+            this.Controls.Add(this._comboBoxEngine2);
+            this.Controls.Add(this._comboBoxEngine1);
+            this.Controls.Add(this._radioButtonCompetitive);
+            this.Controls.Add(this._radioButtonAnalysis);
+            this.Controls.Add(this._radioButtonDisabled);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this._buttonAddNew);
             this.Controls.Add(this._buttonApply);
             this.Controls.Add(this._buttonRemove);
@@ -196,5 +298,13 @@
         private System.Windows.Forms.Button _buttonAddNew;
         private System.Windows.Forms.Button _buttonApply;
         private System.Windows.Forms.Button _buttonRemove;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.RadioButton _radioButtonDisabled;
+        private System.Windows.Forms.RadioButton _radioButtonAnalysis;
+        private System.Windows.Forms.RadioButton _radioButtonCompetitive;
+        private System.Windows.Forms.ComboBox _comboBoxEngine1;
+        private System.Windows.Forms.ComboBox _comboBoxEngine2;
+        private System.Windows.Forms.Label _labelEngine1;
+        private System.Windows.Forms.Label _labelEngine2;
     }
 }

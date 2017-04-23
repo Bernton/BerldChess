@@ -47,6 +47,11 @@ namespace BerldChess.View
 
         public static Bitmap GetFromFEN(char FENCharacter)
         {
+            if(PieceImages == null || PieceImages[0] == null)
+            {
+                Inititalize(Resources.ChessPiecesSprite1, 0);
+            }
+
             switch (FENCharacter)
             {
                 case 'K':

@@ -17,7 +17,7 @@ namespace BerldChess.ViewModel
         #region Properties
 
         public int NavigationIndex { get; set; }
-        public Engine Engine { get; set; }
+        public Engine[] Engines { get; set; }
         public ChessGame Game { get; set; }
         public List<ChessPly> PlyList { get; set; }
 
@@ -57,6 +57,8 @@ namespace BerldChess.ViewModel
 
         public FormMainViewModel()
         {
+            Engines = new Engine[2];
+
             NavigationIndex = 0;
             PlyList = new List<ChessPly>();
 

@@ -11,9 +11,6 @@ namespace BerldChess.Model
     {
         #region Fields
 
-
-
-
         private const int SideLength = 8;
         private static Color _darkSquare;
         private static Color _lightSquare;

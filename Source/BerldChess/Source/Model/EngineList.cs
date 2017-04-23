@@ -7,7 +7,8 @@ namespace BerldChess.Model
     public class EngineList
     {
         public List<EngineSetting> Settings { get; set; }
-        public int SelectedIndex { get; set; }
+        public int SelectedIndex1 { get; set; }
+        public int SelectedIndex2 { get; set; }
 
         public List<string> LastPaths { get; set; } = new List<string>();
 
@@ -20,23 +21,36 @@ namespace BerldChess.Model
         }
 
 
-        public EngineSetting SelectedSetting
+        public EngineSetting SelectedSetting1
         {
             get
             {
-                if(SelectedIndex == -1)
+                if(SelectedIndex1 == -1)
                 {
                     return null;
                 }
 
-                return Settings[SelectedIndex];
+                return Settings[SelectedIndex1];
+            }
+        }
+
+        public EngineSetting SelectedSetting2
+        {
+            get
+            {
+                if (SelectedIndex2 == -1)
+                {
+                    return null;
+                }
+
+                return Settings[SelectedIndex2];
             }
         }
 
         public EngineList()
         {
             Settings = new List<EngineSetting>();
-            SelectedIndex = -1;
+            SelectedIndex1 = -1;
         }
 
         public void AddLastPath(string path)

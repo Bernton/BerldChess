@@ -85,6 +85,7 @@ namespace ChessEngineInterface
             }
 
             InitializeEngine();
+            Query("uci");
         }
 
         #endregion
@@ -105,7 +106,6 @@ namespace ChessEngineInterface
         private bool IsResponding(string query)
         {
             _autoResetEvent.Reset();
-            Console.WriteLine("query trig");
             Query(query);
             return _autoResetEvent.WaitOne(TimeoutDuration);
         }

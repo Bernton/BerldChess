@@ -37,7 +37,7 @@ namespace BerldChess.View
 
         public double PieceSizeFactor { get; set; } = 1;
         public bool Gradient { get; set; } = true;
-
+        public bool BorderHighlight { get; set; } = false;
         public bool IsUnicodeFont { get; set; }
 
         public string ChessFontChars { get; set; }
@@ -188,7 +188,7 @@ namespace BerldChess.View
                     }
                 }
 
-                if(Gradient)
+                if (Gradient)
                 {
                     for (int i = 0; i < _scaledPieceImages.Length; i++)
                     {
@@ -228,25 +228,16 @@ namespace BerldChess.View
             {
                 for (int x = 0; x < Game.BoardHeight; x++)
                 {
+                    int index = y * Game.BoardHeight + x + y;
 
-                    if (y % 2 == 1)
+                    if (index % 2 == 0)
                     {
-                        if ((x + 1) % 2 == 0)
-                        {
-                            g.FillRectangle(new SolidBrush(evenSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
-                            continue;
-                        }
+                        g.FillRectangle(new SolidBrush(evenSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
                     }
                     else
                     {
-                        if (x % 2 == 0)
-                        {
-                            g.FillRectangle(new SolidBrush(evenSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
-                            continue;
-                        }
+                        g.FillRectangle(new SolidBrush(oddSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
                     }
-
-                    g.FillRectangle(new SolidBrush(oddSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
                 }
             }
 
@@ -254,13 +245,14 @@ namespace BerldChess.View
             {
                 for (int x = 0; x < Game.BoardHeight; x++)
                 {
+                    int index = y * Game.BoardHeight + x + y;
+                    bool isLightSquare = index % 2 == 0;
+
                     for (int i = 0; i < HighlighedSquares.Count; i++)
                     {
                         if (HighlighedSquares[i].X == x && HighlighedSquares[i].Y == y && !IsFlipped ||
                             (HighlighedSquares[i].X == Invert(Game.BoardHeight - 1, x) && (HighlighedSquares[i].Y == Invert(Game.BoardHeight - 1, y) && IsFlipped)))
                         {
-                            SolidBrush highLight = new SolidBrush(Color.FromArgb(70, 255, 255, 0));
-
                             int widthCorrection = 0;
                             int heightCorrection = 0;
 
@@ -274,7 +266,34 @@ namespace BerldChess.View
                                 heightCorrection = 1;
                             }
 
-                            g.FillRectangle(highLight, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + widthCorrection, xLinePositions[y + 1] - xLinePositions[y] + heightCorrection);
+                            if (BorderHighlight)
+                            {
+                                int borderThickness = Round(_fieldSize / 18.0);
+                                int offSet = borderThickness / 2;
+                                borderThickness = offSet * 2;
+
+                                Pen borderPen = new Pen(Color.Red, borderThickness);
+
+                                g.DrawRectangle(borderPen, xLinePositions[x] + offSet, yLinePositions[y] + offSet, xLinePositions[x + 1] - xLinePositions[x] + widthCorrection - borderThickness, xLinePositions[y + 1] - xLinePositions[y] + heightCorrection - borderThickness);
+                            }
+                            else
+                            {
+                                int tone;
+
+                                if (isLightSquare)
+                                {
+                                    tone = Round((LightSquare.A + LightSquare.B + LightSquare.G) / 3.0);
+                                }
+                                else
+                                {
+                                    tone = Round((DarkSquare.A + DarkSquare.B + DarkSquare.G) / 3.0);
+                                }
+
+                                SolidBrush highLight = new SolidBrush(Color.FromArgb(255, tone, tone, 0));
+
+
+                                g.FillRectangle(highLight, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + widthCorrection, xLinePositions[y + 1] - xLinePositions[y] + heightCorrection);
+                            }
                         }
                     }
                 }
@@ -296,7 +315,6 @@ namespace BerldChess.View
 
                         if (_board[y][x].GetFENLetter() == king)
                         {
-                            SolidBrush checkedWarn = new SolidBrush(Color.FromArgb(70, 255, 104, 84));
 
                             int widthCorrection = 0;
                             int heightCorrection = 0;
@@ -317,7 +335,23 @@ namespace BerldChess.View
                                 y = Invert(Game.BoardHeight - 1, y);
                             }
 
-                            g.FillRectangle(checkedWarn, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + widthCorrection, xLinePositions[y + 1] - xLinePositions[y] + heightCorrection);
+                            float width = (xLinePositions[x + 1] - xLinePositions[x] + widthCorrection) * 1.15F;
+                            float height = (xLinePositions[y + 1] - xLinePositions[y] + heightCorrection) * 1.15F;
+
+                            float xKing = xLinePositions[x] - width * 0.07F;
+                            float yKing = yLinePositions[y] - height * 0.07F;
+
+                            GraphicsPath path = new GraphicsPath();
+                            path.AddEllipse(xKing, yKing, width, height);
+
+                            Color strongRed = Color.FromArgb(255, 255, 40, 50);
+                            Color lightRed = Color.FromArgb(0, 255, 80, 80);
+
+                            PathGradientBrush checkedWarn = new PathGradientBrush(path);
+                            checkedWarn.CenterColor = strongRed;
+                            checkedWarn.SurroundColors = new Color[] { lightRed };
+
+                            g.FillEllipse(checkedWarn, xKing, yKing, width, height);
                             kingFound = true;
                             break;
                         }
@@ -583,7 +617,7 @@ namespace BerldChess.View
 
             Bitmap[] pieceImages = new Bitmap[12];
 
-            int minFontSize = 80;
+            int minFontSize = 125;
             int whiteKing = 0x2654;
 
             char[] characters;
