@@ -278,19 +278,7 @@ namespace BerldChess.View
                             }
                             else
                             {
-                                int tone;
-
-                                if (isLightSquare)
-                                {
-                                    tone = Round((LightSquare.A + LightSquare.B + LightSquare.G) / 3.0);
-                                }
-                                else
-                                {
-                                    tone = Round((DarkSquare.A + DarkSquare.B + DarkSquare.G) / 3.0);
-                                }
-
-                                SolidBrush highLight = new SolidBrush(Color.FromArgb(255, tone, tone, 0));
-
+                                SolidBrush highLight = new SolidBrush(Color.FromArgb(85, 255, 255, 0));
 
                                 g.FillRectangle(highLight, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + widthCorrection, xLinePositions[y + 1] - xLinePositions[y] + heightCorrection);
                             }
@@ -335,23 +323,21 @@ namespace BerldChess.View
                                 y = Invert(Game.BoardHeight - 1, y);
                             }
 
-                            float width = (xLinePositions[x + 1] - xLinePositions[x] + widthCorrection) * 1.15F;
-                            float height = (xLinePositions[y + 1] - xLinePositions[y] + heightCorrection) * 1.15F;
-
-                            float xKing = xLinePositions[x] - width * 0.07F;
-                            float yKing = yLinePositions[y] - height * 0.07F;
+                            float width = xLinePositions[x + 1] - xLinePositions[x] + widthCorrection;
+                            float height = xLinePositions[y + 1] - xLinePositions[y] + heightCorrection;
 
                             GraphicsPath path = new GraphicsPath();
-                            path.AddEllipse(xKing, yKing, width, height);
+                            path.AddEllipse(xLinePositions[x], yLinePositions[y], width, height);
 
                             Color strongRed = Color.FromArgb(255, 255, 40, 50);
                             Color lightRed = Color.FromArgb(0, 255, 80, 80);
 
                             PathGradientBrush checkedWarn = new PathGradientBrush(path);
                             checkedWarn.CenterColor = strongRed;
+                            checkedWarn.FocusScales = new PointF(0.5F, 0.5F);
                             checkedWarn.SurroundColors = new Color[] { lightRed };
 
-                            g.FillEllipse(checkedWarn, xKing, yKing, width, height);
+                            g.FillEllipse(checkedWarn, xLinePositions[x], yLinePositions[y], width, height);
                             kingFound = true;
                             break;
                         }
