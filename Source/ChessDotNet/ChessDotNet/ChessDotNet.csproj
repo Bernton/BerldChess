@@ -49,8 +49,8 @@
     <Compile Include="Source\ChessGame.cs" />
     <Compile Include="Source\DetailedMove.cs" />
     <Compile Include="Source\Enums\ChessFile.cs" />
-    <Compile Include="Source\Enums\GameCreationData.cs" />
     <Compile Include="Source\Enums\GameEvent.cs" />
+    <Compile Include="Source\GameCreationData.cs" />
     <Compile Include="Source\GameStatus.cs" />
     <Compile Include="Source\Cache.cs" />
     <Compile Include="Source\Move.cs" />

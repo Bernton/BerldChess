@@ -48,6 +48,7 @@
             this._comboBoxEngine2 = new System.Windows.Forms.ComboBox();
             this._labelEngine1 = new System.Windows.Forms.Label();
             this._labelEngine2 = new System.Windows.Forms.Label();
+            this._buttonPathDialog = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // _listBoxSettings
@@ -115,7 +116,7 @@
             this._labelPath.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelPath.Location = new System.Drawing.Point(261, 87);
             this._labelPath.Name = "_labelPath";
-            this._labelPath.Size = new System.Drawing.Size(132, 20);
+            this._labelPath.Size = new System.Drawing.Size(131, 20);
             this._labelPath.TabIndex = 22;
             this._labelPath.Text = "Path to Executable";
             // 
@@ -125,7 +126,7 @@
             this._comboBoxPath.FormattingEnabled = true;
             this._comboBoxPath.Location = new System.Drawing.Point(265, 110);
             this._comboBoxPath.Name = "_comboBoxPath";
-            this._comboBoxPath.Size = new System.Drawing.Size(310, 28);
+            this._comboBoxPath.Size = new System.Drawing.Size(275, 28);
             this._comboBoxPath.TabIndex = 17;
             // 
             // _buttonAddNew
@@ -247,11 +248,22 @@
             this._labelEngine2.TabIndex = 33;
             this._labelEngine2.Text = "Engine 2";
             // 
+            // _buttonPathDialog
+            // 
+            this._buttonPathDialog.Location = new System.Drawing.Point(543, 109);
+            this._buttonPathDialog.Name = "_buttonPathDialog";
+            this._buttonPathDialog.Size = new System.Drawing.Size(32, 30);
+            this._buttonPathDialog.TabIndex = 34;
+            this._buttonPathDialog.Text = "...";
+            this._buttonPathDialog.UseVisualStyleBackColor = true;
+            this._buttonPathDialog.Click += new System.EventHandler(this.OnButtonPathDialogClick);
+            // 
             // FormEngineSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(591, 515);
+            this.Controls.Add(this._buttonPathDialog);
             this.Controls.Add(this._labelEngine2);
             this.Controls.Add(this._labelEngine1);
             this.Controls.Add(this._comboBoxEngine2);
@@ -306,5 +318,6 @@
         private System.Windows.Forms.ComboBox _comboBoxEngine2;
         private System.Windows.Forms.Label _labelEngine1;
         private System.Windows.Forms.Label _labelEngine2;
+        private System.Windows.Forms.Button _buttonPathDialog;
     }
 }

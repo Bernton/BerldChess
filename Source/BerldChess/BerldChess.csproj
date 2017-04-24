@@ -66,7 +66,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -197,6 +196,18 @@
     <ProjectReference Include="..\ChessEngineInterface\ChessEngineInterface.csproj">
       <Project>{44e30db3-db05-4e3b-a74d-1caf8acaa444}</Project>
       <Name>ChessEngineInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\pgn.Data\pgn.Data.csproj">
+      <Project>{29143ecd-e5d3-41d4-9c62-81d82597d895}</Project>
+      <Name>pgn.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\pgn.NET\pgn.NET.csproj">
+      <Project>{b06a9f96-62f5-49c9-bfa8-58664d9a7462}</Project>
+      <Name>pgn.NET</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\pgn.Parse\pgn.Parse.fsproj">
+      <Project>{90538968-8127-451b-945d-59707a910b63}</Project>
+      <Name>pgn.Parse</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

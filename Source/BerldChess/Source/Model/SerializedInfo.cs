@@ -51,10 +51,23 @@ namespace BerldChess.Model
         private int _clickDelay = 120;
         private double _sizeFactor = 1;
         private EngineMode _engineMode = EngineMode.Disabled;
+        private string _lastPgnDir = "";
 
         #endregion
 
         #region Properties
+
+        public string LastPgnDir
+        {
+            get
+            {
+                return _lastPgnDir;
+            }
+            set
+            {
+                _lastPgnDir = value;
+            }
+        }
 
         public bool BorderHighlight
         {

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -53,6 +54,12 @@ namespace BerldChess.View
             _listBoxSettings.Items.Clear();
             _comboBoxEngine1.Items.Clear();
             _comboBoxEngine2.Items.Clear();
+            _comboBoxPath.Items.Clear();
+
+            for (int i = 0; i < SerializedInfo.Instance.EngineList.LastPaths.Count; i++)
+            {
+                _comboBoxPath.Items.Insert(0, SerializedInfo.Instance.EngineList.LastPaths[i]);
+            }
 
             for (int i = 0; i < _engineList.Settings.Count; i++)
             {
@@ -116,13 +123,15 @@ namespace BerldChess.View
             if(nameChanged)
             {
                 setting.Name = name;
-                UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
             }
 
             setting.ExecutablePath = _comboBoxPath.Text;
             setting.Arguments = _textBoxArguments.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
+            SerializedInfo.Instance.EngineList.AddLastPath(setting.ExecutablePath);
             EngineSelected?.Invoke();
+
+            UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
         }
 
         private void OnButtonAddNewClick(object sender, EventArgs e)
@@ -159,10 +168,14 @@ namespace BerldChess.View
             setting.ExecutablePath = _comboBoxPath.Text;
             setting.Arguments = _textBoxArguments.Text.Split('\n');
 
+            SerializedInfo.Instance.EngineList.AddLastPath(setting.ExecutablePath);
+
             _engineList.Settings.Add(setting);
 
             _listBoxSettings.Items.Add(setting.Name);
             _listBoxSettings.SelectedIndex = _listBoxSettings.Items.Count - 1;
+
+            UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
         }
 
         private void OnButtonRemoveClick(object sender, EventArgs e)
@@ -175,11 +188,15 @@ namespace BerldChess.View
             _listBoxSettings.SelectedIndex = selected - 1;
 
             EngineSelected?.Invoke();
+            UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
         }
 
         private void OnListBoxSettingsSelectedIndexChanged(object sender, EventArgs e)
         {
-            OpenEngineConfig(_listBoxSettings.SelectedIndex);
+            if(_listBoxSettings.SelectedIndex != -1)
+            {
+                OpenEngineConfig(_listBoxSettings.SelectedIndex);
+            }
         }
 
         private void SetUIToEngineMode(EngineMode mode)
@@ -242,6 +259,44 @@ namespace BerldChess.View
         {
             SerializedInfo.Instance.EngineList.SelectedIndex2 = _comboBoxEngine2.SelectedIndex;
             EngineSelected?.Invoke();
+        }
+
+        private void OnButtonPathDialogClick(object sender, EventArgs e)
+        {
+            string initialDirectory = null;
+
+            for (int i = 0; i < SerializedInfo.Instance.EngineList.LastPaths.Count; i++)
+            {
+                string path = SerializedInfo.Instance.EngineList.LastPaths[i];
+
+                if (File.Exists(path))
+                {
+                    FileInfo fileInfo = new FileInfo(path);
+                    initialDirectory = fileInfo.Directory.FullName;
+                    break;
+                }
+                else if (Directory.Exists(path))
+                {
+                    initialDirectory = path;
+                    break;
+                }
+            }
+
+            OpenFileDialog fileDialog = new OpenFileDialog();
+
+            if (initialDirectory != null)
+            {
+                fileDialog.InitialDirectory = initialDirectory;
+            }
+
+            fileDialog.Filter = "exe files (*.exe)|*.exe|All files (*.*)|*.*";
+            fileDialog.Multiselect = false;
+            fileDialog.RestoreDirectory = true;
+
+            if(fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                _comboBoxPath.Text = fileDialog.FileName;
+            }
         }
     }
 }

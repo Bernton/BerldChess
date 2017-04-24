@@ -116,7 +116,7 @@
             // _splitContainerBoard.Panel2
             // 
             this._splitContainerBoard.Panel2.Controls.Add(this._dataGridViewEvaluation);
-            this._splitContainerBoard.Size = new System.Drawing.Size(719, 498);
+            this._splitContainerBoard.Size = new System.Drawing.Size(721, 498);
             this._splitContainerBoard.SplitterDistance = 466;
             this._splitContainerBoard.SplitterWidth = 3;
             this._splitContainerBoard.TabIndex = 0;
@@ -154,7 +154,7 @@
             this._dataGridViewEvaluation.ShowCellErrors = false;
             this._dataGridViewEvaluation.ShowEditingIcon = false;
             this._dataGridViewEvaluation.ShowRowErrors = false;
-            this._dataGridViewEvaluation.Size = new System.Drawing.Size(717, 27);
+            this._dataGridViewEvaluation.Size = new System.Drawing.Size(719, 27);
             this._dataGridViewEvaluation.TabIndex = 1;
             // 
             // _timerValidation
@@ -202,7 +202,7 @@
             // 
             this._menuItemNew.Name = "_menuItemNew";
             this._menuItemNew.ShortcutKeyDisplayString = "N";
-            this._menuItemNew.Size = new System.Drawing.Size(291, 26);
+            this._menuItemNew.Size = new System.Drawing.Size(289, 26);
             this._menuItemNew.Tag = "";
             this._menuItemNew.Text = "New";
             this._menuItemNew.Click += new System.EventHandler(this.OnMenuItemNewClick);
@@ -211,7 +211,7 @@
             // 
             this._menuItemLoadFen.Name = "_menuItemLoadFen";
             this._menuItemLoadFen.ShortcutKeyDisplayString = "L";
-            this._menuItemLoadFen.Size = new System.Drawing.Size(291, 26);
+            this._menuItemLoadFen.Size = new System.Drawing.Size(289, 26);
             this._menuItemLoadFen.Tag = "";
             this._menuItemLoadFen.Text = "Load from FEN";
             this._menuItemLoadFen.Click += new System.EventHandler(this.OnMenuItemLoadFenClick);
@@ -220,16 +220,15 @@
             // 
             this._menuItemCopyFen.Name = "_menuItemCopyFen";
             this._menuItemCopyFen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.C)));
-            this._menuItemCopyFen.Size = new System.Drawing.Size(291, 26);
+            this._menuItemCopyFen.Size = new System.Drawing.Size(289, 26);
             this._menuItemCopyFen.Text = "Copy FEN To Clipboard";
             this._menuItemCopyFen.Click += new System.EventHandler(this.OnMenuItemCopyFenClick);
             // 
             // _menuItemLoadPgn
             // 
             this._menuItemLoadPgn.Name = "_menuItemLoadPgn";
-            this._menuItemLoadPgn.Size = new System.Drawing.Size(291, 26);
+            this._menuItemLoadPgn.Size = new System.Drawing.Size(289, 26);
             this._menuItemLoadPgn.Text = "Load from PGN";
-            this._menuItemLoadPgn.Visible = false;
             this._menuItemLoadPgn.Click += new System.EventHandler(this.OnMenuItemLoadPgnClick);
             // 
             // _menuItemEngine
@@ -249,21 +248,21 @@
             // _menuItemEngineSettings
             // 
             this._menuItemEngineSettings.Name = "_menuItemEngineSettings";
-            this._menuItemEngineSettings.Size = new System.Drawing.Size(220, 26);
+            this._menuItemEngineSettings.Size = new System.Drawing.Size(219, 26);
             this._menuItemEngineSettings.Text = "Engine Settings";
             this._menuItemEngineSettings.Click += new System.EventHandler(this.OnMenuItemEngineSettingsClick);
             // 
             // _menuItemEngineTime
             // 
             this._menuItemEngineTime.Name = "_menuItemEngineTime";
-            this._menuItemEngineTime.Size = new System.Drawing.Size(220, 26);
+            this._menuItemEngineTime.Size = new System.Drawing.Size(219, 26);
             this._menuItemEngineTime.Text = "Engine Time";
             this._menuItemEngineTime.Click += new System.EventHandler(this.OnMenuItemEngineTimeClick);
             // 
             // _menuItemMultiPv
             // 
             this._menuItemMultiPv.Name = "_menuItemMultiPv";
-            this._menuItemMultiPv.Size = new System.Drawing.Size(220, 26);
+            this._menuItemMultiPv.Size = new System.Drawing.Size(219, 26);
             this._menuItemMultiPv.Text = "MultiPV";
             this._menuItemMultiPv.Click += new System.EventHandler(this.OnMenuItemMultiPvClick);
             // 
@@ -271,7 +270,7 @@
             // 
             this._menuItemComputerMove.Name = "_menuItemComputerMove";
             this._menuItemComputerMove.ShortcutKeyDisplayString = "C";
-            this._menuItemComputerMove.Size = new System.Drawing.Size(220, 26);
+            this._menuItemComputerMove.Size = new System.Drawing.Size(219, 26);
             this._menuItemComputerMove.Text = "Play Now";
             this._menuItemComputerMove.Click += new System.EventHandler(this.OnMenuItemComputerMoveClick);
             // 
@@ -279,14 +278,14 @@
             // 
             this._menuItemAutoPlay.Name = "_menuItemAutoPlay";
             this._menuItemAutoPlay.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this._menuItemAutoPlay.Size = new System.Drawing.Size(220, 26);
+            this._menuItemAutoPlay.Size = new System.Drawing.Size(219, 26);
             this._menuItemAutoPlay.Text = "Auto Play";
             this._menuItemAutoPlay.Click += new System.EventHandler(this.OnMenuItemAutoPlayClick);
             // 
             // _menuItemDepthAnalysis
             // 
             this._menuItemDepthAnalysis.Name = "_menuItemDepthAnalysis";
-            this._menuItemDepthAnalysis.Size = new System.Drawing.Size(220, 26);
+            this._menuItemDepthAnalysis.Size = new System.Drawing.Size(219, 26);
             this._menuItemDepthAnalysis.Text = "Start Depth Analysis";
             this._menuItemDepthAnalysis.Click += new System.EventHandler(this.OnMenuItemDepthAnalysisClick);
             // 
@@ -302,7 +301,7 @@
             this._menuItemAutoMove,
             this._menuItemCheckAuto});
             this._menuItemCheatMode.Name = "_menuItemCheatMode";
-            this._menuItemCheatMode.Size = new System.Drawing.Size(220, 26);
+            this._menuItemCheatMode.Size = new System.Drawing.Size(219, 26);
             this._menuItemCheatMode.Text = "Cheat Mode";
             this._menuItemCheatMode.CheckedChanged += new System.EventHandler(this.OnMenuItemCheatModeCheckedChanged);
             // 
@@ -483,7 +482,7 @@
             this._labelShowEvaluation.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelShowEvaluation.Location = new System.Drawing.Point(-1, 10);
             this._labelShowEvaluation.Name = "_labelShowEvaluation";
-            this._labelShowEvaluation.Size = new System.Drawing.Size(231, 21);
+            this._labelShowEvaluation.Size = new System.Drawing.Size(229, 21);
             this._labelShowEvaluation.TabIndex = 2;
             this._labelShowEvaluation.Text = "Evaluation:";
             this._labelShowEvaluation.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -497,7 +496,7 @@
             this._labelEvaluation.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(127)))), ((int)(((byte)(0)))));
             this._labelEvaluation.Location = new System.Drawing.Point(3, 31);
             this._labelEvaluation.Name = "_labelEvaluation";
-            this._labelEvaluation.Size = new System.Drawing.Size(224, 39);
+            this._labelEvaluation.Size = new System.Drawing.Size(222, 39);
             this._labelEvaluation.TabIndex = 3;
             this._labelEvaluation.Text = "+0.00";
             this._labelEvaluation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -515,7 +514,7 @@
             this._panelRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this._panelRight.Location = new System.Drawing.Point(0, 0);
             this._panelRight.Name = "_panelRight";
-            this._panelRight.Size = new System.Drawing.Size(248, 498);
+            this._panelRight.Size = new System.Drawing.Size(246, 498);
             this._panelRight.TabIndex = 4;
             // 
             // _tableLayoutPanelEvalInfos
@@ -542,7 +541,7 @@
             this._tableLayoutPanelEvalInfos.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.10392F));
             this._tableLayoutPanelEvalInfos.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.10392F));
             this._tableLayoutPanelEvalInfos.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 3.790648F));
-            this._tableLayoutPanelEvalInfos.Size = new System.Drawing.Size(185, 99);
+            this._tableLayoutPanelEvalInfos.Size = new System.Drawing.Size(183, 99);
             this._tableLayoutPanelEvalInfos.TabIndex = 8;
             // 
             // _labelTime
@@ -553,7 +552,7 @@
             this._labelTime.Location = new System.Drawing.Point(0, 69);
             this._labelTime.Margin = new System.Windows.Forms.Padding(0);
             this._labelTime.Name = "_labelTime";
-            this._labelTime.Size = new System.Drawing.Size(92, 22);
+            this._labelTime.Size = new System.Drawing.Size(91, 22);
             this._labelTime.TabIndex = 8;
             this._labelTime.Text = "-";
             this._labelTime.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -565,10 +564,10 @@
             this._labelNPS.BackColor = System.Drawing.SystemColors.Control;
             this._labelNPS.Dock = System.Windows.Forms.DockStyle.Fill;
             this._labelNPS.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelNPS.Location = new System.Drawing.Point(92, 69);
+            this._labelNPS.Location = new System.Drawing.Point(91, 69);
             this._labelNPS.Margin = new System.Windows.Forms.Padding(0);
             this._labelNPS.Name = "_labelNPS";
-            this._labelNPS.Size = new System.Drawing.Size(93, 22);
+            this._labelNPS.Size = new System.Drawing.Size(92, 22);
             this._labelNPS.TabIndex = 7;
             this._labelNPS.Text = "-";
             this._labelNPS.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -584,7 +583,7 @@
             this._labelDepth.Location = new System.Drawing.Point(0, 22);
             this._labelDepth.Margin = new System.Windows.Forms.Padding(0);
             this._labelDepth.Name = "_labelDepth";
-            this._labelDepth.Size = new System.Drawing.Size(92, 22);
+            this._labelDepth.Size = new System.Drawing.Size(91, 22);
             this._labelDepth.TabIndex = 6;
             this._labelDepth.Text = "-";
             this._labelDepth.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -596,10 +595,10 @@
             this._labelShowNodes.BackColor = System.Drawing.SystemColors.Control;
             this._labelShowNodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this._labelShowNodes.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowNodes.Location = new System.Drawing.Point(92, 0);
+            this._labelShowNodes.Location = new System.Drawing.Point(91, 0);
             this._labelShowNodes.Margin = new System.Windows.Forms.Padding(0);
             this._labelShowNodes.Name = "_labelShowNodes";
-            this._labelShowNodes.Size = new System.Drawing.Size(93, 22);
+            this._labelShowNodes.Size = new System.Drawing.Size(92, 22);
             this._labelShowNodes.TabIndex = 4;
             this._labelShowNodes.Text = "Nodes";
             this._labelShowNodes.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -613,7 +612,7 @@
             this._labelShowDepth.Location = new System.Drawing.Point(0, 0);
             this._labelShowDepth.Margin = new System.Windows.Forms.Padding(0);
             this._labelShowDepth.Name = "_labelShowDepth";
-            this._labelShowDepth.Size = new System.Drawing.Size(92, 22);
+            this._labelShowDepth.Size = new System.Drawing.Size(91, 22);
             this._labelShowDepth.TabIndex = 3;
             this._labelShowDepth.Text = "Depth";
             this._labelShowDepth.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -627,7 +626,7 @@
             this._labelShowTime.Location = new System.Drawing.Point(0, 47);
             this._labelShowTime.Margin = new System.Windows.Forms.Padding(0);
             this._labelShowTime.Name = "_labelShowTime";
-            this._labelShowTime.Size = new System.Drawing.Size(92, 22);
+            this._labelShowTime.Size = new System.Drawing.Size(91, 22);
             this._labelShowTime.TabIndex = 9;
             this._labelShowTime.Text = "Time";
             this._labelShowTime.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -638,10 +637,10 @@
             this._labelShowNPS.BackColor = System.Drawing.SystemColors.Control;
             this._labelShowNPS.Dock = System.Windows.Forms.DockStyle.Fill;
             this._labelShowNPS.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowNPS.Location = new System.Drawing.Point(92, 47);
+            this._labelShowNPS.Location = new System.Drawing.Point(91, 47);
             this._labelShowNPS.Margin = new System.Windows.Forms.Padding(0);
             this._labelShowNPS.Name = "_labelShowNPS";
-            this._labelShowNPS.Size = new System.Drawing.Size(93, 22);
+            this._labelShowNPS.Size = new System.Drawing.Size(92, 22);
             this._labelShowNPS.TabIndex = 10;
             this._labelShowNPS.Text = "NPS";
             this._labelShowNPS.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -653,10 +652,10 @@
             this._labelNodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this._labelNodes.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._labelNodes.ForeColor = System.Drawing.SystemColors.ControlText;
-            this._labelNodes.Location = new System.Drawing.Point(92, 22);
+            this._labelNodes.Location = new System.Drawing.Point(91, 22);
             this._labelNodes.Margin = new System.Windows.Forms.Padding(0);
             this._labelNodes.Name = "_labelNodes";
-            this._labelNodes.Size = new System.Drawing.Size(93, 22);
+            this._labelNodes.Size = new System.Drawing.Size(92, 22);
             this._labelNodes.TabIndex = 5;
             this._labelNodes.Text = "-";
             this._labelNodes.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -680,7 +679,7 @@
             this._tableLayoutPanelModules.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 47.64972F));
             this._tableLayoutPanelModules.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this._tableLayoutPanelModules.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this._tableLayoutPanelModules.Size = new System.Drawing.Size(185, 336);
+            this._tableLayoutPanelModules.Size = new System.Drawing.Size(183, 336);
             this._tableLayoutPanelModules.TabIndex = 7;
             this._tableLayoutPanelModules.Resize += new System.EventHandler(this.OnTableLayoutPanelModulesResize);
             // 
@@ -716,7 +715,7 @@
             this._dataGridViewMoves.ShowCellErrors = false;
             this._dataGridViewMoves.ShowEditingIcon = false;
             this._dataGridViewMoves.ShowRowErrors = false;
-            this._dataGridViewMoves.Size = new System.Drawing.Size(179, 153);
+            this._dataGridViewMoves.Size = new System.Drawing.Size(177, 153);
             this._dataGridViewMoves.TabIndex = 6;
             this._dataGridViewMoves.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.OnDataGridViewMovesCellMouseClick);
             this._dataGridViewMoves.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnDataGridViewMovesKeyDown);
@@ -742,7 +741,7 @@
             this._panelEvaluationChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this._panelEvaluationChart.Location = new System.Drawing.Point(3, 178);
             this._panelEvaluationChart.Name = "_panelEvaluationChart";
-            this._panelEvaluationChart.Size = new System.Drawing.Size(179, 155);
+            this._panelEvaluationChart.Size = new System.Drawing.Size(177, 155);
             this._panelEvaluationChart.TabIndex = 5;
             this._panelEvaluationChart.Tag = "";
             this._panelEvaluationChart.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPanelEvaluationChartPaint);
@@ -766,7 +765,7 @@
             this._splitContainerMain.Panel2.Controls.Add(this._panelRight);
             this._splitContainerMain.Panel2MinSize = 200;
             this._splitContainerMain.Size = new System.Drawing.Size(969, 498);
-            this._splitContainerMain.SplitterDistance = 719;
+            this._splitContainerMain.SplitterDistance = 721;
             this._splitContainerMain.SplitterWidth = 2;
             this._splitContainerMain.TabIndex = 5;
             // 

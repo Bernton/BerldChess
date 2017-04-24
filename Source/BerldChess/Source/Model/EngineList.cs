@@ -55,11 +55,14 @@ namespace BerldChess.Model
 
         public void AddLastPath(string path)
         {
-            LastPaths.Add(path);
-
-            if(LastPaths.Count > 8)
+            if (!LastPaths.Contains(path))
             {
-                LastPaths.RemoveRange(8, LastPaths.Count - 8);
+                LastPaths.Add(path);
+
+                if (LastPaths.Count > 8)
+                {
+                    LastPaths.RemoveRange(8, LastPaths.Count - 8);
+                }
             }
         }
     }

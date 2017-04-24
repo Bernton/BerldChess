@@ -440,7 +440,8 @@ namespace BerldChess.View
             }
         }
 
-        private bool PlayMove(PieceMovedEventArgs args, char? promotion = null, bool cheatMove = false)
+
+        private bool PlayMove(PieceMovedEventArgs args, char? promotion = null, bool cheatMove = false, bool silent = false)
         {
             BoardPosition sourcePosition = new BoardPosition((ChessFile)args.Position.X, Invert(args.Position.Y - 1, 7));
             BoardPosition destinationPosition = new BoardPosition((ChessFile)args.NewPosition.X, Invert(args.NewPosition.Y - 1, 7));
@@ -460,7 +461,7 @@ namespace BerldChess.View
 
             if (!_vm.Game.IsValidMove(move))
             {
-                if (!cheatMove && _menuItemSound.Checked)
+                if (!cheatMove && !silent && _menuItemSound.Checked)
                 {
                     _illegalPlayer.Play();
                 }
@@ -478,7 +479,10 @@ namespace BerldChess.View
             ReadOnlyCollection<Move> validMoves = _vm.Game.GetValidMoves(_vm.Game.WhoseTurn);
             MoveType moveType = _vm.Game.ApplyMove(move, true);
 
-            PlayMoveSound();
+            if (!silent)
+            {
+                PlayMoveSound();
+            }
 
             _chessPanel.HighlighedSquares.Clear();
             _chessPanel.HighlighedSquares.Add(args.Position);
@@ -685,7 +689,7 @@ namespace BerldChess.View
                     continue;
                 }
 
-                if(_vm.Engines[i].Name != null)
+                if (_vm.Engines[i].Name != null)
                 {
                     text += $" | {_vm.Engines[i].Name}";
                 }
@@ -1119,7 +1123,7 @@ namespace BerldChess.View
                                 Navigate(i);
                             });
 
-                            while (_vm.PlyList[i].EvaluationDepth < depth)
+                            while (_vm.PlyList[i].EvaluationDepth < depth && !IsFinishedPosition())
                             {
                                 Thread.Sleep(100);
 
@@ -1186,7 +1190,257 @@ namespace BerldChess.View
         private void OnMenuItemLoadPgnClick(object sender, EventArgs e)
         {
             FormPgnLoader pgnLoader = new FormPgnLoader();
-            pgnLoader.ShowDialog();
+
+            if (pgnLoader.ShowDialog() == DialogResult.OK)
+            {
+                LoadGame(pgnLoader.PgnLoadedGame);
+            }
+        }
+
+        private void LoadGame(ilf.pgn.Data.Game game)
+        {
+            if(game.Tags.ContainsKey("FEN"))
+            {
+                ResetGame(new ChessGame(game.Tags["FEN"]));
+            }
+            else
+            {
+                ResetGame(new ChessGame());
+            }
+
+            for (int i = 0; i < game.MoveText.Count; i++)
+            {
+                switch (game.MoveText[i].Type)
+                {
+                    case ilf.pgn.Data.MoveTextEntryType.MovePair:
+                        ilf.pgn.Data.MovePairEntry movePair = (ilf.pgn.Data.MovePairEntry)game.MoveText[i];
+
+                        PlayShortMove(movePair.White, true);
+                        PlayShortMove(movePair.Black, false);
+                        break;
+
+                    case ilf.pgn.Data.MoveTextEntryType.SingleMove:
+                        ilf.pgn.Data.HalfMoveEntry singleMove = (ilf.pgn.Data.HalfMoveEntry)game.MoveText[i];
+
+                        bool isWhite = false;
+
+                        if(_vm.Game.WhoseTurn == ChessPlayer.White)
+                        {
+                            isWhite = true;
+                        }
+
+                        PlayShortMove(singleMove.Move, isWhite);
+                        break;
+                }
+            }
+        }
+
+        private void PlayShortMove(ilf.pgn.Data.Move move, bool isWhite)
+        {
+            ChessPiece[][] pieces = _vm.Game.GetBoard();
+            string moveString = move.ToString();
+
+            if (move.ToString().Contains("=Q"))
+            {
+
+            }
+
+            if (move.Type == ilf.pgn.Data.MoveType.CastleKingSide)
+            {
+                Point position;
+                Point newPosition;
+
+                if (isWhite)
+                {
+                    position = new Point(4, 7);
+                    newPosition = new Point(6, 7);
+                }
+                else
+                {
+                    position = new Point(4, 0);
+                    newPosition = new Point(6, 0);
+                }
+
+                PieceMovedEventArgs args = new PieceMovedEventArgs(position, newPosition);
+
+                PlayMove(args);
+                return;
+            }
+            else if (move.Type == ilf.pgn.Data.MoveType.CastleQueenSide)
+            {
+                Point position;
+                Point newPosition;
+
+                if (isWhite)
+                {
+                    position = new Point(4, 7);
+                    newPosition = new Point(2, 7);
+                }
+                else
+                {
+                    position = new Point(4, 0);
+                    newPosition = new Point(2, 0);
+                }
+
+                PieceMovedEventArgs args = new PieceMovedEventArgs(position, newPosition);
+
+                PlayMove(args);
+                return;
+            }
+
+            char searchedPiece = ' ';
+
+            switch (move.Piece)
+            {
+                case ilf.pgn.Data.PieceType.King:
+
+                    if (isWhite)
+                    {
+                        searchedPiece = 'K';
+                    }
+                    else
+                    {
+                        searchedPiece = 'k';
+                    }
+                    break;
+
+                case ilf.pgn.Data.PieceType.Bishop:
+
+                    if (isWhite)
+                    {
+                        searchedPiece = 'B';
+                    }
+                    else
+                    {
+                        searchedPiece = 'b';
+                    }
+                    break;
+
+                case ilf.pgn.Data.PieceType.Knight:
+
+                    if (isWhite)
+                    {
+                        searchedPiece = 'N';
+                    }
+                    else
+                    {
+                        searchedPiece = 'n';
+                    }
+                    break;
+
+                case ilf.pgn.Data.PieceType.Pawn:
+
+                    if (isWhite)
+                    {
+                        searchedPiece = 'P';
+                    }
+                    else
+                    {
+                        searchedPiece = 'p';
+                    }
+                    break;
+
+                case ilf.pgn.Data.PieceType.Queen:
+
+                    if (isWhite)
+                    {
+                        searchedPiece = 'Q';
+                    }
+                    else
+                    {
+                        searchedPiece = 'q';
+                    }
+                    break;
+
+                case ilf.pgn.Data.PieceType.Rook:
+
+                    if (isWhite)
+                    {
+                        searchedPiece = 'R';
+                    }
+                    else
+                    {
+                        searchedPiece = 'r';
+                    }
+                    break;
+            }
+
+            int originY = -1;
+
+            if (move.OriginRank != null)
+            {
+                originY = Invert((int)move.OriginRank - 1, 7);
+            }
+
+            int originX = -1;
+
+            if (move.OriginFile != null)
+            {
+                originX = (int)move.OriginFile - 1;
+            }
+
+            bool found = false;
+
+            for (int y = 0; y < pieces.Length; y++)
+            {
+                if (originY != -1 && y != originY)
+                {
+                    continue;
+                }
+
+                for (int x = 0; x < pieces.Length; x++)
+                {
+                    if (originX != -1 && x != originX)
+                    {
+                        continue;
+                    }
+
+                    if (pieces[y][x] != null && pieces[y][x].GetFENLetter() == searchedPiece)
+                    {
+                        Point position = new Point(x, y);
+                        Point newPosition = new Point((int)move.TargetSquare.File - 1, Invert(move.TargetSquare.Rank - 1, 7));
+
+                        if (pieces[y][x].IsLegalMove(new Move(new BoardPosition((ChessFile)x, Invert(y, 7) + 1), new BoardPosition(move.TargetSquare.ToString()), isWhite ? ChessPlayer.White : ChessPlayer.Black, GetPieceChar(move.PromotedPiece)), _vm.Game))
+                        {
+                            PieceMovedEventArgs args = new PieceMovedEventArgs(position, newPosition);
+
+                            PlayMove(args, GetPieceChar(move.PromotedPiece), silent: true);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (found)
+                {
+                    break;
+                }
+            }
+        }
+
+        private char GetPieceChar(ilf.pgn.Data.PieceType? type)
+        {
+            if (type == null)
+            {
+                return 'q';
+            }
+
+            switch (type)
+            {
+                case ilf.pgn.Data.PieceType.Queen:
+                    return 'q';
+
+                case ilf.pgn.Data.PieceType.Rook:
+                    return 'r';
+
+                case ilf.pgn.Data.PieceType.Bishop:
+                    return 'b';
+
+                case ilf.pgn.Data.PieceType.Knight:
+                    return 'n';
+            }
+
+            return 'q';
         }
 
         private void OnPanelEvaluationChartPaint(object sender, PaintEventArgs e)
@@ -2280,8 +2534,13 @@ namespace BerldChess.View
 
                 PieceMovedEventArgs args = new PieceMovedEventArgs(source, destination);
 
-                PlayMove(args, 'q', true);
-                GetPlayingEngine().RequestStop();
+                if (PlayMove(args, 'q', true))
+                {
+                    _movePlayed = true;
+                    GetPlayingEngine().RequestStop();
+                }
+
+                Recognizer.UpdateBoardImage(_currImg);
             }
 
             _comparisonSnap = _currImg;
@@ -2289,39 +2548,48 @@ namespace BerldChess.View
 
         private bool CompareBitmaps(Bitmap bitmap1, Bitmap bitmap2)
         {
-            bool equals = true;
-
-            Rectangle rect = new Rectangle(0, 0, bitmap1.Width, bitmap1.Height);
-            BitmapData bitmapData1 = bitmap1.LockBits(rect, ImageLockMode.ReadOnly, bitmap1.PixelFormat);
-            BitmapData bitmapData2 = bitmap2.LockBits(rect, ImageLockMode.ReadOnly, bitmap2.PixelFormat);
-
-            unsafe
+            try
             {
-                byte* ptr1 = (byte*)bitmapData1.Scan0.ToPointer();
-                byte* ptr2 = (byte*)bitmapData2.Scan0.ToPointer();
-                int width = rect.Width * 3;
+                bool equals = true;
 
-                for (int y = 0; equals && y < rect.Height; y++)
+                Rectangle rect = new Rectangle(0, 0, bitmap1.Width, bitmap1.Height);
+                BitmapData bitmapData1 = bitmap1.LockBits(rect, ImageLockMode.ReadOnly, bitmap1.PixelFormat);
+                BitmapData bitmapData2 = bitmap2.LockBits(rect, ImageLockMode.ReadOnly, bitmap2.PixelFormat);
+
+                unsafe
                 {
-                    for (int x = 0; x < width; x++)
+                    byte* ptr1 = (byte*)bitmapData1.Scan0.ToPointer();
+                    byte* ptr2 = (byte*)bitmapData2.Scan0.ToPointer();
+                    int width = rect.Width * 3;
+
+                    for (int y = 0; equals && y < rect.Height; y++)
                     {
-                        if (*ptr1 != *ptr2)
+                        for (int x = 0; x < width; x++)
                         {
-                            equals = false;
-                            break;
+                            if (*ptr1 != *ptr2)
+                            {
+                                equals = false;
+                                break;
+                            }
+                            ptr1++;
+                            ptr2++;
                         }
-                        ptr1++;
-                        ptr2++;
+                        ptr1 += bitmapData1.Stride - width;
+                        ptr2 += bitmapData2.Stride - width;
                     }
-                    ptr1 += bitmapData1.Stride - width;
-                    ptr2 += bitmapData2.Stride - width;
                 }
+
+                bitmap1.UnlockBits(bitmapData1);
+                bitmap2.UnlockBits(bitmapData2);
+
+                return equals;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
             }
 
-            bitmap1.UnlockBits(bitmapData1);
-            bitmap2.UnlockBits(bitmapData2);
-
-            return equals;
+            return false;
         }
 
         private void SetExtendedInfoEnabled(bool active)

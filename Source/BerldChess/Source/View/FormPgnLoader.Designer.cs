@@ -44,6 +44,7 @@
             this._buttonLoad.TabIndex = 0;
             this._buttonLoad.Text = "Load";
             this._buttonLoad.UseVisualStyleBackColor = true;
+            this._buttonLoad.Click += new System.EventHandler(this.OnButtonLoadClick);
             // 
             // _buttonCancel
             // 
@@ -54,6 +55,7 @@
             this._buttonCancel.TabIndex = 1;
             this._buttonCancel.Text = "Cancel";
             this._buttonCancel.UseVisualStyleBackColor = true;
+            this._buttonCancel.Click += new System.EventHandler(this.OnButtonCancelClick);
             // 
             // _textBoxPgnInput
             // 
@@ -82,6 +84,7 @@
             this._buttonChooseFile.Size = new System.Drawing.Size(138, 40);
             this._buttonChooseFile.TabIndex = 4;
             this._buttonChooseFile.Text = "Choose File";
+            this._buttonChooseFile.Click += new System.EventHandler(this.OnButtonChooseFileClick);
             // 
             // FormPgnLoader
             // 
