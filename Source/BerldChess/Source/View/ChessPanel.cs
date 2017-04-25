@@ -18,17 +18,19 @@ namespace BerldChess.View
     {
         #region Fields
 
+        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(200, 3, 139, 115));
         private bool _renderImages = true;
         private int _boardDimension;
         private double _fieldSize;
         private double _fontSizeFactor = -1;
         private Point _boardLocation;
+        private Point _selectedIndex = new Point(-1, -1);
         private Point _movingPieceIndex = new Point(-1, -1);
         private Point _movingPoint = new Point(-1, -1);
         private List<Arrow> _arrows = new List<Arrow>();
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
-
+        private ChessGame _game = null;
         private string _pieceFontFamily = string.Empty;
 
         #endregion
@@ -72,7 +74,21 @@ namespace BerldChess.View
         public Color DarkSquare { get; set; }
         public Color LightSquare { get; set; }
 
-        public ChessGame Game { get; set; } = null;
+        public ChessGame Game
+        {
+            get
+            {
+                return _game;
+            }
+            set
+            {
+                _movingPieceIndex = new Point(-1, -1);
+                _selectedIndex = new Point(-1, -1);
+
+                _game = value;
+            }
+        }
+
         public List<Point> HighlighedSquares { get; set; } = new List<Point>();
 
         public ChessPiece[][] Board
@@ -100,7 +116,7 @@ namespace BerldChess.View
 
         #region Events
 
-        public event FigureMovedEventHandler PieceMoved;
+        public event PieceMovedEventHandler PieceMoved;
 
         #endregion
 
@@ -378,7 +394,7 @@ namespace BerldChess.View
             {
                 for (int x = 0; x < _board.Length; x++)
                 {
-                    if (_board[y][x] == null || (y == _movingPieceIndex.Y && x == _movingPieceIndex.X))
+                    if (_board[y][x] == null || (y == _movingPieceIndex.Y && x == _movingPieceIndex.X && _movingPoint.X != -1))
                     {
                         continue;
                     }
@@ -412,11 +428,50 @@ namespace BerldChess.View
                 }
             }
 
+            Point _possibleMovePieceIndex = new Point(-1, -1);
+
+            if (_movingPieceIndex.X != -1)
+            {
+                _possibleMovePieceIndex = _movingPieceIndex;
+            }
+            else if (_selectedIndex.X != -1)
+            {
+                _possibleMovePieceIndex = _selectedIndex;
+            }
+
+            if (_possibleMovePieceIndex.X != -1 && _board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X] != null)
+            {
+                if (_board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X].Owner == ChessPlayer.White)
+                {
+                    figureBrush = new SolidBrush(Color.White);
+                }
+                else
+                {
+                    figureBrush = new SolidBrush(Color.Black);
+                }
+
+                BoardPosition startPosition = new BoardPosition((ChessFile)_possibleMovePieceIndex.X, Invert(Game.BoardHeight, _possibleMovePieceIndex.Y));
+
+                ReadOnlyCollection<Move> validMoves = Game.GetValidMoves(startPosition);
+
+                for (int i = 0; i < validMoves.Count; i++)
+                {
+                    Move current = validMoves[i];
+
+                    if (!IsFlipped)
+                    {
+                        g.FillEllipse(_legalMoveCircleBrush, Round(((int)current.NewPosition.File) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round(Invert(Game.BoardHeight, current.NewPosition.Rank) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
+
+                    }
+                    else
+                    {
+                        g.FillEllipse(_legalMoveCircleBrush, Round((Invert(Game.BoardHeight - 1, (int)current.NewPosition.File)) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round((current.NewPosition.Rank - 1) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
+                    }
+                }
+            }
+
             if (_arrows.Count > 0)
             {
-                bool moving = _movingPieceIndex.X != -1 && _board[_movingPieceIndex.Y][_movingPieceIndex.X] != null;
-
-
                 ArrowDrawInfo[] drawInfo = new ArrowDrawInfo[_arrows.Count];
 
                 Point[][] arrowPositions = new Point[_arrows.Count][];
@@ -449,36 +504,8 @@ namespace BerldChess.View
                 }
             }
 
-            if (_movingPieceIndex.X != -1 && _board[_movingPieceIndex.Y][_movingPieceIndex.X] != null)
+            if (_movingPieceIndex.X != -1 && _movingPoint.X != -1)
             {
-                if (_board[_movingPieceIndex.Y][_movingPieceIndex.X].Owner == ChessPlayer.White)
-                {
-                    figureBrush = new SolidBrush(Color.White);
-                }
-                else
-                {
-                    figureBrush = new SolidBrush(Color.Black);
-                }
-
-                BoardPosition startPosition = new BoardPosition((ChessFile)_movingPieceIndex.X, Invert(Game.BoardHeight, _movingPieceIndex.Y));
-
-                ReadOnlyCollection<Move> validMoves = Game.GetValidMoves(startPosition);
-
-                for (int i = 0; i < validMoves.Count; i++)
-                {
-                    Move current = validMoves[i];
-
-                    if (!IsFlipped)
-                    {
-                        g.FillEllipse(Brushes.LightCoral, Round(((int)current.NewPosition.File) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round(Invert(Game.BoardHeight, current.NewPosition.Rank) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
-
-                    }
-                    else
-                    {
-                        g.FillEllipse(Brushes.LightCoral, Round((Invert(Game.BoardHeight - 1, (int)current.NewPosition.File)) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round((current.NewPosition.Rank - 1) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
-                    }
-                }
-
                 absX = _movingPoint.X - (float)(_fieldSize / 2.0);
                 absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
 
@@ -487,6 +514,7 @@ namespace BerldChess.View
 
                 g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())], absX, absY);
             }
+
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
@@ -515,9 +543,7 @@ namespace BerldChess.View
                 return;
             }
 
-            //_movingPoint = new Point(Round(relativeBoardX * _fieldSize + _boardLocation.X + _fieldSize / 2.0 + (_fieldSize - _pieceDimension) / 2.0), Round(relativeBoardY * _fieldSize + _boardLocation.Y + _fieldSize / 2.0 + (_fieldSize - _pieceDimension) / 2.0));
-            _movingPoint = new Point(e.X, e.Y);
-            //_movingOffset = new Point(_movingPoint.X - e.X, _movingPoint.Y - e.Y);
+            _movingPoint = new Point(-1, -1);
             _movingPieceIndex = pieceIndex;
 
             Invalidate();
@@ -527,41 +553,68 @@ namespace BerldChess.View
         {
             base.OnMouseUp(e);
 
-            if (_movingPieceIndex.X != -1)
+            int absoluteBoardX = e.X - _boardLocation.X;
+            int absoluteBoardY = e.Y - _boardLocation.Y;
+
+            int relativeBoardX;
+            int relativeBoardY;
+
+            if (!IsFlipped)
             {
-                int absoluteBoardX = e.X - _boardLocation.X; //+ _movingOffset.X;
-                int absoluteBoardY = e.Y - _boardLocation.Y; //+ _movingOffset.Y;
+                relativeBoardX = absoluteBoardX / (int)_fieldSize;
+                relativeBoardY = absoluteBoardY / (int)_fieldSize;
+            }
+            else
+            {
+                relativeBoardX = Invert(Game.BoardHeight - 1, absoluteBoardX / (int)_fieldSize);
+                relativeBoardY = Invert(Game.BoardHeight - 1, absoluteBoardY / (int)_fieldSize);
+            }
 
-                int relativeBoardX;
-                int relativeBoardY;
-
-                if (!IsFlipped)
-                {
-                    relativeBoardX = absoluteBoardX / (int)_fieldSize;
-                    relativeBoardY = absoluteBoardY / (int)_fieldSize;
-                }
-                else
-                {
-                    relativeBoardX = Invert(Game.BoardHeight - 1, absoluteBoardX / (int)_fieldSize);
-                    relativeBoardY = Invert(Game.BoardHeight - 1, absoluteBoardY / (int)_fieldSize);
-                }
-
-                if (relativeBoardX < 0 || relativeBoardX > 7 || relativeBoardY < 0 || relativeBoardY > 7)
-                {
-                    _movingPieceIndex = new Point(-1, -1);
-                    Invalidate();
-                    return;
-                }
-
-                Point destination = new Point(relativeBoardX, relativeBoardY);
-
-                if (!_movingPieceIndex.Equals(destination))
-                {
-                    PieceMoved?.Invoke(this, new PieceMovedEventArgs(_movingPieceIndex, destination));
-                }
-
+            if (relativeBoardX < 0 || relativeBoardX > 7 || relativeBoardY < 0 || relativeBoardY > 7)
+            {
                 _movingPieceIndex = new Point(-1, -1);
+                _selectedIndex = new Point(-1, -1);
                 Invalidate();
+                return;
+            }
+
+            Point currentIndex = new Point(relativeBoardX, relativeBoardY);
+
+            if (_movingPieceIndex.X != -1 && !_movingPieceIndex.Equals(currentIndex))
+            {
+                PieceMoved?.Invoke(this, new PieceMovedEventArgs(_movingPieceIndex, currentIndex));
+                _movingPieceIndex = new Point(-1, -1);
+                _selectedIndex = new Point(-1, -1);
+                Invalidate();
+            }
+            else
+            {
+                _movingPieceIndex = new Point(-1, -1);
+
+                if (_selectedIndex.X == -1)
+                {
+                    if (_board[currentIndex.Y][currentIndex.X] != null && _board[currentIndex.Y][currentIndex.X].Owner == Game.WhoseTurn)
+                    {
+                        _selectedIndex = currentIndex;
+                    }
+
+                    Invalidate();
+                }
+                else if (!_selectedIndex.Equals(currentIndex))
+                {
+                    if (_board[currentIndex.Y][currentIndex.X] != null && _board[currentIndex.Y][currentIndex.X].Owner == _board[_selectedIndex.Y][_selectedIndex.X].Owner)
+                    {
+                        _selectedIndex = currentIndex;
+                    }
+                    else
+                    {
+                        PieceMoved?.Invoke(this, new PieceMovedEventArgs(_selectedIndex, currentIndex));
+
+                        _movingPieceIndex = new Point(-1, -1);
+                        _selectedIndex = new Point(-1, -1);
+                        Invalidate();
+                    }
+                }
             }
         }
 

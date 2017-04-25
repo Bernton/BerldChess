@@ -29,7 +29,8 @@ namespace BerldChess.Model
 
         #region Fields
 
-        private bool _localMode;
+        private bool _illegalSound = true;
+        private bool _localMode = false;
         private bool _hideOutput = true;
         private bool _hideArrows;
         private bool _boardFlipped;
@@ -56,6 +57,18 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public bool IllegalSound
+        {
+            get
+            {
+                return _illegalSound;
+            }
+            set
+            {
+                _illegalSound = value;
+            }
+        }
 
         public string LastPgnDir
         {

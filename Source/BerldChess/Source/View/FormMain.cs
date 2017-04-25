@@ -30,7 +30,6 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private bool _matchPlayMode = true;
         private int _draws = 0;
         private int[] _engineWins = new int[2];
 
@@ -461,7 +460,7 @@ namespace BerldChess.View
 
             if (!_vm.Game.IsValidMove(move))
             {
-                if (!cheatMove && !silent && _menuItemSound.Checked)
+                if (_menuItemIllegalSound.Checked && !cheatMove && !silent && _menuIllegalSound.Checked)
                 {
                     _illegalPlayer.Play();
                 }
@@ -619,7 +618,7 @@ namespace BerldChess.View
 
         private void PlayMoveSound()
         {
-            if (_menuItemSound.Checked)
+            if (_menuIllegalSound.Checked)
             {
                 if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].IsCapture)
                 {
@@ -2030,8 +2029,9 @@ namespace BerldChess.View
             _menuItemLocalMode.Checked = SerializedInfo.Instance.LocalMode;
             _menuItemCheatMode.Checked = SerializedInfo.Instance.CheatMode;
             _menuItemCheckAuto.Checked = SerializedInfo.Instance.AutoCheck;
+            _menuItemIllegalSound.Checked = SerializedInfo.Instance.IllegalSound;
             _engineTime = SerializedInfo.Instance.EngineTime;
-            _menuItemSound.Checked = SerializedInfo.Instance.Sound;
+            _menuIllegalSound.Checked = SerializedInfo.Instance.Sound;
             _animationTime = SerializedInfo.Instance.AnimationTime;
 
             SetDarkMode(this, SerializedInfo.Instance.DarkMode);
@@ -2103,7 +2103,7 @@ namespace BerldChess.View
                 SerializedInfo.Instance.LocalMode = _menuItemLocalMode.Checked;
                 SerializedInfo.Instance.CheatMode = _menuItemCheatMode.Checked;
                 SerializedInfo.Instance.EngineTime = _engineTime;
-                SerializedInfo.Instance.Sound = _menuItemSound.Checked;
+                SerializedInfo.Instance.Sound = _menuIllegalSound.Checked;
                 SerializedInfo.Instance.AutoCheck = _menuItemCheckAuto.Checked;
                 SerializedInfo.Instance.AnimationTime = _animationTime;
 

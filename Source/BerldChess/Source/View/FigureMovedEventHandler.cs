@@ -1,4 +1,4 @@
 ﻿namespace BerldChess.View
 {
-    public delegate void FigureMovedEventHandler(object sender, PieceMovedEventArgs e);
+    public delegate void PieceMovedEventHandler(object sender, PieceMovedEventArgs e);
 }
