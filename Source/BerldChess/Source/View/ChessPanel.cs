@@ -18,7 +18,7 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(200, 3, 139, 115));
+        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(200, 99, 194, 107));
         private bool _renderImages = true;
         private int _boardDimension;
         private double _fieldSize;
@@ -32,15 +32,30 @@ namespace BerldChess.View
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
         private ChessGame _game = null;
         private string _pieceFontFamily = string.Empty;
+        private bool _displayCoordinates = false;
 
         #endregion
 
         #region Properties
 
+        public bool DisplayCoordinates
+        {
+            get
+            {
+                return _displayCoordinates;
+            }
+            set
+            {
+                InvalidateRender();
+                _displayCoordinates = value;
+            }
+        }
+
         public double PieceSizeFactor { get; set; } = 1;
         public bool Gradient { get; set; } = true;
         public bool BorderHighlight { get; set; } = false;
         public bool IsUnicodeFont { get; set; }
+        public bool DisplayLegalMoves { get; set; } = true;
 
         public string ChessFontChars { get; set; }
 
@@ -142,10 +157,7 @@ namespace BerldChess.View
 
             _board = Game.GetBoard();
 
-
-
             Graphics g = e.Graphics;
-
 
             if (Width > Height)
             {
@@ -156,6 +168,61 @@ namespace BerldChess.View
             {
                 _boardLocation = new Point(0, Round((Height - Width) / 2.0));
                 _boardDimension = Width - 1;
+            }
+
+            if (DisplayCoordinates)
+            {
+                int[] borderColor = new int[3];
+
+                borderColor[0] = DarkSquare.R - 50;
+                borderColor[1] = DarkSquare.G - 50;
+                borderColor[2] = DarkSquare.B - 50;
+
+                for (int i = 0; i < borderColor.Length; i++)
+                {
+                    if(borderColor[i] < 0)
+                    {
+                        borderColor[i] = 0;
+                    }
+                }
+
+                SolidBrush borderBrush = new SolidBrush(Color.FromArgb(borderColor[0], borderColor[1], borderColor[2]));
+                int borderThickness = Round(_boardDimension * 0.025);
+
+                g.FillRectangle(borderBrush, _boardLocation.X, _boardLocation.Y, _boardDimension, _boardDimension);
+                g.DrawRectangle(Pens.Black, _boardLocation.X, _boardLocation.Y, _boardDimension, _boardDimension);
+
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+                Font coordinateFont = new Font("Arial", (int)(borderThickness * 0.5), FontStyle.Bold);
+
+                for (int i = 0; i < _board.Length; i++)
+                {
+                    string rank;
+                    string file;
+
+                    if(IsFlipped)
+                    {
+                        rank = (i + 1).ToString();
+                        file = ((char)(Invert(i, 7) + 65)).ToString();
+                    }
+                    else
+                    {
+                        rank = (Invert(i, 7) + 1).ToString();
+                        file = ((char)(i + 65)).ToString();
+                    }
+
+                    g.DrawString(rank, coordinateFont, Brushes.White, _boardLocation.X + Round(borderThickness * 0.18), _boardLocation.Y + Round(borderThickness + _fieldSize / 2.2 + _fieldSize * i));
+
+                    g.DrawString(file, coordinateFont, Brushes.White, _boardLocation.X + Round(borderThickness + _fieldSize / 2.37 + _fieldSize * i), _boardLocation.Y + _boardDimension - Round(borderThickness * 0.85));
+                }
+
+                _boardLocation.X += borderThickness;
+                _boardLocation.Y += borderThickness;
+
+                _boardDimension -= 2 * borderThickness;
+
+                g.DrawRectangle(Pens.Black, _boardLocation.X - 1, _boardLocation.Y - 1, _boardDimension + 2, _boardDimension + 2);
             }
 
             _fieldSize = _boardDimension / (double)_board.Length;
@@ -394,7 +461,7 @@ namespace BerldChess.View
             {
                 for (int x = 0; x < _board.Length; x++)
                 {
-                    if (_board[y][x] == null || (y == _movingPieceIndex.Y && x == _movingPieceIndex.X && _movingPoint.X != -1))
+                    if (_board[y][x] == null || (y == _movingPieceIndex.Y && x == _movingPieceIndex.X))
                     {
                         continue;
                     }
@@ -428,44 +495,47 @@ namespace BerldChess.View
                 }
             }
 
-            Point _possibleMovePieceIndex = new Point(-1, -1);
+            if (DisplayLegalMoves)
+            {
+                Point _possibleMovePieceIndex = new Point(-1, -1);
 
-            if (_movingPieceIndex.X != -1)
-            {
-                _possibleMovePieceIndex = _movingPieceIndex;
-            }
-            else if (_selectedIndex.X != -1)
-            {
-                _possibleMovePieceIndex = _selectedIndex;
-            }
-
-            if (_possibleMovePieceIndex.X != -1 && _board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X] != null)
-            {
-                if (_board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X].Owner == ChessPlayer.White)
+                if (_movingPieceIndex.X != -1)
                 {
-                    figureBrush = new SolidBrush(Color.White);
+                    _possibleMovePieceIndex = _movingPieceIndex;
                 }
-                else
+                else if (_selectedIndex.X != -1)
                 {
-                    figureBrush = new SolidBrush(Color.Black);
+                    _possibleMovePieceIndex = _selectedIndex;
                 }
 
-                BoardPosition startPosition = new BoardPosition((ChessFile)_possibleMovePieceIndex.X, Invert(Game.BoardHeight, _possibleMovePieceIndex.Y));
-
-                ReadOnlyCollection<Move> validMoves = Game.GetValidMoves(startPosition);
-
-                for (int i = 0; i < validMoves.Count; i++)
+                if (_possibleMovePieceIndex.X != -1 && _board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X] != null)
                 {
-                    Move current = validMoves[i];
-
-                    if (!IsFlipped)
+                    if (_board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X].Owner == ChessPlayer.White)
                     {
-                        g.FillEllipse(_legalMoveCircleBrush, Round(((int)current.NewPosition.File) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round(Invert(Game.BoardHeight, current.NewPosition.Rank) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
-
+                        figureBrush = new SolidBrush(Color.White);
                     }
                     else
                     {
-                        g.FillEllipse(_legalMoveCircleBrush, Round((Invert(Game.BoardHeight - 1, (int)current.NewPosition.File)) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round((current.NewPosition.Rank - 1) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
+                        figureBrush = new SolidBrush(Color.Black);
+                    }
+
+                    BoardPosition startPosition = new BoardPosition((ChessFile)_possibleMovePieceIndex.X, Invert(Game.BoardHeight, _possibleMovePieceIndex.Y));
+
+                    ReadOnlyCollection<Move> validMoves = Game.GetValidMoves(startPosition);
+
+                    for (int i = 0; i < validMoves.Count; i++)
+                    {
+                        Move current = validMoves[i];
+
+                        if (!IsFlipped)
+                        {
+                            g.FillEllipse(_legalMoveCircleBrush, Round(((int)current.NewPosition.File) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round(Invert(Game.BoardHeight, current.NewPosition.Rank) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
+
+                        }
+                        else
+                        {
+                            g.FillEllipse(_legalMoveCircleBrush, Round((Invert(Game.BoardHeight - 1, (int)current.NewPosition.File)) * _fieldSize + _fieldSize * 0.4) + _boardLocation.X, Round((current.NewPosition.Rank - 1) * _fieldSize + _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
+                        }
                     }
                 }
             }
@@ -543,7 +613,7 @@ namespace BerldChess.View
                 return;
             }
 
-            _movingPoint = new Point(-1, -1);
+            _movingPoint = new Point(e.X, e.Y);
             _movingPieceIndex = pieceIndex;
 
             Invalidate();
@@ -624,7 +694,7 @@ namespace BerldChess.View
 
             if (_movingPieceIndex.X != -1)
             {
-                _movingPoint = new Point(e.X /*+ _movingOffset.X*/, e.Y /*+ _movingOffset.Y*/);
+                _movingPoint = new Point(e.X, e.Y);
                 Invalidate();
             }
         }

@@ -29,6 +29,7 @@ namespace BerldChess.Model
 
         #region Fields
 
+        private bool _displayLegalMoves = true;
         private bool _illegalSound = true;
         private bool _localMode = false;
         private bool _hideOutput = true;
@@ -49,6 +50,7 @@ namespace BerldChess.Model
         private bool _autoCheck = false;
         private bool _darkMode = false;
         private bool _borderHighlight = false;
+        private bool _displayCoordinates = false;
         private int _clickDelay = 120;
         private double _sizeFactor = 1;
         private EngineMode _engineMode = EngineMode.Disabled;
@@ -57,6 +59,31 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public bool DisplayCoordinates
+        {
+            get
+            {
+                return _displayCoordinates;
+            }
+
+            set
+            {
+                _displayCoordinates = value;
+            }
+        }
+
+        public bool DisplayLegalMoves
+        {
+            get
+            {
+                return _displayLegalMoves;
+            }
+            set
+            {
+                _displayLegalMoves = value;
+            }
+        }
 
         public bool IllegalSound
         {

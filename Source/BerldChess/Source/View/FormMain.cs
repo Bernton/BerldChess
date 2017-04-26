@@ -883,6 +883,18 @@ namespace BerldChess.View
             ResetGame(gameFromFen);
         }
 
+        private void OnMenuItemDisplayLegalMovesCheckedChanged(object sender, EventArgs e)
+        {
+            _chessPanel.DisplayLegalMoves = _menuItemDisplayLegalMoves.Checked;
+            _chessPanel.Invalidate();
+        }
+
+        private void OnMenuItemDisplayCoordinatesCheckedChanged(object sender, EventArgs e)
+        {
+            _chessPanel.DisplayCoordinates = _menuItemDisplayCoordinates.Checked;
+            _chessPanel.Invalidate();
+        }
+
         private void OnMenuItemBackClick(object sender, EventArgs e)
         {
             if (_vm.NavigationIndex > 0)
@@ -2018,6 +2030,8 @@ namespace BerldChess.View
             _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
             _chessPanel.LightSquare = SerializedInfo.Instance.BoardLightSquare;
             _chessPanel.Gradient = SerializedInfo.Instance.Gradient;
+            _chessPanel.DisplayLegalMoves = SerializedInfo.Instance.DisplayLegalMoves;
+            _chessPanel.DisplayCoordinates = SerializedInfo.Instance.DisplayCoordinates;
 
             _menuItemHideOutput.Checked = SerializedInfo.Instance.HideOutput;
             _menuItemHideArrows.Checked = SerializedInfo.Instance.HideArrows;
@@ -2027,9 +2041,11 @@ namespace BerldChess.View
             _chessPanel.DisplayGridBorders = SerializedInfo.Instance.DisplayGridBorder;
             _menuItemFlipBoard.Checked = SerializedInfo.Instance.BoardFlipped;
             _menuItemLocalMode.Checked = SerializedInfo.Instance.LocalMode;
+            _menuItemDisplayCoordinates.Checked = SerializedInfo.Instance.DisplayCoordinates;
             _menuItemCheatMode.Checked = SerializedInfo.Instance.CheatMode;
             _menuItemCheckAuto.Checked = SerializedInfo.Instance.AutoCheck;
             _menuItemIllegalSound.Checked = SerializedInfo.Instance.IllegalSound;
+            _menuItemDisplayLegalMoves.Checked = SerializedInfo.Instance.DisplayLegalMoves;
             _engineTime = SerializedInfo.Instance.EngineTime;
             _menuIllegalSound.Checked = SerializedInfo.Instance.Sound;
             _animationTime = SerializedInfo.Instance.AnimationTime;
@@ -2106,6 +2122,9 @@ namespace BerldChess.View
                 SerializedInfo.Instance.Sound = _menuIllegalSound.Checked;
                 SerializedInfo.Instance.AutoCheck = _menuItemCheckAuto.Checked;
                 SerializedInfo.Instance.AnimationTime = _animationTime;
+                SerializedInfo.Instance.DisplayLegalMoves = _menuItemDisplayLegalMoves.Checked;
+                SerializedInfo.Instance.IllegalSound = _menuItemIllegalSound.Checked;
+                SerializedInfo.Instance.DisplayCoordinates = _menuItemDisplayCoordinates.Checked;
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SerializedInfo));
                 FileStream fileStream = new FileStream(FormMainViewModel.ConfigurationFileName, FileMode.Create);
@@ -2641,8 +2660,6 @@ namespace BerldChess.View
         {
             return _vm.Game.IsCheckmated(_vm.Game.WhoseTurn) || _vm.Game.IsDraw;
         }
-
-
 
         #endregion
     }
