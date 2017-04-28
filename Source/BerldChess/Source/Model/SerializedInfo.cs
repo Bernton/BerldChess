@@ -44,6 +44,7 @@ namespace BerldChess.Model
         private Rectangle? _bounds = null;
         private int _multiPV = 250;
         private int _animTime = 300;
+        private int _splitterDistance = 767;
         private List<ChessFont> _chessFonts = new List<ChessFont>();
         private EngineList _engineList = new EngineList();
         private int _selectedFontIndex = 0;
@@ -59,6 +60,18 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public int SplitterDistance
+        {
+            get
+            {
+                return _splitterDistance;
+            }
+            set
+            {
+                _splitterDistance = value;
+            }
+        }
 
         public bool DisplayCoordinates
         {

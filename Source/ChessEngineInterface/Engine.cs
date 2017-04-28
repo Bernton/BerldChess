@@ -177,7 +177,6 @@ namespace ChessEngineInterface
 
                 case "uciok":
 
-                    Debug.WriteLine("uciok trig");
                     _autoResetEvent.Set();
                     break;
 

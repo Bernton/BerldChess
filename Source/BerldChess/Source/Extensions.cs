@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -8,25 +10,32 @@ namespace BerldChess
 {
     public static class Extensions
     {
-        public static void SetDoubleBuffered(this Control c)
+        public static void SetDoubleBuffered(this Control control)
         {
-            //Taxes: Remote Desktop Connection and painting
-            //http://blogs.msdn.com/oldnewthing/archive/2006/01/03/508694.aspx
-            if (System.Windows.Forms.SystemInformation.TerminalServerSession)
+            if (SystemInformation.TerminalServerSession)
+            {
                 return;
+            }
 
-            System.Reflection.PropertyInfo aProp =
-                  typeof(System.Windows.Forms.Control).GetProperty(
-                        "DoubleBuffered",
-                        System.Reflection.BindingFlags.NonPublic |
-                        System.Reflection.BindingFlags.Instance);
-
-            aProp.SetValue(c, true, null);
+            PropertyInfo doubleBufferedProperty = typeof(Control).GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance);
+            doubleBufferedProperty.SetValue(control, true, null);
         }
 
-        public static void FitFont(this Control control)
+        public static void FitFont(this Control control, double widthFactor, double heightFactor)
         {
+            int fontSize = 1;
+            Size size = TextRenderer.MeasureText(control.Text, new Font(control.Font.FontFamily, fontSize));
 
+            double factorWidth = control.Width * widthFactor;
+            double factorHeight = control.Height * heightFactor;
+
+            while (size.Width < factorWidth && size.Height < factorHeight )
+            {
+                fontSize++;
+                size = TextRenderer.MeasureText(control.Text, new Font(control.Font.FontFamily, fontSize));
+            }
+
+            control.Font = new Font(control.Font.FontFamily, fontSize);
         }
     }
 }

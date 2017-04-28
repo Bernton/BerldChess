@@ -18,46 +18,38 @@ namespace BerldChess.View
     {
         #region Fields
 
-        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(200, 99, 194, 107));
+        private bool _displayCoordinates = true;
         private bool _renderImages = true;
         private int _boardDimension;
         private double _fieldSize;
-        private double _fontSizeFactor = -1;
+        private double? _fontSizeFactor = null;
+        private string _pieceFontFamily = string.Empty;
+        private Color _darkSquare = Color.Brown;
+        private Color _lightSquare = Color.WhiteSmoke;
+        private Color _borderColor = Color.White;
+        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(200, 99, 194, 107));
         private Point _boardLocation;
         private Point _selectedIndex = new Point(-1, -1);
         private Point _movingPieceIndex = new Point(-1, -1);
         private Point _movingPoint = new Point(-1, -1);
-        private List<Arrow> _arrows = new List<Arrow>();
+        private ChessGame _game = null;
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
-        private ChessGame _game = null;
-        private string _pieceFontFamily = string.Empty;
-        private bool _displayCoordinates = false;
+        private List<Arrow> _arrows = new List<Arrow>();
 
         #endregion
 
         #region Properties
 
-        public bool DisplayCoordinates
-        {
-            get
-            {
-                return _displayCoordinates;
-            }
-            set
-            {
-                InvalidateRender();
-                _displayCoordinates = value;
-            }
-        }
-
-        public double PieceSizeFactor { get; set; } = 1;
         public bool Gradient { get; set; } = true;
         public bool BorderHighlight { get; set; } = false;
         public bool IsUnicodeFont { get; set; }
         public bool DisplayLegalMoves { get; set; } = true;
-
+        public bool IsFlipped { get; set; } = false;
+        public bool DisplayGridBorders { get; set; } = false;
+        public double PieceSizeFactor { get; set; } = 1;
         public string ChessFontChars { get; set; }
+        public List<Point> HighlighedSquares { get; set; } = new List<Point>();
 
         public string PieceFontFamily
         {
@@ -67,8 +59,8 @@ namespace BerldChess.View
             }
             set
             {
-                _fontSizeFactor = -1;
                 _pieceFontFamily = value;
+                _fontSizeFactor = null;
 
                 if (_pieceFontFamily != "")
                 {
@@ -83,11 +75,60 @@ namespace BerldChess.View
             }
         }
 
-        public bool IsFlipped { get; set; } = false;
-        public bool DisplayGridBorders { get; set; } = false;
+        public bool DisplayCoordinates
+        {
+            get
+            {
+                return _displayCoordinates;
+            }
+            set
+            {
+                InvalidateRender();
+                _displayCoordinates = value;
+            }
+        }
 
-        public Color DarkSquare { get; set; }
-        public Color LightSquare { get; set; }
+        public Color DarkSquare
+        {
+            get
+            {
+                return _darkSquare;
+            }
+
+            set
+            {
+                _darkSquare = value;
+
+                int[] borderColor = new int[3];
+
+                borderColor[0] = _darkSquare.R - 30;
+                borderColor[1] = _darkSquare.G - 30;
+                borderColor[2] = _darkSquare.B - 30;
+
+                for (int i = 0; i < borderColor.Length; i++)
+                {
+                    if (borderColor[i] < 0)
+                    {
+                        borderColor[i] = 0;
+                    }
+                }
+
+                _borderColor = Color.FromArgb(borderColor[0], borderColor[1], borderColor[2]);
+            }
+        }
+
+        public Color LightSquare
+        {
+            get
+            {
+                return _lightSquare;
+            }
+
+            set
+            {
+                _lightSquare = value;
+            }
+        }
 
         public ChessGame Game
         {
@@ -103,8 +144,6 @@ namespace BerldChess.View
                 _game = value;
             }
         }
-
-        public List<Point> HighlighedSquares { get; set; } = new List<Point>();
 
         public ChessPiece[][] Board
         {
@@ -148,16 +187,13 @@ namespace BerldChess.View
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
-
             if (Game == null)
             {
                 return;
             }
 
-            _board = Game.GetBoard();
-
             Graphics g = e.Graphics;
+            _board = Game.GetBoard();
 
             if (Width > Height)
             {
@@ -172,25 +208,11 @@ namespace BerldChess.View
 
             if (DisplayCoordinates)
             {
-                int[] borderColor = new int[3];
-
-                borderColor[0] = DarkSquare.R - 50;
-                borderColor[1] = DarkSquare.G - 50;
-                borderColor[2] = DarkSquare.B - 50;
-
-                for (int i = 0; i < borderColor.Length; i++)
-                {
-                    if(borderColor[i] < 0)
-                    {
-                        borderColor[i] = 0;
-                    }
-                }
-
-                SolidBrush borderBrush = new SolidBrush(Color.FromArgb(borderColor[0], borderColor[1], borderColor[2]));
+                SolidBrush borderBrush = new SolidBrush(_borderColor);
                 int borderThickness = Round(_boardDimension * 0.025);
 
-                g.FillRectangle(borderBrush, _boardLocation.X, _boardLocation.Y, _boardDimension, _boardDimension);
-                g.DrawRectangle(Pens.Black, _boardLocation.X, _boardLocation.Y, _boardDimension, _boardDimension);
+                g.FillRectangle(borderBrush, _boardLocation.X, _boardLocation.Y, _boardDimension + 1, _boardDimension + 1);
+                g.DrawRectangle(Pens.Black, _boardLocation.X - 1, _boardLocation.Y - 1, _boardDimension + 2, _boardDimension + 2);
 
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
@@ -201,7 +223,7 @@ namespace BerldChess.View
                     string rank;
                     string file;
 
-                    if(IsFlipped)
+                    if (IsFlipped)
                     {
                         rank = (i + 1).ToString();
                         file = ((char)(Invert(i, 7) + 65)).ToString();
@@ -584,7 +606,6 @@ namespace BerldChess.View
 
                 g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())], absX, absY);
             }
-
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
@@ -655,7 +676,6 @@ namespace BerldChess.View
                 PieceMoved?.Invoke(this, new PieceMovedEventArgs(_movingPieceIndex, currentIndex));
                 _movingPieceIndex = new Point(-1, -1);
                 _selectedIndex = new Point(-1, -1);
-                Invalidate();
             }
             else
             {
@@ -667,8 +687,6 @@ namespace BerldChess.View
                     {
                         _selectedIndex = currentIndex;
                     }
-
-                    Invalidate();
                 }
                 else if (!_selectedIndex.Equals(currentIndex))
                 {
@@ -682,10 +700,11 @@ namespace BerldChess.View
 
                         _movingPieceIndex = new Point(-1, -1);
                         _selectedIndex = new Point(-1, -1);
-                        Invalidate();
                     }
                 }
             }
+
+            Invalidate();
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -744,7 +763,7 @@ namespace BerldChess.View
                 characters = ChessFontChars.ToCharArray();
             }
 
-            if (_fontSizeFactor == -1)
+            if (_fontSizeFactor == null)
             {
                 _fontSizeFactor = double.MaxValue;
 

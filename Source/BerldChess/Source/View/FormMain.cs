@@ -51,6 +51,7 @@ namespace BerldChess.View
         private Random _random = new Random();
         private Bitmap _comparisonSnap = null;
         private ChessPanel _chessPanel;
+
         private SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
         private SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
         private SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
@@ -273,6 +274,11 @@ namespace BerldChess.View
         #endregion
 
         #region Event Methods
+
+        private void OnDataGridViewMovesResize(object sender, EventArgs e)
+        {
+            _dataGridViewMoves.DefaultCellStyle.Font = new Font(_dataGridViewMoves.DefaultCellStyle.Font.FontFamily, _dataGridViewMoves.Width / 22.5F);
+        }
 
         private void OnBestMoveFound(string move)
         {
@@ -552,8 +558,10 @@ namespace BerldChess.View
                     }
                 }
 
-                FillPlyList(depth, whitePawnEvaluation);
-                UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                if (FillPlyList(depth, whitePawnEvaluation))
+                {
+                    UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                }
             }
 
             _vm.PlyList.Add(new ChessPly(_vm.Game.GetFen(), 0.0, moveString));
@@ -563,20 +571,20 @@ namespace BerldChess.View
         private void UpdateMoveGrid(ReadOnlyCollection<Move> validMoves, Move move, MoveType moveType)
         {
             int cellCount = _dataGridViewMoves.GetCellCount(DataGridViewElementStates.None);
+            int plyCount = _vm.PlyList.Count;
 
-            for (int i = cellCount - 2; i >= _vm.NavigationIndex; i--)
+            for (int i = cellCount; i >= plyCount; i--)
             {
                 if (i % 2 == 0)
                 {
-                    _dataGridViewMoves.Rows.RemoveAt(i / 2);
+                    _dataGridViewMoves.Rows.RemoveAt(i / 2 - 1);
                 }
                 else
                 {
-                    _dataGridViewMoves.Rows[i / 2].Cells[1].Value = "";
+                    _dataGridViewMoves.Rows[i / 2 - 1].Cells[1].Value = "";
                 }
             }
 
-            int plyCount = _vm.PlyList.Count;
             string formattedEvaluation = _labelEvaluation.Text;
 
             if (formattedEvaluation.Substring(0, 4) == "Mate")
@@ -594,7 +602,7 @@ namespace BerldChess.View
 
                 if (GetPlayingEngine() != null)
                 {
-                    whiteMove.Value += "\n(" + formattedEvaluation + ")";
+                    whiteMove.Value += "\n[" + formattedEvaluation + "]";
                 }
 
                 row.Cells.Add(whiteMove);
@@ -609,7 +617,7 @@ namespace BerldChess.View
 
                 if (GetPlayingEngine() != null)
                 {
-                    _dataGridViewMoves.Rows[plyCount / 2 - 1].Cells[1].Value += "\n(" + formattedEvaluation + ")";
+                    _dataGridViewMoves.Rows[plyCount / 2 - 1].Cells[1].Value += "\n[" + formattedEvaluation + "]";
                 }
             }
 
@@ -664,6 +672,8 @@ namespace BerldChess.View
             {
                 WindowState = FormWindowState.Maximized;
             }
+
+            _splitContainerMain.SplitterDistance = SerializedInfo.Instance.SplitterDistance;
         }
 
         private void OnTimerValidationTick(object sender, EventArgs e)
@@ -768,8 +778,10 @@ namespace BerldChess.View
                 _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
             }
 
-            FillPlyList(depth, whitePawnEvaluation);
-            UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+            if (FillPlyList(depth, whitePawnEvaluation))
+            {
+                UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+            }
 
             for (int iPV = 0; iPV < _evaluations.Length; iPV++)
             {
@@ -827,7 +839,7 @@ namespace BerldChess.View
             }
         }
 
-        private void FillPlyList(int depth, double whitePawnEvaluation)
+        private bool FillPlyList(int depth, double whitePawnEvaluation)
         {
             if (_vm.PlyList.Count > 0 && _vm.PlyList.Count > _vm.NavigationIndex)
             {
@@ -835,8 +847,12 @@ namespace BerldChess.View
                 {
                     _vm.CurrentPly.Evaluation = whitePawnEvaluation;
                     _vm.CurrentPly.EvaluationDepth = depth;
+
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private void OnTimerAutoCheckTick(object sender, EventArgs e)
@@ -1471,7 +1487,7 @@ namespace BerldChess.View
             SolidBrush chartDarkBrush = new SolidBrush(Color.FromArgb(69, 66, 63));
 
             int peak;
-            float chartYMiddle = _panelEvaluationChart.Height / 2.0F;
+            int chartYMiddle = (int)(_panelEvaluationChart.Height / 2.0);
 
             List<ChessPly> positions = _vm.PlyList.ToList();
 
@@ -1497,9 +1513,9 @@ namespace BerldChess.View
                 peak++;
             }
 
-            if (peak < 3)
+            if (peak < 2)
             {
-                peak = 3;
+                peak = 2;
             }
             else if (peak > 8)
             {
@@ -1583,14 +1599,14 @@ namespace BerldChess.View
                     double evaluation = positions[i].Evaluation;
 
                     float x = (float)(i * xUnitLength);
-                    float y;
+                    int y;
 
-                    float height = (float)Math.Abs((evaluation * yUnitLength));
-                    float width = (float)((i + 1) * xUnitLength - i * xUnitLength);
+                    int height = Round(Math.Abs((evaluation * yUnitLength)));
+                    float width = (float)(((i + 1) * xUnitLength - i * xUnitLength));
 
                     if (evaluation >= 0)
                     {
-                        y = chartYMiddle - (float)(evaluation * yUnitLength);
+                        y = chartYMiddle - height;
                         g.FillRectangle(chartLightBrush, x, y, width, height);
                         g.DrawRectangle(chartBorderPen, x, y, width, height);
                     }
@@ -1661,12 +1677,12 @@ namespace BerldChess.View
         private void OnLabelTextValidate(object sender, EventArgs e)
         {
             Control source = (Control)sender;
-            source.FitFont();
+            source.FitFont(0.9, 0.9);
         }
 
         private void OnLabelEvaluationTextChanged(object sender, EventArgs e)
         {
-            _labelEvaluation.FitFont();
+            _labelEvaluation.FitFont(0.9, 0.98);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -1788,7 +1804,7 @@ namespace BerldChess.View
                 }
                 else if (whitePawnEvaluation == 0)
                 {
-                    formatEvaluation = " 0.00";
+                    formatEvaluation = "0.00";
                 }
                 else
                 {
@@ -1799,7 +1815,7 @@ namespace BerldChess.View
 
                 if (currentValue != null && depth > 0)
                 {
-                    _dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value = $"{currentValue.Substring(0, currentValue.IndexOf('(') + 1)}{formatEvaluation} D{depth})";
+                    _dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value = $"{currentValue.Substring(0, currentValue.IndexOf('[') + 1)}{formatEvaluation} D{depth}]";
                 }
             }
         }
@@ -1947,7 +1963,6 @@ namespace BerldChess.View
                         grid.BackgroundColor = Color.FromArgb(49, 46, 43);
                         grid.DefaultCellStyle.BackColor = Color.FromArgb(49, 46, 43);
                         grid.DefaultCellStyle.ForeColor = Color.White;
-                        grid.DefaultCellStyle.SelectionBackColor = SystemColors.ActiveCaption;
                         grid.DefaultCellStyle.SelectionForeColor = Color.Black;
                     }
                     else
@@ -1956,7 +1971,6 @@ namespace BerldChess.View
                         grid.BackgroundColor = Color.White;
                         grid.DefaultCellStyle.BackColor = Color.White;
                         grid.DefaultCellStyle.ForeColor = Color.Black;
-                        grid.DefaultCellStyle.SelectionBackColor = SystemColors.ActiveCaption;
                         grid.DefaultCellStyle.SelectionForeColor = Color.Black;
                     }
                 }
@@ -2052,6 +2066,7 @@ namespace BerldChess.View
 
             SetDarkMode(this, SerializedInfo.Instance.DarkMode);
 
+
             if (SerializedInfo.Instance.ChessFonts.Count == 0)
             {
                 SerializedInfo.Instance.ChessFonts.Add(new ChessFont
@@ -2111,6 +2126,8 @@ namespace BerldChess.View
                 {
                     SerializedInfo.Instance.Bounds = Bounds;
                 }
+
+                SerializedInfo.Instance.SplitterDistance = _splitContainerMain.SplitterDistance;
 
                 SerializedInfo.Instance.IsMaximized = WindowState == FormWindowState.Maximized;
                 SerializedInfo.Instance.BoardFlipped = _menuItemFlipBoard.Checked;
