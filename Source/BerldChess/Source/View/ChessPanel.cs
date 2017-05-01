@@ -27,7 +27,7 @@ namespace BerldChess.View
         private Color _darkSquare = Color.Brown;
         private Color _lightSquare = Color.WhiteSmoke;
         private Color _borderColor = Color.White;
-        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(200, 99, 194, 107));
+        private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(80, 6, 6, 6));
         private Point _boardLocation;
         private Point _selectedIndex = new Point(-1, -1);
         private Point _movingPieceIndex = new Point(-1, -1);
