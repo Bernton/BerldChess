@@ -127,6 +127,53 @@ namespace BerldChess.Model
             return null;
         }
 
+
+        public static bool CompareBitmaps(Bitmap bitmap1, Bitmap bitmap2)
+        {
+            try
+            {
+                bool equals = true;
+
+                Rectangle rect = new Rectangle(0, 0, bitmap1.Width, bitmap1.Height);
+                BitmapData bitmapData1 = bitmap1.LockBits(rect, ImageLockMode.ReadOnly, bitmap1.PixelFormat);
+                BitmapData bitmapData2 = bitmap2.LockBits(rect, ImageLockMode.ReadOnly, bitmap2.PixelFormat);
+
+                unsafe
+                {
+                    byte* ptr1 = (byte*)bitmapData1.Scan0.ToPointer();
+                    byte* ptr2 = (byte*)bitmapData2.Scan0.ToPointer();
+                    int width = rect.Width * 3;
+
+                    for (int y = 0; equals && y < rect.Height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            if (*ptr1 != *ptr2)
+                            {
+                                equals = false;
+                                break;
+                            }
+                            ptr1++;
+                            ptr2++;
+                        }
+                        ptr1 += bitmapData1.Stride - width;
+                        ptr2 += bitmapData2.Stride - width;
+                    }
+                }
+
+                bitmap1.UnlockBits(bitmapData1);
+                bitmap2.UnlockBits(bitmapData2);
+
+                return equals;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
+
+            return false;
+        }
+
         private unsafe static int GetPixel(byte* scan0, int stride, int x, int y)
         {
             byte* colPointer = scan0;

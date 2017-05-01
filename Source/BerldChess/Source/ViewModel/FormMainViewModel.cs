@@ -2,7 +2,6 @@
 using ChessDotNet;
 using ChessEngineInterface;
 using System.Collections.Generic;
-using System.IO;
 
 namespace BerldChess.ViewModel
 {
@@ -20,6 +19,14 @@ namespace BerldChess.ViewModel
         public Engine[] Engines { get; set; }
         public ChessGame Game { get; set; }
         public List<ChessPly> PlyList { get; set; }
+
+        public bool GameFinished
+        {
+            get
+            {
+                return Game.IsCheckmated(Game.WhoseTurn) || Game.IsDraw;
+            }
+        }
 
         public ChessPly LatestPly
         {

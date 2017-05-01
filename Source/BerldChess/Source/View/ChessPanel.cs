@@ -51,6 +51,19 @@ namespace BerldChess.View
         public string ChessFontChars { get; set; }
         public List<Point> HighlighedSquares { get; set; } = new List<Point>();
 
+        public bool DisplayCoordinates
+        {
+            get
+            {
+                return _displayCoordinates;
+            }
+            set
+            {
+                InvalidateRender();
+                _displayCoordinates = value;
+            }
+        }
+
         public string PieceFontFamily
         {
             get
@@ -72,19 +85,6 @@ namespace BerldChess.View
                 }
 
                 Invalidate();
-            }
-        }
-
-        public bool DisplayCoordinates
-        {
-            get
-            {
-                return _displayCoordinates;
-            }
-            set
-            {
-                InvalidateRender();
-                _displayCoordinates = value;
             }
         }
 
@@ -690,7 +690,9 @@ namespace BerldChess.View
                 }
                 else if (!_selectedIndex.Equals(currentIndex))
                 {
-                    if (_board[currentIndex.Y][currentIndex.X] != null && _board[currentIndex.Y][currentIndex.X].Owner == _board[_selectedIndex.Y][_selectedIndex.X].Owner)
+                    if (_board[currentIndex.Y][currentIndex.X] != null &&
+                        _board[_selectedIndex.Y][_selectedIndex.X] != null &&
+                        _board[currentIndex.Y][currentIndex.X].Owner == _board[_selectedIndex.Y][_selectedIndex.X].Owner)
                     {
                         _selectedIndex = currentIndex;
                     }
@@ -734,6 +736,314 @@ namespace BerldChess.View
         {
             _renderImages = true;
             Invalidate();
+        }
+
+        private void FloodFill(Bitmap image, int x, int y)
+        {
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            LinkedList<Point> check = new LinkedList<Point>();
+
+            int recordLength = 4;
+            int[] bits = new int[data.Stride / recordLength * data.Height];
+
+            Marshal.Copy(data.Scan0, bits, 0, bits.Length);
+
+            List<int> smoothPixelLocations = new List<int>();
+            List<int> smoothPixelColors = new List<int>();
+
+            int border = -16777216;
+            int alpha1 = 16777216;
+            int floodTo = 16777215;
+            int floodFrom = bits[x + y * data.Stride / recordLength];
+
+            bits[x + y * data.Stride / recordLength] = floodTo;
+
+            Point[] offSets = new Point[]
+            {
+                new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0)
+            };
+
+            if (floodFrom != floodTo)
+            {
+                check.AddLast(new Point(x, y));
+
+                while (check.Count > 0)
+                {
+                    Point current = check.First.Value;
+                    check.RemoveFirst();
+
+                    foreach (Point offSet in offSets)
+                    {
+                        Point next = new Point(current.X + offSet.X, current.Y + offSet.Y);
+
+                        if (next.X >= 0 && next.Y >= 0 && next.X < data.Width && next.Y < data.Height)
+                        {
+                            if (bits[next.X + next.Y * data.Stride / recordLength] != border && (bits[next.X + next.Y * data.Stride / recordLength] > alpha1 || bits[next.X + next.Y * data.Stride / recordLength] < 0))
+                            {
+                                check.AddLast(next);
+
+                                if (bits[next.X + next.Y * data.Stride / recordLength] != floodFrom)
+                                {
+                                    smoothPixelLocations.Add(next.X + next.Y * data.Stride / recordLength);
+                                    smoothPixelColors.Add(bits[next.X + next.Y * data.Stride / recordLength]);
+                                }
+
+                                bits[next.X + next.Y * data.Stride / recordLength] = floodTo;
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < smoothPixelLocations.Count; i++)
+            {
+                int colorInteger = smoothPixelColors[i];
+                Color color = Color.FromArgb(colorInteger);
+
+                bits[smoothPixelLocations[i]] = (Color.FromArgb(Math.Abs(color.R - 255), 0, 0, 0)).ToArgb();
+            }
+
+            Marshal.Copy(bits, 0, data.Scan0, bits.Length);
+            image.UnlockBits(data);
+        }
+
+        private int Round(double number)
+        {
+            return (int)Math.Round(number, 0);
+        }
+
+        private int Invert(int max, int value)
+        {
+            return Math.Abs(value - max);
+        }
+
+        private int GetPieceIndexFromFenChar(char fenCharacter)
+        {
+            switch (fenCharacter)
+            {
+                case 'K':
+                    return 0;
+                case 'k':
+                    return 6;
+                case 'Q':
+                    return 1;
+                case 'q':
+                    return 7;
+                case 'R':
+                    return 4;
+                case 'r':
+                    return 10;
+                case 'B':
+                    return 2;
+                case 'b':
+                    return 8;
+                case 'N':
+                    return 3;
+                case 'n':
+                    return 9;
+                case 'P':
+                    return 5;
+                case 'p':
+                    return 11;
+            }
+
+            return -1;
+        }
+
+        private Bitmap FillTransparentSectors(Bitmap image)
+        {
+            Bitmap filledImage;
+            filledImage = TransparentToColor(image, Color.White);
+            FloodFill(filledImage, 0, 0);
+            return filledImage;
+        }
+
+        private Bitmap TransparentToColor(Bitmap image, Color color)
+        {
+            Bitmap filledImage = new Bitmap(image.Width, image.Height);
+            Rectangle rectangle = new Rectangle(Point.Empty, image.Size);
+
+            using (Graphics g = Graphics.FromImage(filledImage))
+            {
+                g.Clear(color);
+                g.DrawImageUnscaledAndClipped(image, rectangle);
+            }
+
+            return filledImage;
+        }
+
+        private Bitmap GradientBitmap(Bitmap image)
+        {
+            unsafe
+            {
+                BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                byte* pointer = (byte*)data.Scan0;
+
+                int startingPoint = (int)(image.Width * 0.4);
+
+                for (int y = 0; y < image.Height; y++)
+                {
+                    for (int x = startingPoint; x < image.Width; x++)
+                    {
+                        int diffValue = (int)(255 * ((x - startingPoint) / (double)image.Width * 0.225));
+
+                        pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
+
+                        if (pointer[3] == 255)
+                        {
+                            for (int i = 0; i < 3; i++)
+                            {
+                                int value = pointer[i] - diffValue;
+
+                                if (value < 0)
+                                {
+                                    value = 0;
+                                }
+
+                                pointer[i] = (byte)value;
+                            }
+                        }
+                    }
+                }
+
+                image.UnlockBits(data);
+            }
+
+            return image;
+        }
+
+        private Bitmap CropTransparentBorders(Bitmap image)
+        {
+            int width = image.Width;
+            int height = image.Height;
+
+            Func<int, bool> allTransparentRow = (row) =>
+            {
+                for (int i = 0; i < width; ++i)
+                    if (image.GetPixel(i, row).A != 0)
+                        return false;
+                return true;
+            };
+
+            Func<int, bool> allTransparentColumn = (column) =>
+            {
+                for (int i = 0; i < height; ++i)
+                    if (image.GetPixel(column, i).A != 0)
+                        return false;
+                return true;
+            };
+
+            int topmost = 0;
+            for (int row = 0; row < height; ++row)
+            {
+                if (allTransparentRow(row))
+                    topmost = row;
+                else break;
+            }
+
+            int bottommost = 0;
+            for (int row = height - 1; row >= 0; --row)
+            {
+                if (allTransparentRow(row))
+                    bottommost = row;
+                else break;
+            }
+
+            int leftmost = 0;
+            int rightmost = 0;
+
+            for (int column = 0; column < width; ++column)
+            {
+                if (allTransparentColumn(column))
+                    leftmost = column;
+                else
+                    break;
+            }
+
+            for (int column = width - 1; column >= 0; --column)
+            {
+                if (allTransparentColumn(column))
+                    rightmost = column;
+                else
+                    break;
+            }
+
+            int croppedWidth = rightmost + 1 - leftmost;
+            int croppedHeight = bottommost + 1 - topmost;
+
+            try
+            {
+                Bitmap target = new Bitmap(croppedWidth, croppedHeight);
+
+                using (Graphics g = Graphics.FromImage(target))
+                {
+                    g.DrawImage(image, new RectangleF(0, 0, croppedWidth, croppedHeight), new RectangleF(leftmost, topmost, croppedWidth, croppedHeight), GraphicsUnit.Pixel);
+                }
+
+                return target;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return image;
+            }
+        }
+
+        private Bitmap GetCharacterImage(string fontFamily, int fontSize, char character)
+        {
+            Font font = new Font(fontFamily, fontSize);
+            SizeF drawSize = TextRenderer.MeasureText(character.ToString(), font);
+            Bitmap charImage = new Bitmap((int)drawSize.Width, (int)drawSize.Height);
+            Graphics g = Graphics.FromImage(charImage);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            g.DrawString(character.ToString(), font, Brushes.Black, 0, 0);
+            return charImage;
+        }
+
+        private Bitmap ResizeImage(Image image, int width, int height)
+        {
+            Bitmap result = new Bitmap(width, height);
+            result.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.CompositingQuality = CompositingQuality.HighQuality;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                g.DrawImage(image, 0, 0, result.Width, result.Height);
+            }
+
+            return result;
+        }
+
+        public Point[] GetRelPositionsFromMoveString(string move)
+        {
+            Point[] index = new Point[2];
+            index[0] = new Point(move[0] - 97, Invert(Game.BoardHeight, int.Parse(move[1].ToString())));
+            index[1] = new Point(move[2] - 97, Invert(Game.BoardHeight, int.Parse(move[3].ToString())));
+
+            return index;
+        }
+
+        public PointF[] GetAbsPositionsFromMoveString(string move)
+        {
+            PointF[] index = new PointF[2];
+
+            double offSet = 0.5;
+
+            if (!IsFlipped)
+            {
+                index[0] = new PointF((float)(((move[0] - 97) + offSet) * _fieldSize + _boardLocation.X - 0.45F), (float)(((Invert(Game.BoardHeight, int.Parse(move[1].ToString())) + offSet) * _fieldSize) + _boardLocation.Y));
+                index[1] = new PointF((float)((((move[2] - 97) + offSet) * _fieldSize) + _boardLocation.X - 0.45F), (float)(((Invert(Game.BoardHeight, int.Parse(move[3].ToString())) + offSet) * _fieldSize) + _boardLocation.Y));
+            }
+            else
+            {
+                index[0] = new PointF((float)(((Invert(Game.BoardHeight - 1, move[0] - 97) + offSet) * _fieldSize) + _boardLocation.X - 0.70F), (float)(((int.Parse(move[1].ToString()) - 1 + offSet) * _fieldSize) + _boardLocation.Y));
+                index[1] = new PointF((float)(((Invert(Game.BoardHeight - 1, move[2] - 97) + offSet) * _fieldSize) + _boardLocation.X - 0.70F), (float)(((int.Parse(move[3].ToString()) - 1 + offSet) * _fieldSize) + _boardLocation.Y));
+            }
+
+            return index;
         }
 
         private Bitmap[] GetPiecesFromFontFamily(string fontFamily, double fieldSize)
@@ -830,314 +1140,6 @@ namespace BerldChess.View
             }
 
             return pieceImages;
-        }
-
-        private Bitmap FillTransparentSectors(Bitmap image)
-        {
-            Bitmap filledImage;
-            filledImage = TransparentToColor(image, Color.White);
-            FloodFill(filledImage, 0, 0);
-            return filledImage;
-        }
-
-        private void FloodFill(Bitmap image, int x, int y)
-        {
-            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            LinkedList<Point> check = new LinkedList<Point>();
-
-            int recordLength = 4;
-            int[] bits = new int[data.Stride / recordLength * data.Height];
-
-            Marshal.Copy(data.Scan0, bits, 0, bits.Length);
-
-            List<int> smoothPixelLocations = new List<int>();
-            List<int> smoothPixelColors = new List<int>();
-
-            int border = -16777216;
-            int alpha1 = 16777216;
-            int floodTo = 16777215;
-            int floodFrom = bits[x + y * data.Stride / recordLength];
-
-            bits[x + y * data.Stride / recordLength] = floodTo;
-
-            Point[] offSets = new Point[]
-            {
-                new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0)
-            };
-
-            if (floodFrom != floodTo)
-            {
-                check.AddLast(new Point(x, y));
-
-                while (check.Count > 0)
-                {
-                    Point current = check.First.Value;
-                    check.RemoveFirst();
-
-                    foreach (Point offSet in offSets)
-                    {
-                        Point next = new Point(current.X + offSet.X, current.Y + offSet.Y);
-
-                        if (next.X >= 0 && next.Y >= 0 && next.X < data.Width && next.Y < data.Height)
-                        {
-                            if (bits[next.X + next.Y * data.Stride / recordLength] != border && (bits[next.X + next.Y * data.Stride / recordLength] > alpha1 || bits[next.X + next.Y * data.Stride / recordLength] < 0))
-                            {
-                                check.AddLast(next);
-
-                                if (bits[next.X + next.Y * data.Stride / recordLength] != floodFrom)
-                                {
-                                    smoothPixelLocations.Add(next.X + next.Y * data.Stride / recordLength);
-                                    smoothPixelColors.Add(bits[next.X + next.Y * data.Stride / recordLength]);
-                                }
-
-                                bits[next.X + next.Y * data.Stride / recordLength] = floodTo;
-                            }
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < smoothPixelLocations.Count; i++)
-            {
-                int colorInteger = smoothPixelColors[i];
-                Color color = Color.FromArgb(colorInteger);
-
-                bits[smoothPixelLocations[i]] = (Color.FromArgb(Math.Abs(color.R - 255), 0, 0, 0)).ToArgb();
-            }
-
-            Marshal.Copy(bits, 0, data.Scan0, bits.Length);
-            image.UnlockBits(data);
-        }
-
-        private Bitmap TransparentToColor(Bitmap image, Color color)
-        {
-            Bitmap filledImage = new Bitmap(image.Width, image.Height);
-            Rectangle rectangle = new Rectangle(Point.Empty, image.Size);
-
-            using (Graphics g = Graphics.FromImage(filledImage))
-            {
-                g.Clear(color);
-                g.DrawImageUnscaledAndClipped(image, rectangle);
-            }
-
-            return filledImage;
-        }
-
-        private Bitmap GradientBitmap(Bitmap image)
-        {
-            unsafe
-            {
-                BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-                byte* pointer = (byte*)data.Scan0;
-
-                int startingPoint = (int)(image.Width * 0.4);
-
-                for (int y = 0; y < image.Height; y++)
-                {
-                    for (int x = startingPoint; x < image.Width; x++)
-                    {
-                        int diffValue = (int)(255 * ((x - startingPoint) / (double)image.Width * 0.225));
-
-                        pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
-
-                        if (pointer[3] == 255)
-                        {
-                            for (int i = 0; i < 3; i++)
-                            {
-                                int value = pointer[i] - diffValue;
-
-                                if (value < 0)
-                                {
-                                    value = 0;
-                                }
-
-                                pointer[i] = (byte)value;
-                            }
-                        }
-                    }
-                }
-
-                image.UnlockBits(data);
-            }
-
-            return image;
-        }
-
-        public Bitmap CropTransparentBorders(Bitmap image)
-        {
-            int width = image.Width;
-            int height = image.Height;
-
-            Func<int, bool> allTransparentRow = (row) =>
-            {
-                for (int i = 0; i < width; ++i)
-                    if (image.GetPixel(i, row).A != 0)
-                        return false;
-                return true;
-            };
-
-            Func<int, bool> allTransparentColumn = (column) =>
-            {
-                for (int i = 0; i < height; ++i)
-                    if (image.GetPixel(column, i).A != 0)
-                        return false;
-                return true;
-            };
-
-            int topmost = 0;
-            for (int row = 0; row < height; ++row)
-            {
-                if (allTransparentRow(row))
-                    topmost = row;
-                else break;
-            }
-
-            int bottommost = 0;
-            for (int row = height - 1; row >= 0; --row)
-            {
-                if (allTransparentRow(row))
-                    bottommost = row;
-                else break;
-            }
-
-            int leftmost = 0;
-            int rightmost = 0;
-
-            for (int column = 0; column < width; ++column)
-            {
-                if (allTransparentColumn(column))
-                    leftmost = column;
-                else
-                    break;
-            }
-
-            for (int column = width - 1; column >= 0; --column)
-            {
-                if (allTransparentColumn(column))
-                    rightmost = column;
-                else
-                    break;
-            }
-
-            int croppedWidth = rightmost + 1 - leftmost;
-            int croppedHeight = bottommost + 1 - topmost;
-
-            try
-            {
-                Bitmap target = new Bitmap(croppedWidth, croppedHeight);
-
-                using (Graphics g = Graphics.FromImage(target))
-                {
-                    g.DrawImage(image, new RectangleF(0, 0, croppedWidth, croppedHeight), new RectangleF(leftmost, topmost, croppedWidth, croppedHeight), GraphicsUnit.Pixel);
-                }
-
-                return target;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                return image;
-            }
-        }
-
-        private Bitmap GetCharacterImage(string fontFamily, int fontSize, char character)
-        {
-            Font font = new Font(fontFamily, fontSize);
-            SizeF drawSize = TextRenderer.MeasureText(character.ToString(), font);
-            Bitmap charImage = new Bitmap((int)drawSize.Width, (int)drawSize.Height);
-            Graphics g = Graphics.FromImage(charImage);
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            g.DrawString(character.ToString(), font, Brushes.Black, 0, 0);
-            return charImage;
-        }
-
-        public Point[] GetRelPositionsFromMoveString(string move)
-        {
-            Point[] index = new Point[2];
-            index[0] = new Point(move[0] - 97, Invert(Game.BoardHeight, int.Parse(move[1].ToString())));
-            index[1] = new Point(move[2] - 97, Invert(Game.BoardHeight, int.Parse(move[3].ToString())));
-
-            return index;
-        }
-
-        public PointF[] GetAbsPositionsFromMoveString(string move)
-        {
-            PointF[] index = new PointF[2];
-
-            double offSet = 0.5;
-
-            if (!IsFlipped)
-            {
-                index[0] = new PointF((float)(((move[0] - 97) + offSet) * _fieldSize + _boardLocation.X - 0.45F), (float)(((Invert(Game.BoardHeight, int.Parse(move[1].ToString())) + offSet) * _fieldSize) + _boardLocation.Y));
-                index[1] = new PointF((float)((((move[2] - 97) + offSet) * _fieldSize) + _boardLocation.X - 0.45F), (float)(((Invert(Game.BoardHeight, int.Parse(move[3].ToString())) + offSet) * _fieldSize) + _boardLocation.Y));
-            }
-            else
-            {
-                index[0] = new PointF((float)(((Invert(Game.BoardHeight - 1, move[0] - 97) + offSet) * _fieldSize) + _boardLocation.X - 0.70F), (float)(((int.Parse(move[1].ToString()) - 1 + offSet) * _fieldSize) + _boardLocation.Y));
-                index[1] = new PointF((float)(((Invert(Game.BoardHeight - 1, move[2] - 97) + offSet) * _fieldSize) + _boardLocation.X - 0.70F), (float)(((int.Parse(move[3].ToString()) - 1 + offSet) * _fieldSize) + _boardLocation.Y));
-            }
-
-            return index;
-        }
-
-        private int Round(double number)
-        {
-            return (int)Math.Round(number, 0);
-        }
-
-        private int GetPieceIndexFromFenChar(char fenCharacter)
-        {
-            switch (fenCharacter)
-            {
-                case 'K':
-                    return 0;
-                case 'k':
-                    return 6;
-                case 'Q':
-                    return 1;
-                case 'q':
-                    return 7;
-                case 'R':
-                    return 4;
-                case 'r':
-                    return 10;
-                case 'B':
-                    return 2;
-                case 'b':
-                    return 8;
-                case 'N':
-                    return 3;
-                case 'n':
-                    return 9;
-                case 'P':
-                    return 5;
-                case 'p':
-                    return 11;
-            }
-
-            return -1;
-        }
-
-        private Bitmap ResizeImage(Image image, int width, int height)
-        {
-            Bitmap result = new Bitmap(width, height);
-            result.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (Graphics g = Graphics.FromImage(result))
-            {
-                g.CompositingQuality = CompositingQuality.HighQuality;
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.SmoothingMode = SmoothingMode.HighQuality;
-                g.DrawImage(image, 0, 0, result.Width, result.Height);
-            }
-
-            return result;
-        }
-
-        private int Invert(int max, int value)
-        {
-            return Math.Abs(value - max);
         }
 
         #endregion

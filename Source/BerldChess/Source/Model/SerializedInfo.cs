@@ -29,47 +29,59 @@ namespace BerldChess.Model
 
         #region Fields
 
-        private bool _displayLegalMoves = true;
-        private bool _illegalSound = true;
-        private bool _localMode = false;
-        private bool _hideOutput = true;
         private bool _hideArrows;
         private bool _boardFlipped;
-        private bool _displayGridBorder;
-        private bool _gradient = true;
-        private bool _isMaximized = true;
         private bool _cheatMode;
+        private bool _displayGridBorder;
         private bool _sound = true;
-        private int _engineTime = 1000;
-        private Rectangle? _bounds = null;
-        private int _multiPV = 250;
-        private int _animTime = 300;
-        private int _splitterDistance = 767;
-        private List<ChessFont> _chessFonts = new List<ChessFont>();
-        private EngineList _engineList = new EngineList();
-        private int _selectedFontIndex = 0;
-        private bool _autoCheck = false;
+        private bool _gradient = true;
+        private bool _hideOutput = true;
+        private bool _isMaximized = true;
+        private bool _illegalSound = true;
+        private bool _displayLegalMoves = true;
         private bool _darkMode = false;
+        private bool _autoCheck = false;
+        private bool _localMode = false;
         private bool _borderHighlight = false;
         private bool _displayCoordinates = false;
+        private int _selectedFontIndex = 0;
         private int _clickDelay = 120;
+        private int _multiPV = 250;
+        private int _animTime = 300;
+        private int _engineTime = 1000;
+        private int? _splitterDistance = null;
         private double _sizeFactor = 1;
-        private EngineMode _engineMode = EngineMode.Disabled;
         private string _lastPgnDir = "";
+        private EngineMode _engineMode = EngineMode.Disabled;
+        private Rectangle? _bounds = null;
+        private EngineList _engineList = new EngineList();
+        private List<ChessFont> _chessFonts = new List<ChessFont>();
 
         #endregion
 
         #region Properties
 
-        public int SplitterDistance
+        public bool HideArrows
         {
             get
             {
-                return _splitterDistance;
+                return _hideArrows;
             }
             set
             {
-                _splitterDistance = value;
+                _hideArrows = value;
+            }
+        }
+
+        public bool BoardFlipped
+        {
+            get
+            {
+                return _boardFlipped;
+            }
+            set
+            {
+                _boardFlipped = value;
             }
         }
 
@@ -110,15 +122,29 @@ namespace BerldChess.Model
             }
         }
 
-        public string LastPgnDir
+        public bool Gradient
         {
             get
             {
-                return _lastPgnDir;
+                return _gradient;
             }
+
             set
             {
-                _lastPgnDir = value;
+                _gradient = value;
+            }
+        }
+
+        public bool DarkMode
+        {
+            get
+            {
+                return _darkMode;
+            }
+
+            set
+            {
+                _darkMode = value;
             }
         }
 
@@ -134,104 +160,6 @@ namespace BerldChess.Model
             }
         }
 
-        public EngineMode EngineMode
-        {
-            get
-            {
-                return _engineMode;
-            }
-
-            set
-            {
-                _engineMode = value;
-            }
-        }
-
-        public bool Gradient
-        {
-            get
-            {
-                return _gradient;
-            }
-
-            set
-            {
-                _gradient = value;
-            }
-        }
-
-        public EngineList EngineList
-        {
-            get
-            {
-                return _engineList;
-            }
-
-            set
-            {
-                _engineList = value;
-            }
-        }
-
-        public ChessFont SelectedChessFont
-        {
-            get
-            {
-               return _chessFonts[_selectedFontIndex];
-            }
-        }
-
-        public bool DarkMode
-        {
-            get
-            {
-                return _darkMode;
-            }
-            
-            set
-            {
-                _darkMode = value;
-            }
-        }
-
-        public int SelectedFontIndex
-        {
-            get
-            {
-                return _selectedFontIndex;
-            }
-
-            set
-            {
-                _selectedFontIndex = value;
-            }
-        }
-
-        public List<ChessFont> ChessFonts
-        {
-            get
-           {
-                return _chessFonts;
-            }
-
-            set
-            {
-                _chessFonts = value;
-            }
-        }
-
-        public int ClickDelay
-        {
-            get
-            {
-                return _clickDelay;
-            }
-            set
-            {
-                _clickDelay = value;
-            }
-        }
-
         public bool AutoCheck
         {
             get
@@ -241,144 +169,6 @@ namespace BerldChess.Model
             set
             {
                 _autoCheck = value;
-            }
-        }
-
-        public double PieceSizeFactor
-        {
-            get
-            {
-                return _sizeFactor;
-            }
-            set
-            {
-                _sizeFactor = value;
-            }
-        }
-
-        public int AnimationTime
-        {
-            get
-            {
-                return _animTime;
-            }
-            set
-            {
-                _animTime = value;
-            }
-        }
-
-        [XmlIgnore]
-        public Color BoardDarkSquare { get; set; } = Color.FromArgb(140, 162, 173);
-
-        [XmlIgnore]
-        public Color BoardLightSquare { get; set; } = Color.FromArgb(222, 227, 230);
-
-        [XmlElement("BoardDarkSquare")]
-        public int BoardDarkSquareAsArgb
-        {
-            get
-            {
-                return BoardDarkSquare.ToArgb();
-            }
-            set
-            {
-                BoardDarkSquare = Color.FromArgb(value);
-            }
-        }
-
-        [XmlElement("BoardLightSquare")]
-        public int BoardLightSquareAsArgb
-        {
-            get
-            {
-                return BoardLightSquare.ToArgb();
-            }
-            set
-            {
-                BoardLightSquare = Color.FromArgb(value);
-            }
-        }
-
-        [XmlIgnore]
-        public Color EngineDarkSquare { get; set; } = Color.FromArgb(186, 85, 70);
-
-        [XmlIgnore]
-        public Color EngineLightSquare { get; set; } = Color.FromArgb(240, 216, 191);
-
-        [XmlElement("EngineDarkSquare")]
-        public int EngineDarkSquareAsArgb
-        {
-            get
-            {
-                return EngineDarkSquare.ToArgb();
-            }
-            set
-            {
-                EngineDarkSquare = Color.FromArgb(value);
-            }
-        }
-
-        [XmlElement("EngineLightSquare")]
-        public int EngineLightSquareAsArgb
-        {
-            get
-            {
-                return EngineLightSquare.ToArgb();
-            }
-            set
-            {
-                EngineLightSquare = Color.FromArgb(value);
-            }
-        }
-
-        public bool Sound
-        {
-            get
-            {
-                return _sound;
-            }
-            set
-            {
-                _sound = value;
-            }
-        }
-
-        public int MultiPV
-        {
-            get
-            {
-                return _multiPV;
-            }
-            set
-            {
-                _multiPV = value;
-            }
-        }
-
-        public bool CheatMode
-        {
-            get
-            {
-                return _cheatMode;
-            }
-
-            set
-            {
-                _cheatMode = value;
-            }
-        }
-
-        public int EngineTime
-        {
-            get
-            {
-                return _engineTime;
-            }
-
-            set
-            {
-                _engineTime = value;
             }
         }
 
@@ -406,30 +196,6 @@ namespace BerldChess.Model
             }
         }
 
-        public bool HideArrows
-        {
-            get
-            {
-                return _hideArrows;
-            }
-            set
-            {
-                _hideArrows = value;
-            }
-        }
-
-        public bool BoardFlipped
-        {
-            get
-            {
-                return _boardFlipped;
-            }
-            set
-            {
-                _boardFlipped = value;
-            }
-        }
-
         public bool DisplayGridBorder
         {
             get
@@ -454,6 +220,240 @@ namespace BerldChess.Model
             }
         }
 
+        public bool Sound
+        {
+            get
+            {
+                return _sound;
+            }
+            set
+            {
+                _sound = value;
+            }
+        }
+
+        public bool CheatMode
+        {
+            get
+            {
+                return _cheatMode;
+            }
+
+            set
+            {
+                _cheatMode = value;
+            }
+        }
+
+        public int MultiPV
+        {
+            get
+            {
+                return _multiPV;
+            }
+            set
+            {
+                _multiPV = value;
+            }
+        }
+
+        public int EngineTime
+        {
+            get
+            {
+                return _engineTime;
+            }
+
+            set
+            {
+                _engineTime = value;
+            }
+        }
+
+        public int ClickDelay
+        {
+            get
+            {
+                return _clickDelay;
+            }
+            set
+            {
+                _clickDelay = value;
+            }
+        }
+
+        public int SelectedFontIndex
+        {
+            get
+            {
+                return _selectedFontIndex;
+            }
+
+            set
+            {
+                _selectedFontIndex = value;
+            }
+        }
+
+        public int AnimationTime
+        {
+            get
+            {
+                return _animTime;
+            }
+            set
+            {
+                _animTime = value;
+            }
+        }
+
+        [XmlElement("EngineDarkSquare")]
+        public int EngineDarkSquareAsArgb
+        {
+            get
+            {
+                return EngineDarkSquare.ToArgb();
+            }
+            set
+            {
+                EngineDarkSquare = Color.FromArgb(value);
+            }
+        }
+
+        [XmlElement("EngineLightSquare")]
+        public int EngineLightSquareAsArgb
+        {
+            get
+            {
+                return EngineLightSquare.ToArgb();
+            }
+            set
+            {
+                EngineLightSquare = Color.FromArgb(value);
+            }
+        }
+
+        [XmlElement("BoardDarkSquare")]
+        public int BoardDarkSquareAsArgb
+        {
+            get
+            {
+                return BoardDarkSquare.ToArgb();
+            }
+            set
+            {
+                BoardDarkSquare = Color.FromArgb(value);
+            }
+        }
+
+        [XmlElement("BoardLightSquare")]
+        public int BoardLightSquareAsArgb
+        {
+            get
+            {
+                return BoardLightSquare.ToArgb();
+            }
+            set
+            {
+                BoardLightSquare = Color.FromArgb(value);
+            }
+        }
+
+        public int? SplitterDistance
+        {
+            get
+            {
+                return _splitterDistance;
+            }
+            set
+            {
+                _splitterDistance = value;
+            }
+        }
+
+        public double PieceSizeFactor
+        {
+            get
+            {
+                return _sizeFactor;
+            }
+            set
+            {
+                _sizeFactor = value;
+            }
+        }
+
+        public string LastPgnDir
+        {
+            get
+            {
+                return _lastPgnDir;
+            }
+            set
+            {
+                _lastPgnDir = value;
+            }
+        }
+
+        public EngineMode EngineMode
+        {
+            get
+            {
+                return _engineMode;
+            }
+
+            set
+            {
+                _engineMode = value;
+            }
+        }
+
+        public EngineList EngineList
+        {
+            get
+            {
+                return _engineList;
+            }
+
+            set
+            {
+                _engineList = value;
+            }
+        }
+
+        public ChessFont SelectedChessFont
+        {
+            get
+            {
+                return _chessFonts[_selectedFontIndex];
+            }
+        }
+
+        [XmlIgnore]
+        public Color BoardDarkSquare { get; set; } = Color.FromArgb(140, 162, 173);
+
+        [XmlIgnore]
+        public Color BoardLightSquare { get; set; } = Color.FromArgb(222, 227, 230);
+
+        [XmlIgnore]
+        public Color EngineDarkSquare { get; set; } = Color.FromArgb(186, 85, 70);
+
+        [XmlIgnore]
+        public Color EngineLightSquare { get; set; } = Color.FromArgb(240, 216, 191);
+
+        public List<ChessFont> ChessFonts
+        {
+            get
+            {
+                return _chessFonts;
+            }
+
+            set
+            {
+                _chessFonts = value;
+            }
+        }
+
         public Rectangle? Bounds
         {
             get
@@ -469,6 +469,6 @@ namespace BerldChess.Model
         #endregion
 
         private SerializedInfo()
-        {  }
+        { }
     }
 }

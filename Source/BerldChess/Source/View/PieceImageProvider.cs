@@ -6,12 +6,12 @@ namespace BerldChess.View
 {
     public static class PieceImageProvider
     {
+        public const int ColorCount = 2;
+        public const int PieceCount = 6;
+
         private static int _id = -1;
 
         public static Bitmap[] PieceImages { get; set; }
-
-        public const int ColorCount = 2;
-        public const int PieceCount = 6;
 
         public static void Inititalize(Bitmap sprite, int id)
         {
@@ -47,7 +47,7 @@ namespace BerldChess.View
 
         public static Bitmap GetFromFEN(char FENCharacter)
         {
-            if(PieceImages == null || PieceImages[0] == null)
+            if (PieceImages == null || PieceImages[0] == null)
             {
                 Inititalize(Resources.ChessPiecesSprite1, 0);
             }
@@ -83,6 +83,11 @@ namespace BerldChess.View
             throw new ArgumentException("Invalid char.");
         }
 
+        private static int Round(double value)
+        {
+            return (int)Math.Round(value, 0);
+        }
+
         private static Bitmap CropImage(Bitmap source, Rectangle section)
         {
             Bitmap croppedImage = new Bitmap(section.Width, section.Height);
@@ -93,11 +98,6 @@ namespace BerldChess.View
             g.Dispose();
 
             return croppedImage;
-        }
-
-        private static int Round(double value)
-        {
-            return (int)Math.Round(value, 0);
         }
     }
 }
