@@ -1,13 +1,7 @@
 ﻿using BerldChess.Model;
 using Microsoft.VisualBasic;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace BerldChess.View
@@ -82,7 +76,7 @@ namespace BerldChess.View
         {
             if (comboBox.Items.Count > 0)
             {
-                if(selectedIndex < comboBox.Items.Count && selectedIndex >= 0)
+                if (selectedIndex < comboBox.Items.Count && selectedIndex >= 0)
                 {
                     comboBox.SelectedIndex = selectedIndex;
                 }
@@ -104,23 +98,28 @@ namespace BerldChess.View
 
         private void OnButtonApplyClick(object sender, EventArgs e)
         {
+            if (_engineList.Settings.Count == 0)
+            {
+                return;
+            }
+
             string name = _textBoxName.Text;
             EngineSetting setting = _engineList.Settings[_listBoxSettings.SelectedIndex];
 
-            if(setting == null)
+            if (setting == null)
             {
                 return;
             }
 
             bool nameChanged = name != setting.Name;
 
-            if(nameChanged && _listBoxSettings.Items.Contains(name))
+            if (nameChanged && _listBoxSettings.Items.Contains(name))
             {
                 MessageBox.Show(this, "Setting with this name already exists.", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if(nameChanged)
+            if (nameChanged)
             {
                 setting.Name = name;
             }
@@ -138,6 +137,13 @@ namespace BerldChess.View
         {
             EngineSetting setting = new EngineSetting();
             string name = _textBoxName.Text;
+
+
+            if(name.Length < 3)
+            {
+                MessageBox.Show(this, "Setting name must be longer than 2 characters.", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             bool warn = false;
 
@@ -180,10 +186,14 @@ namespace BerldChess.View
 
         private void OnButtonRemoveClick(object sender, EventArgs e)
         {
+            if (!_engineList.SettingAvailable)
+            {
+                return;
+            }
+
             int selected = _listBoxSettings.SelectedIndex;
 
             _engineList.Settings.RemoveAt(selected);
-
             _listBoxSettings.Items.RemoveAt(selected);
             _listBoxSettings.SelectedIndex = selected - 1;
 
@@ -193,7 +203,7 @@ namespace BerldChess.View
 
         private void OnListBoxSettingsSelectedIndexChanged(object sender, EventArgs e)
         {
-            if(_listBoxSettings.SelectedIndex != -1)
+            if (_listBoxSettings.SelectedIndex != -1)
             {
                 OpenEngineConfig(_listBoxSettings.SelectedIndex);
             }
@@ -293,7 +303,7 @@ namespace BerldChess.View
             fileDialog.Multiselect = false;
             fileDialog.RestoreDirectory = true;
 
-            if(fileDialog.ShowDialog() == DialogResult.OK)
+            if (fileDialog.ShowDialog() == DialogResult.OK)
             {
                 _comboBoxPath.Text = fileDialog.FileName;
             }

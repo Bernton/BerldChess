@@ -16,11 +16,21 @@ namespace BerldChess.View
     public partial class FormPgnLoader : Form
     {
         public Game PgnLoadedGame { get; set; } = null;
+        public bool Analysis { get; set; }
+        public int Depth { get; set; }
 
-        public FormPgnLoader()
+        public FormPgnLoader(bool analysis, int depth)
         {
             InitializeComponent();
             InitializeWindow();
+
+            _checkBoxAnalysis.Checked = analysis;
+            _textBoxDepth.Enabled = analysis;
+
+            if(analysis)
+            {
+                _textBoxDepth.Text = depth.ToString();
+            }
         }
 
         private void InitializeWindow()
@@ -39,6 +49,21 @@ namespace BerldChess.View
                 {
                     Game firstGame = database.Games[0];
                     PgnLoadedGame = firstGame;
+
+                    Analysis = _checkBoxAnalysis.Checked;
+
+                    int parseDepth;
+                    bool parsed = int.TryParse(_textBoxDepth.Text, out parseDepth);
+
+                    if (parsed)
+                    {
+                        Depth = Math.Abs(parseDepth);
+                    }
+                    else
+                    {
+                        Analysis = false;
+                    }
+
                     DialogResult = DialogResult.OK;
                 }
                 else
@@ -91,6 +116,11 @@ namespace BerldChess.View
         private void OnButtonCancelClick(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+        }
+
+        private void OnCheckBoxAnalysisCheckedChanged(object sender, EventArgs e)
+        {
+            _textBoxDepth.Enabled = _checkBoxAnalysis.Checked;
         }
     }
 }

@@ -274,7 +274,13 @@ namespace ChessEngineInterface
 
         public void Dispose()
         {
-            _engine.Kill();
+            try
+            {
+                _engine.Kill();
+            }
+            catch
+            { }
+
             _engine = null;
         }
 

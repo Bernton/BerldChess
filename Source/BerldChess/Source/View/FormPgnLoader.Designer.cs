@@ -33,12 +33,15 @@
             this._textBoxPgnInput = new System.Windows.Forms.TextBox();
             this._labelPgnInput = new System.Windows.Forms.Label();
             this._buttonChooseFile = new System.Windows.Forms.Button();
+            this._checkBoxAnalysis = new System.Windows.Forms.CheckBox();
+            this._textBoxDepth = new System.Windows.Forms.TextBox();
+            this._labelDepth = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // _buttonLoad
             // 
             this._buttonLoad.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonLoad.Location = new System.Drawing.Point(12, 268);
+            this._buttonLoad.Location = new System.Drawing.Point(12, 277);
             this._buttonLoad.Name = "_buttonLoad";
             this._buttonLoad.Size = new System.Drawing.Size(150, 40);
             this._buttonLoad.TabIndex = 0;
@@ -49,7 +52,7 @@
             // _buttonCancel
             // 
             this._buttonCancel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonCancel.Location = new System.Drawing.Point(312, 268);
+            this._buttonCancel.Location = new System.Drawing.Point(312, 277);
             this._buttonCancel.Name = "_buttonCancel";
             this._buttonCancel.Size = new System.Drawing.Size(154, 40);
             this._buttonCancel.TabIndex = 1;
@@ -63,7 +66,7 @@
             this._textBoxPgnInput.Location = new System.Drawing.Point(12, 58);
             this._textBoxPgnInput.Multiline = true;
             this._textBoxPgnInput.Name = "_textBoxPgnInput";
-            this._textBoxPgnInput.Size = new System.Drawing.Size(454, 189);
+            this._textBoxPgnInput.Size = new System.Drawing.Size(454, 201);
             this._textBoxPgnInput.TabIndex = 2;
             // 
             // _labelPgnInput
@@ -79,18 +82,51 @@
             // _buttonChooseFile
             // 
             this._buttonChooseFile.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._buttonChooseFile.Location = new System.Drawing.Point(168, 268);
+            this._buttonChooseFile.Location = new System.Drawing.Point(168, 277);
             this._buttonChooseFile.Name = "_buttonChooseFile";
             this._buttonChooseFile.Size = new System.Drawing.Size(138, 40);
             this._buttonChooseFile.TabIndex = 4;
             this._buttonChooseFile.Text = "Choose File";
             this._buttonChooseFile.Click += new System.EventHandler(this.OnButtonChooseFileClick);
             // 
+            // _checkBoxAnalysis
+            // 
+            this._checkBoxAnalysis.AutoSize = true;
+            this._checkBoxAnalysis.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._checkBoxAnalysis.Location = new System.Drawing.Point(176, 21);
+            this._checkBoxAnalysis.Name = "_checkBoxAnalysis";
+            this._checkBoxAnalysis.Size = new System.Drawing.Size(137, 21);
+            this._checkBoxAnalysis.TabIndex = 5;
+            this._checkBoxAnalysis.Text = "Analysis after Load";
+            this._checkBoxAnalysis.UseVisualStyleBackColor = true;
+            this._checkBoxAnalysis.CheckedChanged += new System.EventHandler(this.OnCheckBoxAnalysisCheckedChanged);
+            // 
+            // _textBoxDepth
+            // 
+            this._textBoxDepth.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._textBoxDepth.Location = new System.Drawing.Point(366, 19);
+            this._textBoxDepth.Name = "_textBoxDepth";
+            this._textBoxDepth.Size = new System.Drawing.Size(100, 25);
+            this._textBoxDepth.TabIndex = 6;
+            // 
+            // _labelDepth
+            // 
+            this._labelDepth.AutoSize = true;
+            this._labelDepth.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelDepth.Location = new System.Drawing.Point(317, 22);
+            this._labelDepth.Name = "_labelDepth";
+            this._labelDepth.Size = new System.Drawing.Size(43, 17);
+            this._labelDepth.TabIndex = 7;
+            this._labelDepth.Text = "Depth";
+            // 
             // FormPgnLoader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(478, 320);
+            this.ClientSize = new System.Drawing.Size(478, 329);
+            this.Controls.Add(this._labelDepth);
+            this.Controls.Add(this._textBoxDepth);
+            this.Controls.Add(this._checkBoxAnalysis);
             this.Controls.Add(this._buttonChooseFile);
             this.Controls.Add(this._labelPgnInput);
             this.Controls.Add(this._textBoxPgnInput);
@@ -114,5 +150,8 @@
         private System.Windows.Forms.TextBox _textBoxPgnInput;
         private System.Windows.Forms.Button _buttonChooseFile;
         private System.Windows.Forms.Label _labelPgnInput;
+        private System.Windows.Forms.CheckBox _checkBoxAnalysis;
+        private System.Windows.Forms.TextBox _textBoxDepth;
+        private System.Windows.Forms.Label _labelDepth;
     }
 }

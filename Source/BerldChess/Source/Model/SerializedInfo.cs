@@ -18,7 +18,6 @@ namespace BerldChess.Model
             {
                 return _instance;
             }
-
             set
             {
                 _instance = value;
@@ -29,6 +28,8 @@ namespace BerldChess.Model
 
         #region Fields
 
+        private bool _timePerMoveMode = false;
+        private bool _pgnAnalysis = false;
         private bool _hideArrows;
         private bool _boardFlipped;
         private bool _cheatMode;
@@ -49,6 +50,9 @@ namespace BerldChess.Model
         private int _multiPV = 250;
         private int _animTime = 300;
         private int _engineTime = 1000;
+        private int _increment = 2000;
+        private long _totalTime = 180000;
+        private int _pgnAnalysisDepth;
         private int? _splitterDistance = null;
         private double _sizeFactor = 1;
         private string _lastPgnDir = "";
@@ -60,6 +64,30 @@ namespace BerldChess.Model
         #endregion
 
         #region Properties
+
+        public bool TimePerMoveMode
+        {
+            get
+            {
+                return _timePerMoveMode;
+            }
+            set
+            {
+                _timePerMoveMode = value;
+            }
+        }
+
+        public bool PgnAnalysis
+        {
+            get
+            {
+                return _pgnAnalysis;
+            }
+            set
+            {
+                _pgnAnalysis = value;
+            }
+        }
 
         public bool HideArrows
         {
@@ -245,6 +273,30 @@ namespace BerldChess.Model
             }
         }
 
+        public int Increment
+        {
+            get
+            {
+                return _increment;
+            }
+            set
+            {
+                _increment = value;
+            }
+        }
+
+        public int PgnAnalysisDepth
+        {
+            get
+            {
+                return _pgnAnalysisDepth;
+            }
+            set
+            {
+                _pgnAnalysisDepth = value;
+            }
+        }
+
         public int MultiPV
         {
             get
@@ -368,6 +420,18 @@ namespace BerldChess.Model
             set
             {
                 _splitterDistance = value;
+            }
+        }
+
+        public long TotalTime
+        {
+            get
+            {
+                return _totalTime;
+            }
+            set
+            {
+                _totalTime = value;
             }
         }
 

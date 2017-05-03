@@ -14,6 +14,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,8 +31,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -94,7 +94,7 @@
   <ItemGroup>
     <Compile Include="Source\Extensions.cs" />
     <Compile Include="Source\Model\ChessFont.cs" />
-    <Compile Include="Source\Model\ChessPosition.cs" />
+    <Compile Include="Source\Model\ChessPly.cs" />
     <Compile Include="Source\Model\EngineList.cs" />
     <Compile Include="Source\Model\EngineMode.cs" />
     <Compile Include="Source\Model\EngineSetting.cs" />
@@ -135,11 +135,11 @@
       <DependentUpon>FormSquareColor.cs</DependentUpon>
     </Compile>
     <Compile Include="Source\View\PieceImageProvider.cs" />
-    <Compile Include="Source\View\BoardSettingDialog.cs">
+    <Compile Include="Source\View\FormBoardSetting.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Source\View\BoardSettingDialog.Designer.cs">
-      <DependentUpon>BoardSettingDialog.cs</DependentUpon>
+    <Compile Include="Source\View\FormBoardSetting.Designer.cs">
+      <DependentUpon>FormBoardSetting.cs</DependentUpon>
     </Compile>
     <Compile Include="Source\View\FormPieceSettings.cs">
       <SubType>Form</SubType>
@@ -179,8 +179,8 @@
     <EmbeddedResource Include="Source\View\FormSquareColor.resx">
       <DependentUpon>FormSquareColor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Source\View\BoardSettingDialog.resx">
-      <DependentUpon>BoardSettingDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Source\View\FormBoardSetting.resx">
+      <DependentUpon>FormBoardSetting.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\FormPieceSettings.resx">
       <DependentUpon>FormPieceSettings.cs</DependentUpon>
