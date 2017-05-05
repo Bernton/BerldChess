@@ -239,10 +239,17 @@ namespace BerldChess.View
         {
             if (!_movePlayed)
             {
-                Invoke((MethodInvoker)delegate
+                try
                 {
-                    PlayMove(move);
-                });
+                    Invoke((MethodInvoker)delegate
+                    {
+                        PlayMove(move);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
             }
 
             OnEngineStopped();
@@ -349,7 +356,14 @@ namespace BerldChess.View
                     }
                     else
                     {
-                        _vm.Engines[engineIndex].Query($"go wtime {GetRemainingTime(0)} btime {GetRemainingTime(1)} winc {_increment} binc{_increment}");
+                        int increment = _increment;
+
+                        if(increment < 0)
+                        {
+                            increment = 0;
+                        }
+
+                        _vm.Engines[engineIndex].Query($"go wtime {GetRemainingTime(0)} btime {GetRemainingTime(1)} winc {increment} binc{increment}");
                     }
                 }
 

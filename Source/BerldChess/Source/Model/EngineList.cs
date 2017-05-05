@@ -9,8 +9,6 @@ namespace BerldChess.Model
         public int SelectedIndex1 { get; set; }
         public int SelectedIndex2 { get; set; }
         public List<EngineSetting> Settings { get; set; }
-
-
         public List<string> LastPaths { get; set; } = new List<string>();
 
         public bool SettingAvailable

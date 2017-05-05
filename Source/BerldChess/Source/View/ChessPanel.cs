@@ -596,7 +596,7 @@ namespace BerldChess.View
                 }
             }
 
-            if (_movingPieceIndex.X != -1 && _movingPoint.X != -1)
+            if (_movingPieceIndex.X != -1 && _movingPoint.X != -1 && _board[_movingPieceIndex.Y][_movingPieceIndex.X] != null)
             {
                 absX = _movingPoint.X - (float)(_fieldSize / 2.0);
                 absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
