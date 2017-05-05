@@ -98,6 +98,7 @@
     <Compile Include="Source\Model\EngineList.cs" />
     <Compile Include="Source\Model\EngineMode.cs" />
     <Compile Include="Source\Model\EngineSetting.cs" />
+    <Compile Include="Source\Model\PGNExporter.cs" />
     <Compile Include="Source\Model\Recognizer.cs" />
     <Compile Include="Source\Model\SerializedInfo.cs" />
     <Compile Include="Source\ViewModel\FormMainViewModel.cs" />

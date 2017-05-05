@@ -2706,5 +2706,15 @@ namespace BerldChess.View
         }
 
         #endregion
+
+        private void saveToPGNToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string[] exMoves = new string[_vm.PlyList.Count - 1];
+            for (int i = 1;i < _vm.PlyList.Count;i++)
+            {
+                exMoves[i - 1] = _vm.PlyList[i].ShortNotation;
+            }
+            BerldChess.Source.Model.PGNExporter.MovesToString(exMoves);
+        }
     }
 }
