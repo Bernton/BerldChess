@@ -941,11 +941,6 @@ namespace BerldChess.View
                 peak = (int)Math.Ceiling(Math.Abs(lowestValue));
             }
 
-            if (peak % 2 == 1)
-            {
-                peak++;
-            }
-
             if (peak < 2)
             {
                 peak = 2;
@@ -1501,21 +1496,6 @@ namespace BerldChess.View
                     whitePawnEvaluation = centipawn / 100.0;
                 }
 
-                if (_evaluations[0][InfoType.TBHits] != "" && Math.Abs(centipawn / 100) == 128)
-                {
-                    if (centipawn > 0)
-                    {
-                        _labelEvaluation.Text = $"Tablebase Mate";
-                        _labelEvaluation.ForeColor = Color.Green;
-                    }
-                    else
-                    {
-                        _labelEvaluation.Text = $"Tablebase Mated";
-                        _labelEvaluation.ForeColor = Color.Red;
-                    }
-                }
-                else
-                {
                     if (whitePawnEvaluation == 0)
                     {
                         _labelEvaluation.Text = " 0.00";
@@ -1527,7 +1507,6 @@ namespace BerldChess.View
 
                     _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
                 }
-            }
 
             if (FillPlyList(depth, whitePawnEvaluation))
             {
