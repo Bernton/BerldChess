@@ -565,6 +565,14 @@ namespace BerldChess.View
 
             _menuItemWhiteTime.Visible = _menuItemTotalTime.Checked;
             _menuItemBlackTime.Visible = _menuItemTotalTime.Checked;
+
+            if(!_menuItemTotalTime.Checked)
+            {
+                for (int i = 0; i < _playerTimes.Length; i++)
+                {
+                    _playerTimes[i].Reset();
+                }
+            }
         }
 
         private void OnMenuItemTotalTimeCheckedChanged(object sender, EventArgs e)
@@ -1594,15 +1602,7 @@ namespace BerldChess.View
                         continue;
                     }
 
-                    if (i == 0 && SerializedInfo.Instance.EngineList.SelectedSetting1 != null)
-                    {
-                        text += $" | {SerializedInfo.Instance.EngineList.SelectedSetting1.Name}";
-                    }
-                    else if (i == 1 && SerializedInfo.Instance.EngineList.SelectedSetting2 != null)
-                    {
-                        text += $" | {SerializedInfo.Instance.EngineList.SelectedSetting2.Name}";
-                    }
-                    else if (_vm.Engines[i].Name != null)
+                    if (_vm.Engines[i].Name != null)
                     {
                         text += $" | {_vm.Engines[i].Name}";
                     }
