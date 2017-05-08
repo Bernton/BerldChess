@@ -1141,6 +1141,18 @@ namespace BerldChess.View
                 return;
             }
 
+            if(e.KeyCode == Keys.T)
+            {
+                string plies = "";
+
+                for (int i = 0; i < _vm.PlyList.Count; i++)
+                {
+                    plies += (i + 1).ToString() + " " + _vm.PlyList[i].Evaluation + " D" + _vm.PlyList[i].EvaluationDepth + " | ";
+                }
+
+                MessageBox.Show(plies, "BerldChess - Plies");
+            }
+
             foreach (ToolStripMenuItem menuItem in GetMenuItems(_menuStripMain))
             {
                 if (string.IsNullOrEmpty(menuItem.ShortcutKeyDisplayString))
@@ -2012,6 +2024,8 @@ namespace BerldChess.View
             _chessPanel.HighlighedSquares.Clear();
             _dataGridViewMoves.Rows.Clear();
             _movePlayed = true;
+
+            ResetEvaluationData(SerializedInfo.Instance.MultiPV);
 
             if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
             {

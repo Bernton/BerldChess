@@ -216,27 +216,32 @@ namespace BerldChess.View
 
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
-                Font coordinateFont = new Font("Arial", (int)(borderThickness * 0.5), FontStyle.Bold);
+                int coordinateFontSize = (int)(borderThickness * 0.5);
 
-                for (int i = 0; i < _board.Length; i++)
+                if (coordinateFontSize >= 1)
                 {
-                    string rank;
-                    string file;
+                    Font coordinateFont = new Font("Arial", coordinateFontSize, FontStyle.Bold);
 
-                    if (IsFlipped)
+                    for (int i = 0; i < _board.Length; i++)
                     {
-                        rank = (i + 1).ToString();
-                        file = ((char)(Invert(i, 7) + 65)).ToString();
-                    }
-                    else
-                    {
-                        rank = (Invert(i, 7) + 1).ToString();
-                        file = ((char)(i + 65)).ToString();
-                    }
+                        string rank;
+                        string file;
 
-                    g.DrawString(rank, coordinateFont, Brushes.White, _boardLocation.X + Round(borderThickness * 0.18), _boardLocation.Y + Round(borderThickness + _fieldSize / 2.2 + _fieldSize * i));
+                        if (IsFlipped)
+                        {
+                            rank = (i + 1).ToString();
+                            file = ((char)(Invert(i, 7) + 65)).ToString();
+                        }
+                        else
+                        {
+                            rank = (Invert(i, 7) + 1).ToString();
+                            file = ((char)(i + 65)).ToString();
+                        }
 
-                    g.DrawString(file, coordinateFont, Brushes.White, _boardLocation.X + Round(borderThickness + _fieldSize / 2.37 + _fieldSize * i), _boardLocation.Y + _boardDimension - Round(borderThickness * 0.85));
+                        g.DrawString(rank, coordinateFont, Brushes.White, _boardLocation.X + Round(borderThickness * 0.18), _boardLocation.Y + Round(borderThickness + _fieldSize / 2.2 + _fieldSize * i));
+
+                        g.DrawString(file, coordinateFont, Brushes.White, _boardLocation.X + Round(borderThickness + _fieldSize / 2.37 + _fieldSize * i), _boardLocation.Y + _boardDimension - Round(borderThickness * 0.85));
+                    }
                 }
 
                 _boardLocation.X += borderThickness;
