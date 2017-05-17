@@ -1,0 +1,425 @@
+﻿namespace BerldChess.View
+{
+    partial class FormLevelDialog
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormLevelDialog));
+            this._groupBoxMode = new System.Windows.Forms.GroupBox();
+            this._radioButtonNodes = new System.Windows.Forms.RadioButton();
+            this._radioButtonInfinite = new System.Windows.Forms.RadioButton();
+            this._radioButtonTotalTime = new System.Windows.Forms.RadioButton();
+            this._radioButtonTimePerMove = new System.Windows.Forms.RadioButton();
+            this._radioButtonFixedDepth = new System.Windows.Forms.RadioButton();
+            this._groupBoxModeSetting = new System.Windows.Forms.GroupBox();
+            this._panelTotalTime = new System.Windows.Forms.Panel();
+            this._labelIncrementSeconds = new System.Windows.Forms.Label();
+            this._numericIncrement = new System.Windows.Forms.NumericUpDown();
+            this._labelIncrement = new System.Windows.Forms.Label();
+            this._labelTotalTimeSeconds = new System.Windows.Forms.Label();
+            this._numericTotalTimeSeconds = new System.Windows.Forms.NumericUpDown();
+            this._labelTotalTimeMinutes = new System.Windows.Forms.Label();
+            this._numericTotalTimeMinutes = new System.Windows.Forms.NumericUpDown();
+            this._labelTotalTime = new System.Windows.Forms.Label();
+            this._panelNodes = new System.Windows.Forms.Panel();
+            this._numericNodes = new System.Windows.Forms.NumericUpDown();
+            this._labelNodes = new System.Windows.Forms.Label();
+            this._panelTimePerMove = new System.Windows.Forms.Panel();
+            this._labelTimePerMoveSeconds = new System.Windows.Forms.Label();
+            this._labelTimePerMove = new System.Windows.Forms.Label();
+            this._numericTimePerMove = new System.Windows.Forms.NumericUpDown();
+            this._panelFixedDepth = new System.Windows.Forms.Panel();
+            this._labelPlies = new System.Windows.Forms.Label();
+            this._numericPlies = new System.Windows.Forms.NumericUpDown();
+            this._buttonCancel = new System.Windows.Forms.Button();
+            this._buttonApply = new System.Windows.Forms.Button();
+            this._groupBoxMode.SuspendLayout();
+            this._groupBoxModeSetting.SuspendLayout();
+            this._panelTotalTime.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericIncrement)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeSeconds)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeMinutes)).BeginInit();
+            this._panelNodes.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericNodes)).BeginInit();
+            this._panelTimePerMove.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericTimePerMove)).BeginInit();
+            this._panelFixedDepth.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericPlies)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // _groupBoxMode
+            // 
+            this._groupBoxMode.Controls.Add(this._radioButtonNodes);
+            this._groupBoxMode.Controls.Add(this._radioButtonInfinite);
+            this._groupBoxMode.Controls.Add(this._radioButtonTotalTime);
+            this._groupBoxMode.Controls.Add(this._radioButtonTimePerMove);
+            this._groupBoxMode.Controls.Add(this._radioButtonFixedDepth);
+            this._groupBoxMode.Location = new System.Drawing.Point(13, 14);
+            this._groupBoxMode.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this._groupBoxMode.Name = "_groupBoxMode";
+            this._groupBoxMode.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this._groupBoxMode.Size = new System.Drawing.Size(224, 276);
+            this._groupBoxMode.TabIndex = 0;
+            this._groupBoxMode.TabStop = false;
+            this._groupBoxMode.Text = "Mode";
+            // 
+            // _radioButtonNodes
+            // 
+            this._radioButtonNodes.AutoSize = true;
+            this._radioButtonNodes.Location = new System.Drawing.Point(22, 160);
+            this._radioButtonNodes.Name = "_radioButtonNodes";
+            this._radioButtonNodes.Size = new System.Drawing.Size(73, 25);
+            this._radioButtonNodes.TabIndex = 4;
+            this._radioButtonNodes.TabStop = true;
+            this._radioButtonNodes.Text = "Nodes";
+            this._radioButtonNodes.UseVisualStyleBackColor = true;
+            this._radioButtonNodes.CheckedChanged += new System.EventHandler(this.RadioButtonLevelsCheckedChanged);
+            // 
+            // _radioButtonInfinite
+            // 
+            this._radioButtonInfinite.AutoSize = true;
+            this._radioButtonInfinite.Location = new System.Drawing.Point(22, 129);
+            this._radioButtonInfinite.Name = "_radioButtonInfinite";
+            this._radioButtonInfinite.Size = new System.Drawing.Size(76, 25);
+            this._radioButtonInfinite.TabIndex = 3;
+            this._radioButtonInfinite.TabStop = true;
+            this._radioButtonInfinite.Text = "Infinite";
+            this._radioButtonInfinite.UseVisualStyleBackColor = true;
+            this._radioButtonInfinite.CheckedChanged += new System.EventHandler(this.RadioButtonLevelsCheckedChanged);
+            // 
+            // _radioButtonTotalTime
+            // 
+            this._radioButtonTotalTime.AutoSize = true;
+            this._radioButtonTotalTime.Location = new System.Drawing.Point(22, 98);
+            this._radioButtonTotalTime.Name = "_radioButtonTotalTime";
+            this._radioButtonTotalTime.Size = new System.Drawing.Size(95, 25);
+            this._radioButtonTotalTime.TabIndex = 2;
+            this._radioButtonTotalTime.TabStop = true;
+            this._radioButtonTotalTime.Text = "Total time";
+            this._radioButtonTotalTime.UseVisualStyleBackColor = true;
+            this._radioButtonTotalTime.CheckedChanged += new System.EventHandler(this.RadioButtonLevelsCheckedChanged);
+            // 
+            // _radioButtonTimePerMove
+            // 
+            this._radioButtonTimePerMove.AutoSize = true;
+            this._radioButtonTimePerMove.Location = new System.Drawing.Point(22, 67);
+            this._radioButtonTimePerMove.Name = "_radioButtonTimePerMove";
+            this._radioButtonTimePerMove.Size = new System.Drawing.Size(132, 25);
+            this._radioButtonTimePerMove.TabIndex = 1;
+            this._radioButtonTimePerMove.TabStop = true;
+            this._radioButtonTimePerMove.Text = "Time per move";
+            this._radioButtonTimePerMove.UseVisualStyleBackColor = true;
+            this._radioButtonTimePerMove.CheckedChanged += new System.EventHandler(this.RadioButtonLevelsCheckedChanged);
+            // 
+            // _radioButtonFixedDepth
+            // 
+            this._radioButtonFixedDepth.AutoSize = true;
+            this._radioButtonFixedDepth.Location = new System.Drawing.Point(22, 36);
+            this._radioButtonFixedDepth.Name = "_radioButtonFixedDepth";
+            this._radioButtonFixedDepth.Size = new System.Drawing.Size(157, 25);
+            this._radioButtonFixedDepth.TabIndex = 0;
+            this._radioButtonFixedDepth.TabStop = true;
+            this._radioButtonFixedDepth.Text = "Fixed search depth";
+            this._radioButtonFixedDepth.UseVisualStyleBackColor = true;
+            this._radioButtonFixedDepth.CheckedChanged += new System.EventHandler(this.RadioButtonLevelsCheckedChanged);
+            // 
+            // _groupBoxModeSetting
+            // 
+            this._groupBoxModeSetting.Controls.Add(this._panelTimePerMove);
+            this._groupBoxModeSetting.Controls.Add(this._panelFixedDepth);
+            this._groupBoxModeSetting.Controls.Add(this._panelTotalTime);
+            this._groupBoxModeSetting.Controls.Add(this._panelNodes);
+            this._groupBoxModeSetting.Location = new System.Drawing.Point(263, 14);
+            this._groupBoxModeSetting.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this._groupBoxModeSetting.Name = "_groupBoxModeSetting";
+            this._groupBoxModeSetting.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this._groupBoxModeSetting.Size = new System.Drawing.Size(275, 276);
+            this._groupBoxModeSetting.TabIndex = 1;
+            this._groupBoxModeSetting.TabStop = false;
+            this._groupBoxModeSetting.Text = "Mode Name";
+            // 
+            // _panelTotalTime
+            // 
+            this._panelTotalTime.Controls.Add(this._labelIncrementSeconds);
+            this._panelTotalTime.Controls.Add(this._numericIncrement);
+            this._panelTotalTime.Controls.Add(this._labelIncrement);
+            this._panelTotalTime.Controls.Add(this._labelTotalTimeSeconds);
+            this._panelTotalTime.Controls.Add(this._numericTotalTimeSeconds);
+            this._panelTotalTime.Controls.Add(this._labelTotalTimeMinutes);
+            this._panelTotalTime.Controls.Add(this._numericTotalTimeMinutes);
+            this._panelTotalTime.Controls.Add(this._labelTotalTime);
+            this._panelTotalTime.Location = new System.Drawing.Point(7, 23);
+            this._panelTotalTime.Name = "_panelTotalTime";
+            this._panelTotalTime.Size = new System.Drawing.Size(261, 245);
+            this._panelTotalTime.TabIndex = 7;
+            // 
+            // _labelIncrementSeconds
+            // 
+            this._labelIncrementSeconds.AutoSize = true;
+            this._labelIncrementSeconds.Location = new System.Drawing.Point(148, 165);
+            this._labelIncrementSeconds.Name = "_labelIncrementSeconds";
+            this._labelIncrementSeconds.Size = new System.Drawing.Size(66, 21);
+            this._labelIncrementSeconds.TabIndex = 12;
+            this._labelIncrementSeconds.Text = "seconds";
+            // 
+            // _numericIncrement
+            // 
+            this._numericIncrement.Location = new System.Drawing.Point(12, 159);
+            this._numericIncrement.Name = "_numericIncrement";
+            this._numericIncrement.Size = new System.Drawing.Size(130, 29);
+            this._numericIncrement.TabIndex = 11;
+            // 
+            // _labelIncrement
+            // 
+            this._labelIncrement.AutoSize = true;
+            this._labelIncrement.Location = new System.Drawing.Point(8, 132);
+            this._labelIncrement.Name = "_labelIncrement";
+            this._labelIncrement.Size = new System.Drawing.Size(80, 21);
+            this._labelIncrement.TabIndex = 10;
+            this._labelIncrement.Text = "Increment";
+            // 
+            // _labelTotalTimeSeconds
+            // 
+            this._labelTotalTimeSeconds.AutoSize = true;
+            this._labelTotalTimeSeconds.Location = new System.Drawing.Point(148, 84);
+            this._labelTotalTimeSeconds.Name = "_labelTotalTimeSeconds";
+            this._labelTotalTimeSeconds.Size = new System.Drawing.Size(66, 21);
+            this._labelTotalTimeSeconds.TabIndex = 9;
+            this._labelTotalTimeSeconds.Text = "seconds";
+            // 
+            // _numericTotalTimeSeconds
+            // 
+            this._numericTotalTimeSeconds.Location = new System.Drawing.Point(12, 78);
+            this._numericTotalTimeSeconds.Name = "_numericTotalTimeSeconds";
+            this._numericTotalTimeSeconds.Size = new System.Drawing.Size(130, 29);
+            this._numericTotalTimeSeconds.TabIndex = 8;
+            // 
+            // _labelTotalTimeMinutes
+            // 
+            this._labelTotalTimeMinutes.AutoSize = true;
+            this._labelTotalTimeMinutes.Location = new System.Drawing.Point(148, 46);
+            this._labelTotalTimeMinutes.Name = "_labelTotalTimeMinutes";
+            this._labelTotalTimeMinutes.Size = new System.Drawing.Size(66, 21);
+            this._labelTotalTimeMinutes.TabIndex = 6;
+            this._labelTotalTimeMinutes.Text = "minutes";
+            // 
+            // _numericTotalTimeMinutes
+            // 
+            this._numericTotalTimeMinutes.Location = new System.Drawing.Point(12, 40);
+            this._numericTotalTimeMinutes.Name = "_numericTotalTimeMinutes";
+            this._numericTotalTimeMinutes.Size = new System.Drawing.Size(130, 29);
+            this._numericTotalTimeMinutes.TabIndex = 5;
+            // 
+            // _labelTotalTime
+            // 
+            this._labelTotalTime.AutoSize = true;
+            this._labelTotalTime.Location = new System.Drawing.Point(8, 13);
+            this._labelTotalTime.Name = "_labelTotalTime";
+            this._labelTotalTime.Size = new System.Drawing.Size(80, 21);
+            this._labelTotalTime.TabIndex = 1;
+            this._labelTotalTime.Text = "Total Time";
+            // 
+            // _panelNodes
+            // 
+            this._panelNodes.Controls.Add(this._numericNodes);
+            this._panelNodes.Controls.Add(this._labelNodes);
+            this._panelNodes.Location = new System.Drawing.Point(7, 23);
+            this._panelNodes.Name = "_panelNodes";
+            this._panelNodes.Size = new System.Drawing.Size(261, 245);
+            this._panelNodes.TabIndex = 8;
+            // 
+            // _numericNodes
+            // 
+            this._numericNodes.Location = new System.Drawing.Point(12, 40);
+            this._numericNodes.Maximum = new decimal(new int[] {
+            -727379968,
+            232,
+            0,
+            0});
+            this._numericNodes.Name = "_numericNodes";
+            this._numericNodes.Size = new System.Drawing.Size(184, 29);
+            this._numericNodes.TabIndex = 5;
+            // 
+            // _labelNodes
+            // 
+            this._labelNodes.AutoSize = true;
+            this._labelNodes.Location = new System.Drawing.Point(8, 13);
+            this._labelNodes.Name = "_labelNodes";
+            this._labelNodes.Size = new System.Drawing.Size(55, 21);
+            this._labelNodes.TabIndex = 1;
+            this._labelNodes.Text = "Nodes";
+            // 
+            // _panelTimePerMove
+            // 
+            this._panelTimePerMove.Controls.Add(this._labelTimePerMoveSeconds);
+            this._panelTimePerMove.Controls.Add(this._labelTimePerMove);
+            this._panelTimePerMove.Controls.Add(this._numericTimePerMove);
+            this._panelTimePerMove.Location = new System.Drawing.Point(7, 23);
+            this._panelTimePerMove.Name = "_panelTimePerMove";
+            this._panelTimePerMove.Size = new System.Drawing.Size(261, 245);
+            this._panelTimePerMove.TabIndex = 6;
+            // 
+            // _labelTimePerMoveSeconds
+            // 
+            this._labelTimePerMoveSeconds.AutoSize = true;
+            this._labelTimePerMoveSeconds.Location = new System.Drawing.Point(148, 45);
+            this._labelTimePerMoveSeconds.Name = "_labelTimePerMoveSeconds";
+            this._labelTimePerMoveSeconds.Size = new System.Drawing.Size(66, 21);
+            this._labelTimePerMoveSeconds.TabIndex = 4;
+            this._labelTimePerMoveSeconds.Text = "seconds";
+            // 
+            // _labelTimePerMove
+            // 
+            this._labelTimePerMove.AutoSize = true;
+            this._labelTimePerMove.Location = new System.Drawing.Point(8, 13);
+            this._labelTimePerMove.Name = "_labelTimePerMove";
+            this._labelTimePerMove.Size = new System.Drawing.Size(84, 21);
+            this._labelTimePerMove.TabIndex = 3;
+            this._labelTimePerMove.Text = "Move time";
+            // 
+            // _numericTimePerMove
+            // 
+            this._numericTimePerMove.Location = new System.Drawing.Point(12, 39);
+            this._numericTimePerMove.Name = "_numericTimePerMove";
+            this._numericTimePerMove.Size = new System.Drawing.Size(130, 29);
+            this._numericTimePerMove.TabIndex = 2;
+            // 
+            // _panelFixedDepth
+            // 
+            this._panelFixedDepth.Controls.Add(this._labelPlies);
+            this._panelFixedDepth.Controls.Add(this._numericPlies);
+            this._panelFixedDepth.Location = new System.Drawing.Point(7, 23);
+            this._panelFixedDepth.Name = "_panelFixedDepth";
+            this._panelFixedDepth.Size = new System.Drawing.Size(261, 245);
+            this._panelFixedDepth.TabIndex = 5;
+            // 
+            // _labelPlies
+            // 
+            this._labelPlies.AutoSize = true;
+            this._labelPlies.Location = new System.Drawing.Point(8, 13);
+            this._labelPlies.Name = "_labelPlies";
+            this._labelPlies.Size = new System.Drawing.Size(134, 21);
+            this._labelPlies.TabIndex = 1;
+            this._labelPlies.Text = "Half moves (Plies)";
+            // 
+            // _numericPlies
+            // 
+            this._numericPlies.Location = new System.Drawing.Point(12, 39);
+            this._numericPlies.Name = "_numericPlies";
+            this._numericPlies.Size = new System.Drawing.Size(130, 29);
+            this._numericPlies.TabIndex = 0;
+            // 
+            // _buttonCancel
+            // 
+            this._buttonCancel.Location = new System.Drawing.Point(163, 312);
+            this._buttonCancel.Name = "_buttonCancel";
+            this._buttonCancel.Size = new System.Drawing.Size(134, 30);
+            this._buttonCancel.TabIndex = 3;
+            this._buttonCancel.Text = "Cancel";
+            this._buttonCancel.UseVisualStyleBackColor = true;
+            this._buttonCancel.Click += new System.EventHandler(this.OnButtonCancelClick);
+            // 
+            // _buttonApply
+            // 
+            this._buttonApply.Location = new System.Drawing.Point(13, 312);
+            this._buttonApply.Name = "_buttonApply";
+            this._buttonApply.Size = new System.Drawing.Size(135, 30);
+            this._buttonApply.TabIndex = 4;
+            this._buttonApply.Text = "Apply";
+            this._buttonApply.UseVisualStyleBackColor = true;
+            this._buttonApply.Click += new System.EventHandler(this.OnButtonApplyClick);
+            // 
+            // FormLevelDialog
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(561, 354);
+            this.Controls.Add(this._buttonApply);
+            this.Controls.Add(this._buttonCancel);
+            this.Controls.Add(this._groupBoxModeSetting);
+            this.Controls.Add(this._groupBoxMode);
+            this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.MaximizeBox = false;
+            this.Name = "FormLevelDialog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Adjust Level";
+            this._groupBoxMode.ResumeLayout(false);
+            this._groupBoxMode.PerformLayout();
+            this._groupBoxModeSetting.ResumeLayout(false);
+            this._panelTotalTime.ResumeLayout(false);
+            this._panelTotalTime.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericIncrement)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeSeconds)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeMinutes)).EndInit();
+            this._panelNodes.ResumeLayout(false);
+            this._panelNodes.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericNodes)).EndInit();
+            this._panelTimePerMove.ResumeLayout(false);
+            this._panelTimePerMove.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericTimePerMove)).EndInit();
+            this._panelFixedDepth.ResumeLayout(false);
+            this._panelFixedDepth.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this._numericPlies)).EndInit();
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.GroupBox _groupBoxMode;
+        private System.Windows.Forms.RadioButton _radioButtonNodes;
+        private System.Windows.Forms.RadioButton _radioButtonInfinite;
+        private System.Windows.Forms.RadioButton _radioButtonTotalTime;
+        private System.Windows.Forms.RadioButton _radioButtonTimePerMove;
+        private System.Windows.Forms.RadioButton _radioButtonFixedDepth;
+        private System.Windows.Forms.GroupBox _groupBoxModeSetting;
+        private System.Windows.Forms.Button _buttonCancel;
+        private System.Windows.Forms.Button _buttonApply;
+        private System.Windows.Forms.Panel _panelFixedDepth;
+        private System.Windows.Forms.Panel _panelTimePerMove;
+        private System.Windows.Forms.Label _labelTimePerMoveSeconds;
+        private System.Windows.Forms.Label _labelTimePerMove;
+        private System.Windows.Forms.NumericUpDown _numericTimePerMove;
+        private System.Windows.Forms.Label _labelPlies;
+        private System.Windows.Forms.NumericUpDown _numericPlies;
+        private System.Windows.Forms.Panel _panelTotalTime;
+        private System.Windows.Forms.Label _labelIncrementSeconds;
+        private System.Windows.Forms.NumericUpDown _numericIncrement;
+        private System.Windows.Forms.Label _labelIncrement;
+        private System.Windows.Forms.Label _labelTotalTimeSeconds;
+        private System.Windows.Forms.NumericUpDown _numericTotalTimeSeconds;
+        private System.Windows.Forms.Label _labelTotalTimeMinutes;
+        private System.Windows.Forms.NumericUpDown _numericTotalTimeMinutes;
+        private System.Windows.Forms.Label _labelTotalTime;
+        private System.Windows.Forms.Panel _panelNodes;
+        private System.Windows.Forms.NumericUpDown _numericNodes;
+        private System.Windows.Forms.Label _labelNodes;
+    }
+}

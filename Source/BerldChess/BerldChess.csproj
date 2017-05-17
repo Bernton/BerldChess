@@ -114,6 +114,12 @@
     <Compile Include="Source\View\FormEngineSettings.Designer.cs">
       <DependentUpon>FormEngineSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\View\FormLevelDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Source\View\FormLevelDialog.Designer.cs">
+      <DependentUpon>FormLevelDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Source\View\FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -128,12 +134,15 @@
     <Compile Include="Source\View\FormPgnLoader.Designer.cs">
       <DependentUpon>FormPgnLoader.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\View\FormProgressDialog.cs" />
     <Compile Include="Source\View\FormSquareColor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Source\View\FormSquareColor.Designer.cs">
       <DependentUpon>FormSquareColor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\Model\Level.cs" />
+    <Compile Include="Source\Model\LevelType.cs" />
     <Compile Include="Source\View\PieceImageProvider.cs" />
     <Compile Include="Source\View\FormBoardSetting.cs">
       <SubType>Form</SubType>
@@ -153,11 +162,15 @@
     <Compile Include="Source\View\FormPromotion.Designer.cs">
       <DependentUpon>FormPromotion.cs</DependentUpon>
     </Compile>
+    <Compile Include="Source\View\ProgressDialog.cs" />
     <EmbeddedResource Include="Source\View\ChessPanel.resx">
       <DependentUpon>ChessPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\FormEngineSettings.resx">
       <DependentUpon>FormEngineSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Source\View\FormLevelDialog.resx">
+      <DependentUpon>FormLevelDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Source\View\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

@@ -8,105 +8,44 @@ namespace BerldChess.View
 {
     public partial class FormEngineSettings : Form
     {
+        #region Fields
+
         private EngineList _engineList;
+
+        #endregion
+
+        #region Events
 
         public event Action EngineSelected;
 
+        #endregion
+
+        #region Constructors
+
         public FormEngineSettings(EngineList engineList)
         {
-            _engineList = engineList;
-
             InitializeComponent();
-            _radioButtonDisabled.Tag = 0;
-            _radioButtonAnalysis.Tag = 1;
-            _radioButtonCompetitive.Tag = 2;
-
             _listBoxSettings.SetDoubleBuffered();
-            UpdateListsAndComboBoxes(_engineList.SelectedIndex1);
-
-            for (int i = engineList.LastPaths.Count - 1; i >= 0; i--)
-            {
-                _comboBoxPath.Items.Add(engineList.LastPaths[i]);
-            }
-
-            switch (SerializedInfo.Instance.EngineMode)
-            {
-                case EngineMode.Disabled:
-                    _radioButtonDisabled.Checked = true;
-                    break;
-                case EngineMode.Analysis:
-                    _radioButtonAnalysis.Checked = true;
-                    break;
-                case EngineMode.Competitive:
-                    _radioButtonCompetitive.Checked = true;
-                    break;
-            }
+            _engineList = engineList;
+            UpdateUI(_engineList.SelectedIndex1);
+            InitializeRadioButtons();
         }
 
-        private void UpdateListsAndComboBoxes(int initialSelect)
-        {
-            _listBoxSettings.Items.Clear();
-            _comboBoxEngine1.Items.Clear();
-            _comboBoxEngine2.Items.Clear();
-            _comboBoxPath.Items.Clear();
+        #endregion
 
-            for (int i = 0; i < SerializedInfo.Instance.EngineList.LastPaths.Count; i++)
-            {
-                _comboBoxPath.Items.Insert(0, SerializedInfo.Instance.EngineList.LastPaths[i]);
-            }
-
-            for (int i = 0; i < _engineList.Settings.Count; i++)
-            {
-                _listBoxSettings.Items.Add(_engineList.Settings[i].Name);
-                _comboBoxEngine1.Items.Add(_engineList.Settings[i].Name);
-                _comboBoxEngine2.Items.Add(_engineList.Settings[i].Name);
-            }
-
-            if (initialSelect != -1)
-            {
-                _listBoxSettings.SelectedIndex = initialSelect;
-                OpenEngineConfig(initialSelect);
-            }
-
-            TrySelect(_comboBoxEngine1, SerializedInfo.Instance.EngineList.SelectedIndex1);
-            TrySelect(_comboBoxEngine2, SerializedInfo.Instance.EngineList.SelectedIndex2);
-        }
-
-        private void TrySelect(ComboBox comboBox, int selectedIndex)
-        {
-            if (comboBox.Items.Count > 0)
-            {
-                if (selectedIndex < comboBox.Items.Count && selectedIndex >= 0)
-                {
-                    comboBox.SelectedIndex = selectedIndex;
-                }
-                else
-                {
-                    comboBox.SelectedIndex = 0;
-                }
-            }
-        }
-
-        private void OpenEngineConfig(int index)
-        {
-            EngineSetting setting = _engineList.Settings[index];
-
-            _textBoxName.Text = setting.Name;
-            _textBoxArguments.Text = string.Join(Environment.NewLine, setting.Arguments);
-            _comboBoxPath.Text = setting.ExecutablePath;
-        }
+        #region Event Methods
 
         private void OnButtonApplyClick(object sender, EventArgs e)
         {
-            if (_engineList.Settings.Count == 0)
+            if (!_engineList.SettingAvailable)
             {
                 return;
             }
 
-            string name = _textBoxName.Text;
             EngineSetting setting = _engineList.Settings[_listBoxSettings.SelectedIndex];
+            string name = _textBoxName.Text;
 
-            if (setting == null)
+            if(string.IsNullOrWhiteSpace(name))
             {
                 return;
             }
@@ -127,10 +66,10 @@ namespace BerldChess.View
             setting.ExecutablePath = _comboBoxPath.Text;
             setting.Arguments = _textBoxArguments.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
-            SerializedInfo.Instance.EngineList.AddLastPath(setting.ExecutablePath);
+            _engineList.TryAddPath(setting.ExecutablePath);
             EngineSelected?.Invoke();
 
-            UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
+            UpdateUI(_listBoxSettings.SelectedIndex);
         }
 
         private void OnButtonAddNewClick(object sender, EventArgs e)
@@ -138,10 +77,9 @@ namespace BerldChess.View
             EngineSetting setting = new EngineSetting();
             string name = _textBoxName.Text;
 
-
-            if(name.Length < 3)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                MessageBox.Show(this, "Setting name must be longer than 2 characters.", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, "Name is missing.", "BerldChess", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -174,14 +112,12 @@ namespace BerldChess.View
             setting.ExecutablePath = _comboBoxPath.Text;
             setting.Arguments = _textBoxArguments.Text.Split('\n');
 
-            SerializedInfo.Instance.EngineList.AddLastPath(setting.ExecutablePath);
-
+            _engineList.TryAddPath(setting.ExecutablePath);
             _engineList.Settings.Add(setting);
 
-            _listBoxSettings.Items.Add(setting.Name);
-            _listBoxSettings.SelectedIndex = _listBoxSettings.Items.Count - 1;
+            UpdateUI(_listBoxSettings.SelectedIndex);
 
-            UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
+            _listBoxSettings.SelectedIndex = _listBoxSettings.Items.Count - 1;
         }
 
         private void OnButtonRemoveClick(object sender, EventArgs e)
@@ -194,11 +130,25 @@ namespace BerldChess.View
             int selected = _listBoxSettings.SelectedIndex;
 
             _engineList.Settings.RemoveAt(selected);
-            _listBoxSettings.Items.RemoveAt(selected);
-            _listBoxSettings.SelectedIndex = selected - 1;
+
+            if (_engineList.SelectedIndex1 == selected)
+            {
+                _engineList.SelectedIndex1 = 0;
+            }
+
+            if (_engineList.SelectedIndex2 == selected)
+            {
+                _engineList.SelectedIndex2 = 0;
+            }
 
             EngineSelected?.Invoke();
-            UpdateListsAndComboBoxes(_listBoxSettings.SelectedIndex);
+
+            UpdateUI(_listBoxSettings.SelectedIndex);
+
+            if (selected - 1 >= 0)
+            {
+                _listBoxSettings.SelectedIndex = selected - 1;
+            }
         }
 
         private void OnListBoxSettingsSelectedIndexChanged(object sender, EventArgs e)
@@ -207,6 +157,132 @@ namespace BerldChess.View
             {
                 OpenEngineConfig(_listBoxSettings.SelectedIndex);
             }
+        }
+
+        private void OnComboBoxEngine1SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _engineList.SelectedIndex1 = _comboBoxEngine1.SelectedIndex;
+            EngineSelected?.Invoke();
+        }
+
+        private void OnComboBoxEngine2SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _engineList.SelectedIndex2 = _comboBoxEngine2.SelectedIndex;
+            EngineSelected?.Invoke();
+        }
+
+        private void OnButtonPathDialogClick(object sender, EventArgs e)
+        {
+            string initialDirectory = null;
+
+            for (int i = 0; i < SerializedInfo.Instance.EngineList.LastPaths.Count; i++)
+            {
+                string path = SerializedInfo.Instance.EngineList.LastPaths[i];
+
+                if (File.Exists(path))
+                {
+                    FileInfo fileInfo = new FileInfo(path);
+                    initialDirectory = fileInfo.Directory.FullName;
+                    break;
+                }
+                else if (Directory.Exists(path))
+                {
+                    initialDirectory = path;
+                    break;
+                }
+            }
+
+            OpenFileDialog fileDialog = new OpenFileDialog();
+
+            if (initialDirectory != null)
+            {
+                fileDialog.InitialDirectory = initialDirectory;
+            }
+
+            fileDialog.Filter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*";
+            fileDialog.Multiselect = false;
+            fileDialog.RestoreDirectory = true;
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                _comboBoxPath.Text = fileDialog.FileName;
+            }
+        }
+
+        private void RadioButtonCheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton radioButton = (RadioButton)sender;
+
+            if (radioButton.Checked && radioButton.Tag != null)
+            {
+                SetUIToEngineMode((EngineMode)(int)radioButton.Tag);
+
+                SerializedInfo.Instance.EngineMode = (EngineMode)(int)radioButton.Tag;
+                EngineSelected?.Invoke();
+            }
+        }
+
+        #endregion
+
+        #region Other Methods
+
+        private void InitializeRadioButtons()
+        {
+            _radioButtonDisabled.Tag = 0;
+            _radioButtonAnalysis.Tag = 1;
+            _radioButtonCompetitive.Tag = 2;
+
+            switch (SerializedInfo.Instance.EngineMode)
+            {
+                case EngineMode.Disabled:
+                    _radioButtonDisabled.Checked = true;
+                    break;
+                case EngineMode.Analysis:
+                    _radioButtonAnalysis.Checked = true;
+                    break;
+                case EngineMode.Competitive:
+                    _radioButtonCompetitive.Checked = true;
+                    break;
+            }
+        }
+
+        private void OpenEngineConfig(int index)
+        {
+            EngineSetting setting = _engineList.Settings[index];
+
+            _textBoxName.Text = setting.Name;
+            _textBoxArguments.Text = string.Join(Environment.NewLine, setting.Arguments);
+            _comboBoxPath.Text = setting.ExecutablePath;
+        }
+
+        private void UpdateUI(int initialSelect)
+        {
+            _listBoxSettings.Items.Clear();
+            _comboBoxEngine1.Items.Clear();
+            _comboBoxEngine2.Items.Clear();
+            _comboBoxPath.Items.Clear();
+
+            for (int i = 0; i < _engineList.LastPaths.Count; i++)
+            {
+                _comboBoxPath.Items.Insert(0, _engineList.LastPaths[i]);
+            }
+
+            for (int i = 0; i < _engineList.Settings.Count; i++)
+            {
+                _listBoxSettings.Items.Add(_engineList.Settings[i].Name);
+
+                _comboBoxEngine1.Items.Add(_engineList.Settings[i].Name);
+                _comboBoxEngine2.Items.Add(_engineList.Settings[i].Name);
+            }
+
+            if (initialSelect != -1 && _listBoxSettings.Items.Count > 0)
+            {
+                _listBoxSettings.SelectedIndex = initialSelect;
+                OpenEngineConfig(initialSelect);
+            }
+
+            TrySelect(_comboBoxEngine1, _engineList.SelectedIndex1);
+            TrySelect(_comboBoxEngine2, _engineList.SelectedIndex2);
         }
 
         private void SetUIToEngineMode(EngineMode mode)
@@ -246,67 +322,21 @@ namespace BerldChess.View
             }
         }
 
-        private void RadioButtonCheckedChanged(object sender, EventArgs e)
+        private void TrySelect(ComboBox comboBox, int selectedIndex)
         {
-            RadioButton radioButton = (RadioButton)sender;
-
-            if (radioButton.Checked && radioButton.Tag != null)
+            if (comboBox.Items.Count > 0)
             {
-                SetUIToEngineMode((EngineMode)(int)radioButton.Tag);
-
-                SerializedInfo.Instance.EngineMode = (EngineMode)(int)radioButton.Tag;
-                EngineSelected?.Invoke();
-            }
-        }
-
-        private void OnComboBoxEngine1SelectedIndexChanged(object sender, EventArgs e)
-        {
-            SerializedInfo.Instance.EngineList.SelectedIndex1 = _comboBoxEngine1.SelectedIndex;
-            EngineSelected?.Invoke();
-        }
-
-        private void OnComboBoxEngine2SelectedIndexChanged(object sender, EventArgs e)
-        {
-            SerializedInfo.Instance.EngineList.SelectedIndex2 = _comboBoxEngine2.SelectedIndex;
-            EngineSelected?.Invoke();
-        }
-
-        private void OnButtonPathDialogClick(object sender, EventArgs e)
-        {
-            string initialDirectory = null;
-
-            for (int i = 0; i < SerializedInfo.Instance.EngineList.LastPaths.Count; i++)
-            {
-                string path = SerializedInfo.Instance.EngineList.LastPaths[i];
-
-                if (File.Exists(path))
+                if (selectedIndex < comboBox.Items.Count && selectedIndex >= 0)
                 {
-                    FileInfo fileInfo = new FileInfo(path);
-                    initialDirectory = fileInfo.Directory.FullName;
-                    break;
+                    comboBox.SelectedIndex = selectedIndex;
                 }
-                else if (Directory.Exists(path))
+                else
                 {
-                    initialDirectory = path;
-                    break;
+                    comboBox.SelectedIndex = 0;
                 }
             }
-
-            OpenFileDialog fileDialog = new OpenFileDialog();
-
-            if (initialDirectory != null)
-            {
-                fileDialog.InitialDirectory = initialDirectory;
-            }
-
-            fileDialog.Filter = "exe files (*.exe)|*.exe|All files (*.*)|*.*";
-            fileDialog.Multiselect = false;
-            fileDialog.RestoreDirectory = true;
-
-            if (fileDialog.ShowDialog() == DialogResult.OK)
-            {
-                _comboBoxPath.Text = fileDialog.FileName;
-            }
         }
+
+        #endregion
     }
 }

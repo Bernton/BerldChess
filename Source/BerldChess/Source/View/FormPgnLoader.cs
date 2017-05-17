@@ -98,6 +98,21 @@ namespace BerldChess.View
                     {
                         Game firstGame = database.Games[0];
                         PgnLoadedGame = firstGame;
+
+                        Analysis = _checkBoxAnalysis.Checked;
+
+                        int parseDepth;
+                        bool parsed = int.TryParse(_textBoxDepth.Text, out parseDepth);
+
+                        if (parsed)
+                        {
+                            Depth = Math.Abs(parseDepth);
+                        }
+                        else
+                        {
+                            Analysis = false;
+                        }
+
                         DialogResult = DialogResult.OK;
                     }
                     else

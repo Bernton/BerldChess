@@ -28,7 +28,6 @@ namespace BerldChess.Model
 
         #region Fields
 
-        private bool _timePerMoveMode = false;
         private bool _pgnAnalysis = false;
         private bool _hideArrows;
         private bool _boardFlipped;
@@ -49,9 +48,6 @@ namespace BerldChess.Model
         private int _clickDelay = 120;
         private int _multiPV = 250;
         private int _animTime = 300;
-        private int _engineTime = 1000;
-        private int _increment = 2000;
-        private long _totalTime = 180000;
         private int _pgnAnalysisDepth;
         private int? _splitterDistance = null;
         private double _sizeFactor = 1;
@@ -60,22 +56,11 @@ namespace BerldChess.Model
         private Rectangle? _bounds = null;
         private EngineList _engineList = new EngineList();
         private List<ChessFont> _chessFonts = new List<ChessFont>();
+        private Level _level = new Level();
 
         #endregion
 
         #region Properties
-
-        public bool TimePerMoveMode
-        {
-            get
-            {
-                return _timePerMoveMode;
-            }
-            set
-            {
-                _timePerMoveMode = value;
-            }
-        }
 
         public bool PgnAnalysis
         {
@@ -273,18 +258,6 @@ namespace BerldChess.Model
             }
         }
 
-        public int Increment
-        {
-            get
-            {
-                return _increment;
-            }
-            set
-            {
-                _increment = value;
-            }
-        }
-
         public int PgnAnalysisDepth
         {
             get
@@ -306,19 +279,6 @@ namespace BerldChess.Model
             set
             {
                 _multiPV = value;
-            }
-        }
-
-        public int EngineTime
-        {
-            get
-            {
-                return _engineTime;
-            }
-
-            set
-            {
-                _engineTime = value;
             }
         }
 
@@ -423,18 +383,6 @@ namespace BerldChess.Model
             }
         }
 
-        public long TotalTime
-        {
-            get
-            {
-                return _totalTime;
-            }
-            set
-            {
-                _totalTime = value;
-            }
-        }
-
         public double PieceSizeFactor
         {
             get
@@ -465,10 +413,21 @@ namespace BerldChess.Model
             {
                 return _engineMode;
             }
-
             set
             {
                 _engineMode = value;
+            }
+        }
+
+        public Level Level
+        {
+            get
+            {
+                return _level;
+            }
+            set
+            {
+                _level = value;
             }
         }
 
@@ -478,7 +437,6 @@ namespace BerldChess.Model
             {
                 return _engineList;
             }
-
             set
             {
                 _engineList = value;

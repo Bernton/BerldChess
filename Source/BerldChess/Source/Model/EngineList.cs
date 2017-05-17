@@ -53,9 +53,9 @@ namespace BerldChess.Model
         }
 
 
-        public void AddLastPath(string path)
+        public void TryAddPath(string path)
         {
-            if (!LastPaths.Contains(path))
+            if (!(string.IsNullOrWhiteSpace(path) || LastPaths.Contains(path)))
             {
                 LastPaths.Add(path);
 
