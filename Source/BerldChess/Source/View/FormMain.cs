@@ -29,18 +29,15 @@ namespace BerldChess.View
         #region Fields
 
         private bool _totalChartView = false;
-        private volatile bool _evalutionEnabled = true;
+        private volatile bool _evaluationEnabled = true;
         private volatile bool _updateAfterAnimation = false;
         private volatile bool _analyzingMode = true;
         private volatile bool _movePlayed = true;
         private int _mainPvReference;
-        private int _engineTime = 300;
-        private int _increment;
         private int _animationTime = 300;
         private int _draws = 0;
         private const int CentipawnTolerance = 85;
         private const int ChartShownPlies = 25;
-        private long _totalTime;
         private const double DefaultSizeFactor = 0.82;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
         private InfoType[] _columnOrder;
@@ -55,6 +52,7 @@ namespace BerldChess.View
         private SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
         private SoundPlayer _illegalPlayer = new SoundPlayer(Resources.Ilegal);
         private InputSimulator _inputSimulator = new InputSimulator();
+        private CancellationTokenSource _depthTaskTS;
         private FormMainViewModel _vm;
         private FormPieceSettings _pieceDialog;
         private FormBoardSetting _boardDialog;
@@ -103,7 +101,7 @@ namespace BerldChess.View
             {
                 case EngineMode.Disabled:
 
-                    _evalutionEnabled = false;
+                    _evaluationEnabled = false;
                     SetEngineViewElementsVisible(false);
                     _chessPanel.Arrows.Clear();
                     _chessPanel.Invalidate();
@@ -113,7 +111,7 @@ namespace BerldChess.View
                 case EngineMode.Analysis:
 
                     SetEngineViewElementsVisible(SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting1, 0, true));
-                    _evalutionEnabled = true;
+                    _evaluationEnabled = true;
                     break;
 
                 case EngineMode.Competitive:
@@ -156,8 +154,7 @@ namespace BerldChess.View
                         ClearEngines();
                     }
 
-                    _evalutionEnabled = true;
-
+                    _evaluationEnabled = true;
                     break;
             }
         }
@@ -350,25 +347,38 @@ namespace BerldChess.View
                 }
                 else
                 {
-                    if (_menuItemEngineTime.Checked)
+                    switch (SerializedInfo.Instance.Level.SelectedLevelType)
                     {
-                        _vm.Engines[engineIndex].Query($"go movetime {_engineTime}");
-                    }
-                    else
-                    {
-                        int increment = _increment;
+                        case LevelType.FixedDepth:
 
-                        if(increment < 0)
-                        {
-                            increment = 0;
-                        }
+                            _vm.Engines[engineIndex].Query($"go depth {SerializedInfo.Instance.Level.Plies}");
+                            break;
 
-                        _vm.Engines[engineIndex].Query($"go wtime {GetRemainingTime(0)} btime {GetRemainingTime(1)} winc {increment} binc{increment}");
+                        case LevelType.TimePerMove:
+
+                            _vm.Engines[engineIndex].Query($"go movetime {SerializedInfo.Instance.Level.TimePerMove}");
+                            break;
+
+                        case LevelType.TotalTime:
+
+                            long increment = SerializedInfo.Instance.Level.Increment;
+                            _vm.Engines[engineIndex].Query($"go wtime {GetRemainingTime(0)} btime {GetRemainingTime(1)} winc {increment} binc{increment}");
+                            break;
+
+                        case LevelType.Infinite:
+
+                            _vm.Engines[engineIndex].Query("go infinite");
+                            break;
+
+                        case LevelType.Nodes:
+
+                            _vm.Engines[engineIndex].Query($"go nodes {SerializedInfo.Instance.Level.Nodes}");
+                            break;
                     }
                 }
 
                 _movePlayed = false;
-                _evalutionEnabled = true;
+                _evaluationEnabled = true;
             }
         }
 
@@ -398,7 +408,7 @@ namespace BerldChess.View
 
         private void OnEvaluationReceived(Evaluation evaluation)
         {
-            if (_evalutionEnabled)
+            if (_evaluationEnabled)
             {
                 ProcessEvaluation(evaluation);
             }
@@ -416,9 +426,6 @@ namespace BerldChess.View
 
         private void OnFormMainLoad(object sender, EventArgs e)
         {
-            _menuItemEngineTime.Text = $"Time Per Move [{_engineTime}]";
-            _menuItemTotalTime.Text = $"Total Time [{_totalTime}]";
-            _menuItemIncrement.Text = $"Increment [{_increment}]";
             _menuItemMultiPv.Text = $"MultiPV [{SerializedInfo.Instance.MultiPV}]";
             _menuItemAnimationTime.Text = $"Animation Time [{_animationTime}]";
             _menuItemClickDelay.Text = $"Click Delay [{SerializedInfo.Instance.ClickDelay}]";
@@ -436,13 +443,13 @@ namespace BerldChess.View
 
         private void OnTimerValidationTick(object sender, EventArgs e)
         {
-            if (_menuItemTotalTime.Checked)
+            if (SerializedInfo.Instance.Level.SelectedLevelType == LevelType.TotalTime)
             {
                 _menuItemWhiteTime.Text = TimeSpan.FromMilliseconds(GetRemainingTime(0)).ToString(@"mm\:ss\.ff");
                 _menuItemBlackTime.Text = TimeSpan.FromMilliseconds(GetRemainingTime(1)).ToString(@"mm\:ss\.ff");
             }
 
-            if (!_vm.GameFinished && _evalutionEnabled)
+            if (!_vm.GameFinished && _evaluationEnabled)
             {
                 UpdateUI();
             }
@@ -466,58 +473,6 @@ namespace BerldChess.View
             if (_menuItemCheckAuto.Checked && _menuItemCheatMode.Checked)
             {
                 CheckExternBoard();
-            }
-        }
-
-        private void OnMenuItemIncrementClick(object sender, EventArgs e)
-        {
-            string input = Interaction.InputBox("Enter Increment:", "BerldChess - Increment");
-            int increment;
-
-            if (int.TryParse(input, out increment))
-            {
-                _increment = increment;
-                _menuItemIncrement.Text = $"Increment [{_increment}]";
-            }
-        }
-
-        private void OnMenuItemEngineTimeMouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                string input = Interaction.InputBox("Enter Engine Time, leave empty to not modify:", "BerldChess - Engine Time");
-                int engineTime;
-
-                if (int.TryParse(input, out engineTime))
-                {
-                    _engineTime = engineTime;
-                    _menuItemEngineTime.Text = $"Time Per Move [{_engineTime}]";
-                }
-            }
-            else
-            {
-                _menuItemEngineTime.Checked = !_menuItemEngineTime.Checked;
-            }
-        }
-
-        private void OnMenuItemTotalTimeMouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                string input = Interaction.InputBox("Enter Total Time, leave empty to not modify:", "BerldChess - Total Time");
-                long totalTime;
-
-                if (long.TryParse(input, out totalTime))
-                {
-                    _totalTime = totalTime;
-                    _menuItemTotalTime.Text = $"Total Time [{_totalTime}]";
-                }
-
-
-            }
-            else
-            {
-                _menuItemTotalTime.Checked = !_menuItemTotalTime.Checked;
             }
         }
 
@@ -557,27 +512,6 @@ namespace BerldChess.View
         {
             _chessPanel.DisplayCoordinates = _menuItemDisplayCoordinates.Checked;
             _chessPanel.Invalidate();
-        }
-
-        private void OnMenuItemEngineTimeCheckedChanged(object sender, EventArgs e)
-        {
-            _menuItemTotalTime.Checked = !_menuItemEngineTime.Checked;
-
-            _menuItemWhiteTime.Visible = _menuItemTotalTime.Checked;
-            _menuItemBlackTime.Visible = _menuItemTotalTime.Checked;
-
-            if(!_menuItemTotalTime.Checked)
-            {
-                for (int i = 0; i < _playerTimes.Length; i++)
-                {
-                    _playerTimes[i].Reset();
-                }
-            }
-        }
-
-        private void OnMenuItemTotalTimeCheckedChanged(object sender, EventArgs e)
-        {
-            _menuItemEngineTime.Checked = !_menuItemTotalTime.Checked;
         }
 
         private void OnMenuItemBackClick(object sender, EventArgs e)
@@ -759,7 +693,7 @@ namespace BerldChess.View
                     {
                         if (multiPV > 0 && multiPV <= 250)
                         {
-                            _evalutionEnabled = false;
+                            _evaluationEnabled = false;
                             _movePlayed = true;
 
                             SerializedInfo.Instance.MultiPV = multiPV;
@@ -771,7 +705,7 @@ namespace BerldChess.View
                             ResetEvaluationData(multiPV);
                             ResetEvaluationGridRows(SerializedInfo.Instance.MultiPV);
 
-                            _evalutionEnabled = true;
+                            _evaluationEnabled = true;
                         }
                     }
                 }
@@ -796,9 +730,17 @@ namespace BerldChess.View
 
         private void StartDepthAnalysis(int depth)
         {
+            if(SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible)
+            {
+                return;
+            }
+
             if (_vm.PlyList.Count > 0)
             {
-                CancellationTokenSource source = new CancellationTokenSource();
+                _depthTaskTS = new CancellationTokenSource();
+
+                ProgressDialog dialog = new ProgressDialog($"Analysis to depth {depth}", "Analyzing...", true);
+                dialog.ClosedByInterface += OnDepthAnalysisCancel;
 
                 Task anaylsisTask = new Task(() =>
                 {
@@ -809,23 +751,35 @@ namespace BerldChess.View
                             Navigate(i);
                         });
 
+                        Invoke((MethodInvoker)delegate
+                        {
+                            dialog.StatusText = $"Analyzing ply {i}...";
+                            dialog.ProgressBarPercentage = (int)Math.Ceiling((double)i / _vm.PlyList.Count * 100.0);
+                        });
+
                         while (_vm.PlyList[i].EvaluationDepth < depth && !_vm.GameFinished)
                         {
                             Thread.Sleep(10);
 
-                            if (source.Token.IsCancellationRequested)
+                            if (_depthTaskTS.Token.IsCancellationRequested)
                             {
+                                Invoke((MethodInvoker)delegate { dialog.Hide(); });
                                 return;
                             }
                         }
                     }
+
+                    Invoke((MethodInvoker)delegate { dialog.Hide(); });
                 });
 
                 anaylsisTask.Start();
-
-                MessageBox.Show(this, "Analysing to depth " + depth + "\n\n Press OK to cancel.", "Depth Analysis", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                source.Cancel();
+                dialog.Show();
             }
+        }
+
+        private void OnDepthAnalysisCancel(object sender, EventArgs e)
+        {
+            _depthTaskTS.Cancel();
         }
 
         private void OnMenuItemCheatModeCheckedChanged(object sender, EventArgs e)
@@ -1107,14 +1061,13 @@ namespace BerldChess.View
         {
             int navigationIndex = e.RowIndex * 2 + e.ColumnIndex + 1;
 
-            if (navigationIndex >= _vm.PlyList.Count)
+            if ((navigationIndex >= _vm.PlyList.Count || navigationIndex == _vm.NavigationIndex))
             {
-                Navigate(_vm.PlyList.Count - 1, false);
+                SelectMovesCell(navigationIndex);
+                return;
             }
-            else
-            {
-                Navigate(e.RowIndex * 2 + e.ColumnIndex + 1);
-            }
+
+            Navigate(e.RowIndex * 2 + e.ColumnIndex + 1);
         }
 
         private void OnTableLayoutPanelModulesResize(object sender, EventArgs e)
@@ -1144,7 +1097,7 @@ namespace BerldChess.View
                 return;
             }
 
-            if(e.KeyCode == Keys.T)
+            if (e.KeyCode == Keys.T)
             {
                 string plies = "";
 
@@ -1200,11 +1153,6 @@ namespace BerldChess.View
                 _chessPanel.PieceSizeFactor = DefaultSizeFactor;
             }
 
-            _menuItemEngineTime.Checked = SerializedInfo.Instance.TimePerMoveMode;
-            _menuItemTotalTime.Checked = !SerializedInfo.Instance.TimePerMoveMode;
-
-            _menuItemWhiteTime.Visible = _menuItemTotalTime.Checked;
-            _menuItemBlackTime.Visible = _menuItemTotalTime.Checked;
 
             _chessPanel.BorderHighlight = SerializedInfo.Instance.BorderHighlight;
             _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
@@ -1226,12 +1174,10 @@ namespace BerldChess.View
             _menuItemCheckAuto.Checked = SerializedInfo.Instance.AutoCheck;
             _menuItemIllegalSound.Checked = SerializedInfo.Instance.IllegalSound;
             _menuItemDisplayLegalMoves.Checked = SerializedInfo.Instance.DisplayLegalMoves;
-            _engineTime = SerializedInfo.Instance.EngineTime;
-            _totalTime = SerializedInfo.Instance.TotalTime;
-            _increment = SerializedInfo.Instance.Increment;
             _menuIllegalSound.Checked = SerializedInfo.Instance.Sound;
             _animationTime = SerializedInfo.Instance.AnimationTime;
 
+            SetLevel();
             SetDarkMode(this, SerializedInfo.Instance.DarkMode);
 
             if (SerializedInfo.Instance.ChessFonts.Count == 0)
@@ -1297,10 +1243,7 @@ namespace BerldChess.View
                 SerializedInfo.Instance.HideOutput = _menuItemHideOutput.Checked;
                 SerializedInfo.Instance.LocalMode = _menuItemLocalMode.Checked;
                 SerializedInfo.Instance.CheatMode = _menuItemCheatMode.Checked;
-                SerializedInfo.Instance.TimePerMoveMode = _menuItemEngineTime.Checked;
-                SerializedInfo.Instance.EngineTime = _engineTime;
-                SerializedInfo.Instance.TotalTime = _totalTime;
-                SerializedInfo.Instance.Increment = _increment;
+
                 SerializedInfo.Instance.Sound = _menuIllegalSound.Checked;
                 SerializedInfo.Instance.AutoCheck = _menuItemCheckAuto.Checked;
                 SerializedInfo.Instance.AnimationTime = _animationTime;
@@ -1504,21 +1447,24 @@ namespace BerldChess.View
                     whitePawnEvaluation = centipawn / 100.0;
                 }
 
-                    if (whitePawnEvaluation == 0)
-                    {
-                        _labelEvaluation.Text = " 0.00";
-                    }
-                    else
-                    {
-                        _labelEvaluation.Text = whitePawnEvaluation.ToString("+0.00;-0.00");
-                    }
-
-                    _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
+                if (whitePawnEvaluation == 0)
+                {
+                    _labelEvaluation.Text = " 0.00";
+                }
+                else
+                {
+                    _labelEvaluation.Text = whitePawnEvaluation.ToString("+0.00;-0.00");
                 }
 
-            if (FillPlyList(depth, whitePawnEvaluation))
+                _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
+            }
+
+            if (!_vm.GameFinished)
             {
-                UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                if (FillPlyList(depth, whitePawnEvaluation, isMate))
+                {
+                    UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                }
             }
 
             for (int iPV = 0; iPV < _evaluations.Length; iPV++)
@@ -1579,7 +1525,7 @@ namespace BerldChess.View
 
         private long GetRemainingTime(int index)
         {
-            long time = _totalTime - (int)_playerTimes[index].Elapsed.TotalMilliseconds + ((_vm.PlyList.Count - 1) / 2) * _increment;
+            long time = SerializedInfo.Instance.Level.TotalTime - (int)_playerTimes[index].Elapsed.TotalMilliseconds + ((_vm.PlyList.Count - 1) / 2) * SerializedInfo.Instance.Level.Increment;
 
             if (time < 1)
             {
@@ -1822,9 +1768,12 @@ namespace BerldChess.View
                     }
                 }
 
-                if (FillPlyList(depth, whitePawnEvaluation))
+                if (!_vm.GameFinished)
                 {
-                    UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                    if (FillPlyList(depth, whitePawnEvaluation, isMate))
+                    {
+                        UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                    }
                 }
             }
 
@@ -1981,7 +1930,7 @@ namespace BerldChess.View
         {
             bool wasFinished = _vm.GameFinished;
 
-            _evalutionEnabled = false;
+            _evaluationEnabled = false;
             _analyzingMode = true;
             _computerPlayer = ChessPlayer.None;
 
@@ -2044,7 +1993,6 @@ namespace BerldChess.View
             }
 
             _chessPanel.Invalidate();
-            UpdateUI();
         }
 
         private void SetDarkMode(Control control, bool darkMode)
@@ -2163,8 +2111,6 @@ namespace BerldChess.View
 
         private void Navigate(int navigation, bool validate = true)
         {
-            UpdateUI();
-
             if (validate)
             {
                 if (navigation == _vm.NavigationIndex || navigation >= _vm.PlyList.Count)
@@ -2174,7 +2120,7 @@ namespace BerldChess.View
             }
 
             bool wasFinished = _vm.GameFinished;
-            _evalutionEnabled = false;
+            _evaluationEnabled = false;
             _analyzingMode = true;
 
             _computerPlayer = ChessPlayer.None;
@@ -2239,6 +2185,10 @@ namespace BerldChess.View
                 }
 
                 return;
+            }
+            else if (navIndex + 1 >= _vm.PlyList.Count)
+            {
+                navIndex = _vm.PlyList.Count - 2;
             }
 
             _dataGridViewMoves.Rows[navIndex / 2].Cells[navIndex % 2].Selected = true;
@@ -2312,11 +2262,11 @@ namespace BerldChess.View
             _tableLayoutPanelEvalInfos.Visible = active;
         }
 
-        private bool FillPlyList(int depth, double whitePawnEvaluation)
+        private bool FillPlyList(int depth, double whitePawnEvaluation, bool isMate)
         {
             if (_vm.PlyList.Count > 0 && _vm.PlyList.Count > _vm.NavigationIndex)
             {
-                if (depth >= _vm.CurrentPly.EvaluationDepth)
+                if (depth >= _vm.CurrentPly.EvaluationDepth || isMate)
                 {
                     _vm.CurrentPly.Evaluation = whitePawnEvaluation;
                     _vm.CurrentPly.EvaluationDepth = depth;
@@ -2361,12 +2311,12 @@ namespace BerldChess.View
                 Recognizer.UpdateBoardImage();
             }
 
-            _evalutionEnabled = false;
+            _evaluationEnabled = false;
 
             ReadOnlyCollection<Move> validMoves = _vm.Game.GetValidMoves(_vm.Game.WhoseTurn);
             MoveType moveType = _vm.Game.ApplyMove(move, true);
 
-            if (_menuItemTotalTime.Enabled)
+            if (SerializedInfo.Instance.Level.SelectedLevelType == LevelType.TotalTime)
             {
                 if (_vm.Game.WhoseTurn == ChessPlayer.White)
                 {
@@ -2393,7 +2343,7 @@ namespace BerldChess.View
             AddMoveToPlyList(move.ToString(""), formattedMove);
             UpdateMoveGrid(formattedMove);
 
-            if (_vm.Game.IsCheckmated(_vm.Game.WhoseTurn) && _evalutionEnabled)
+            if (_vm.Game.IsCheckmated(_vm.Game.WhoseTurn))
             {
                 _vm.LatestPly.Evaluation = _vm.Game.IsCheckmated(ChessPlayer.White) ? -120 : 120;
             }
@@ -2713,5 +2663,42 @@ namespace BerldChess.View
         }
 
         #endregion
+
+        private void SetLevel()
+        {
+            switch (SerializedInfo.Instance.Level.SelectedLevelType)
+            {
+                case LevelType.FixedDepth:
+                case LevelType.TimePerMove:
+                case LevelType.Infinite:
+                case LevelType.Nodes:
+
+                    for (int i = 0; i < _playerTimes.Length; i++)
+                    {
+                        _playerTimes[i].Reset();
+                    }
+
+                    _menuItemWhiteTime.Visible = false;
+                    _menuItemBlackTime.Visible = false;
+                    break;
+
+                case LevelType.TotalTime:
+
+                    _menuItemWhiteTime.Visible = true;
+                    _menuItemBlackTime.Visible = true;
+                    break;
+            }
+        }
+
+        private void OnMenuItemLevelClick(object sender, EventArgs e)
+        {
+            FormLevelDialog levelDialog = new FormLevelDialog(SerializedInfo.Instance.Level);
+
+            if(levelDialog.ShowDialog() == DialogResult.OK)
+            {
+                SerializedInfo.Instance.Level = levelDialog.Level;
+                SetLevel();
+            }
+        }
     }
 }
