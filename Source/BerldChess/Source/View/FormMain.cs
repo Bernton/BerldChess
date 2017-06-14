@@ -896,11 +896,11 @@ namespace BerldChess.View
 
             if (highestValue > Math.Abs(lowestValue))
             {
-                peak = (int)Math.Ceiling(highestValue);
+                peak = (int)Math.Ceiling(highestValue + 0.25);
             }
             else
             {
-                peak = (int)Math.Ceiling(Math.Abs(lowestValue));
+                peak = (int)Math.Ceiling(Math.Abs(lowestValue + 0.25));
             }
 
             if (peak < 2)
