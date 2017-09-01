@@ -728,6 +728,46 @@ namespace BerldChess.View
             }
         }
 
+        private void StartTimeAnalysis(int milliSeconds)
+        {
+            if (SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible)
+            {
+                return;
+            }
+
+            if (_vm.PlyList.Count > 0)
+            {
+                _depthTaskTS = new CancellationTokenSource();
+
+                ProgressDialog dialog = new ProgressDialog($"Time analysis ({milliSeconds} ms/ply)", "Analyzing...", true);
+                dialog.ClosedByInterface += OnDepthAnalysisCancel;
+
+                Task anaylsisTask = new Task(() =>
+                {
+                    for (int i = 0; i < _vm.PlyList.Count; i++)
+                    {
+                        Invoke((MethodInvoker)delegate
+                        {
+                            Navigate(i);
+                        });
+
+                        Invoke((MethodInvoker)delegate
+                        {
+                            dialog.StatusText = $"Analyzing ply {i}...";
+                            dialog.ProgressBarPercentage = (int)Math.Ceiling((double)i / _vm.PlyList.Count * 100.0);
+                        });
+
+                        Thread.Sleep(milliSeconds);
+                    }
+
+                    Invoke((MethodInvoker)delegate { dialog.Hide(); });
+                });
+
+                anaylsisTask.Start();
+                dialog.Show();
+            }
+        }
+
         private void StartDepthAnalysis(int depth)
         {
             if(SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible)
@@ -2698,6 +2738,22 @@ namespace BerldChess.View
             {
                 SerializedInfo.Instance.Level = levelDialog.Level;
                 SetLevel();
+            }
+        }
+
+        private void OnMenuItemTimeAnalysisClick(object sender, EventArgs e)
+        {
+            if (GetPlayingEngine() == null)
+            {
+                return;
+            }
+
+            string input = Interaction.InputBox("Enter Time per ply in ms:", "BerldChess - Time Analysis");
+            int time;
+
+            if (int.TryParse(input, out time))
+            {
+                StartTimeAnalysis(time);
             }
         }
     }
