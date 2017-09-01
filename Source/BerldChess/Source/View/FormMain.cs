@@ -1970,12 +1970,12 @@ namespace BerldChess.View
                     continue;
                 }
 
-                _vm.Engines[i].Query("ucinewgame");
-
                 if (!wasFinished)
                 {
                     _vm.Engines[i].RequestStop();
                 }
+
+                _vm.Engines[i].Query("ucinewgame");
             }
 
             if (wasFinished)
