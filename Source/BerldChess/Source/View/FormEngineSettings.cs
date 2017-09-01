@@ -277,6 +277,11 @@ namespace BerldChess.View
 
             if (initialSelect != -1 && _listBoxSettings.Items.Count > 0)
             {
+                if(initialSelect >= _listBoxSettings.Items.Count)
+                {
+                    initialSelect = _listBoxSettings.Items.Count - 1;
+                }
+
                 _listBoxSettings.SelectedIndex = initialSelect;
                 OpenEngineConfig(initialSelect);
             }
