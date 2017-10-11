@@ -18,6 +18,8 @@ namespace BerldChess.View
     {
         #region Fields
 
+        private bool _moveTrigger = false;
+        private bool _indicatorMoveDrawing = false;
         private bool _displayCoordinates = true;
         private bool _renderImages = true;
         private int _boardDimension;
@@ -30,17 +32,20 @@ namespace BerldChess.View
         private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(80, 6, 6, 6));
         private Point _boardLocation;
         private Point _selectedIndex = new Point(-1, -1);
-        private Point _movingPieceIndex = new Point(-1, -1);
+        private Point _movingIndex = new Point(-1, -1);
         private Point _movingPoint = new Point(-1, -1);
         private ChessGame _game = null;
         private ChessPiece[][] _board;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
-        private List<Arrow> _arrows = new List<Arrow>();
+        private List<MoveArrow> _arrows = new List<MoveArrow>();
+        private List<int> _indicatedSquares = new List<int>();
+        private List<MoveArrow> _indicatedMoves = new List<MoveArrow>();
 
         #endregion
 
         #region Properties
 
+        public bool AllowIndicators { get; set; } = true;
         public bool Gradient { get; set; } = true;
         public bool BorderHighlight { get; set; } = false;
         public bool IsUnicodeFont { get; set; }
@@ -138,7 +143,7 @@ namespace BerldChess.View
             }
             set
             {
-                _movingPieceIndex = new Point(-1, -1);
+                _movingIndex = new Point(-1, -1);
                 _selectedIndex = new Point(-1, -1);
 
                 _game = value;
@@ -153,7 +158,7 @@ namespace BerldChess.View
             }
         }
 
-        public List<Arrow> Arrows
+        public List<MoveArrow> Arrows
         {
             get
             {
@@ -206,6 +211,7 @@ namespace BerldChess.View
                 _boardDimension = Width - 1;
             }
 
+            // Drawing Coordinates
             if (DisplayCoordinates)
             {
                 SolidBrush borderBrush = new SolidBrush(_borderColor);
@@ -254,23 +260,24 @@ namespace BerldChess.View
 
             _fieldSize = _boardDimension / (double)_board.Length;
 
+            // Image rendering if required
             if (_renderImages)
             {
                 _scaledPieceImages = new Bitmap[12];
 
                 bool defaultFont = false;
 
-                if (PieceFontFamily == "" || PieceFontFamily == "Default1")
+                if (PieceFontFamily == "" || PieceFontFamily == "Default")
                 {
                     PieceImageProvider.Inititalize(Resources.ChessPiecesSprite1, 0);
                     defaultFont = true;
                 }
-                else if (PieceFontFamily == "Default2")
+                else if (PieceFontFamily == "Simple")
                 {
                     PieceImageProvider.Inititalize(Resources.ChessPiecesSprite2, 1);
                     defaultFont = true;
                 }
-                else if (PieceFontFamily == "Default3")
+                else if (PieceFontFamily == "Pixel")
                 {
                     PieceImageProvider.Inititalize(Resources.ChessPiecesSprite3, 2);
                     defaultFont = true;
@@ -334,6 +341,7 @@ namespace BerldChess.View
             g.SmoothingMode = SmoothingMode.Default;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
+            // Drawing squares
             for (int y = 0; y < Game.BoardHeight; y++)
             {
                 for (int x = 0; x < Game.BoardHeight; x++)
@@ -351,13 +359,12 @@ namespace BerldChess.View
                 }
             }
 
+
+            // Last move highlight
             for (int y = 0; y < Game.BoardHeight; y++)
             {
                 for (int x = 0; x < Game.BoardHeight; x++)
                 {
-                    int index = y * Game.BoardHeight + x + y;
-                    bool isLightSquare = index % 2 == 0;
-
                     for (int i = 0; i < HighlighedSquares.Count; i++)
                     {
                         if (HighlighedSquares[i].X == x && HighlighedSquares[i].Y == y && !IsFlipped ||
@@ -397,6 +404,30 @@ namespace BerldChess.View
                 }
             }
 
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Draw indicated squares
+            SolidBrush indicatedGreenBrush = new SolidBrush(Color.FromArgb(100, Color.Green));
+            SolidBrush indicatedRedBrush = new SolidBrush(Color.FromArgb(100, Color.Red));
+
+            for (int i = 0; i < _indicatedSquares.Count; i++)
+            {
+                int index = _indicatedSquares[i];
+                SolidBrush brush = indicatedGreenBrush;
+
+                if (_indicatedSquares[i] >= Game.BoardWidth * Game.BoardHeight)
+                {
+                    index -= Game.BoardHeight * Game.BoardWidth;
+                    brush = indicatedRedBrush;
+                }
+
+                int x = index % Game.BoardHeight;
+                int y = index / Game.BoardHeight;
+
+                g.FillEllipse(brush, xLinePositions[x] - 1, yLinePositions[y] - 1, xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
+            }
+
+            // Draw king check effect
             if (Game.IsInCheck(Game.WhoseTurn))
             {
                 char king = Game.WhoseTurn == ChessPlayer.White ? 'K' : 'k';
@@ -460,8 +491,7 @@ namespace BerldChess.View
                 }
             }
 
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-
+            // Draw grid borders
             if (DisplayGridBorders)
             {
                 for (int i = 0; i < _board.Length + 1; i++)
@@ -484,11 +514,12 @@ namespace BerldChess.View
 
             heightOffset = (int)Math.Ceiling((_fieldSize - maxHeight) / 2.0);
 
+            // Draw pieces
             for (int y = 0; y < _board.Length; y++)
             {
                 for (int x = 0; x < _board.Length; x++)
                 {
-                    if (_board[y][x] == null || (y == _movingPieceIndex.Y && x == _movingPieceIndex.X))
+                    if (_board[y][x] == null || (y == _movingIndex.Y && x == _movingIndex.X && !_indicatorMoveDrawing && _moveTrigger))
                     {
                         continue;
                     }
@@ -522,13 +553,15 @@ namespace BerldChess.View
                 }
             }
 
-            if (DisplayLegalMoves)
+
+            // Draw legal moves from moved index
+            if (DisplayLegalMoves && !_indicatorMoveDrawing)
             {
                 Point _possibleMovePieceIndex = new Point(-1, -1);
 
-                if (_movingPieceIndex.X != -1)
+                if (_movingIndex.X != -1)
                 {
-                    _possibleMovePieceIndex = _movingPieceIndex;
+                    _possibleMovePieceIndex = _movingIndex;
                 }
                 else if (_selectedIndex.X != -1)
                 {
@@ -567,16 +600,52 @@ namespace BerldChess.View
                 }
             }
 
+            // Draw indicated move arrows
+            if (_indicatedMoves.Count > 0)
+            {
+                MoveArrowDrawInfo[] drawInfo = new MoveArrowDrawInfo[_indicatedMoves.Count];
+
+                Point[][] arrowPositions = new Point[_indicatedMoves.Count][];
+                float[] arrowDistances = new float[_indicatedMoves.Count];
+
+                for (int i = 0; i < _indicatedMoves.Count; i++)
+                {
+                    drawInfo[i] = new MoveArrowDrawInfo();
+                    drawInfo[i].Arrow = _indicatedMoves[i];
+                    drawInfo[i].Positions = GetAbsPositionsFromMoveString(_indicatedMoves[i].Move);
+                }
+
+                drawInfo = drawInfo.OrderBy(c => c.Length).ToArray();
+
+                for (int i = drawInfo.Length - 1; i >= 0; i--)
+                {
+                    float arrowThickness = (float)((drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension));
+
+                    if (drawInfo[i].Length / _fieldSize > 1.45)
+                    {
+                        arrowThickness -= 0.85F;
+                    }
+
+                    Pen arrowPen = new Pen(Color.Black, arrowThickness);
+                    arrowPen.Brush = new SolidBrush(drawInfo[i].Arrow.Color);
+                    arrowPen.EndCap = LineCap.ArrowAnchor;
+                    arrowPen.StartCap = LineCap.RoundAnchor;
+
+                    g.DrawLine(arrowPen, drawInfo[i].Positions[0], drawInfo[i].Positions[1]);
+                }
+            }
+
+            // Draw input arrows
             if (_arrows.Count > 0)
             {
-                ArrowDrawInfo[] drawInfo = new ArrowDrawInfo[_arrows.Count];
+                MoveArrowDrawInfo[] drawInfo = new MoveArrowDrawInfo[_arrows.Count];
 
                 Point[][] arrowPositions = new Point[_arrows.Count][];
                 float[] arrowDistances = new float[_arrows.Count];
 
                 for (int i = 0; i < _arrows.Count; i++)
                 {
-                    drawInfo[i] = new ArrowDrawInfo();
+                    drawInfo[i] = new MoveArrowDrawInfo();
                     drawInfo[i].Arrow = _arrows[i];
                     drawInfo[i].Positions = GetAbsPositionsFromMoveString(_arrows[i].Move);
                 }
@@ -601,15 +670,45 @@ namespace BerldChess.View
                 }
             }
 
-            if (_movingPieceIndex.X != -1 && _movingPoint.X != -1 && _board[_movingPieceIndex.Y][_movingPieceIndex.X] != null)
+            // Draw moving index
+            if (_movingIndex.X != -1 && _movingPoint.X != -1)
             {
-                absX = _movingPoint.X - (float)(_fieldSize / 2.0);
-                absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
+                Point indexRelPosition = new Point((int)((_movingPoint.X - _boardLocation.X) / _fieldSize), (int)((_movingPoint.Y - _boardLocation.Y) / _fieldSize));
 
-                absX += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Width) / 2);
-                absY += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())].Height) / 2);
+                if (_indicatorMoveDrawing && indexRelPosition != _movingIndex && indexRelPosition != _movingIndex)
+                {
+                    float sourcePosX = (float)((_movingIndex.X + 0.5) * _fieldSize + _boardLocation.X);
+                    float sourcePosY = (float)((_movingIndex.Y + 0.5) * _fieldSize + _boardLocation.Y);
+                    PointF source = new PointF(sourcePosX, sourcePosY);
 
-                g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingPieceIndex.Y][_movingPieceIndex.X].GetFENLetter())], absX, absY);
+                    Color arrowColor;
+
+                    if (ModifierKeys == Keys.Control)
+                    {
+                        arrowColor = Color.Red;
+                    }
+                    else
+                    {
+                        arrowColor = Color.Green;
+                    }
+
+                    Pen arrowPen = new Pen(Color.Black, _boardDimension * 0.025F);
+                    arrowPen.Brush = new SolidBrush(Color.FromArgb(100, arrowColor));
+                    arrowPen.EndCap = LineCap.ArrowAnchor;
+                    arrowPen.StartCap = LineCap.RoundAnchor;
+
+                    g.DrawLine(arrowPen, source, _movingPoint);
+                }
+                else if (_board[_movingIndex.Y][_movingIndex.X] != null && _moveTrigger)
+                {
+                    absX = _movingPoint.X - (float)(_fieldSize / 2.0);
+                    absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
+
+                    absX += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingIndex.Y][_movingIndex.X].GetFENLetter())].Width) / 2);
+                    absY += (float)((_fieldSize - _scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingIndex.Y][_movingIndex.X].GetFENLetter())].Height) / 2);
+
+                    g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(_board[_movingIndex.Y][_movingIndex.X].GetFENLetter())], absX, absY);
+                }
             }
         }
 
@@ -623,24 +722,43 @@ namespace BerldChess.View
             int relativeBoardX = absoluteBoardX / (int)_fieldSize;
             int relativeBoardY = absoluteBoardY / (int)_fieldSize;
 
-            Point pieceIndex;
-
-            if (!IsFlipped)
-            {
-                pieceIndex = new Point(relativeBoardX, relativeBoardY);
-            }
-            else
-            {
-                pieceIndex = new Point(Invert(Game.BoardHeight - 1, relativeBoardX), Invert(Game.BoardHeight - 1, relativeBoardY));
-            }
-
-            if (relativeBoardX < 0 || relativeBoardX > 7 || relativeBoardY < 0 || relativeBoardY > 7 || _board[pieceIndex.Y][pieceIndex.X] == null)
+            if (relativeBoardX < 0 || relativeBoardX > 7 || relativeBoardY < 0 || relativeBoardY > 7)
             {
                 return;
             }
 
-            _movingPoint = new Point(e.X, e.Y);
-            _movingPieceIndex = pieceIndex;
+            if (e.Button == MouseButtons.Left)
+            {
+                Point pieceIndex;
+
+                if (!IsFlipped)
+                {
+                    pieceIndex = new Point(relativeBoardX, relativeBoardY);
+                }
+                else
+                {
+                    pieceIndex = new Point(Invert(Game.BoardHeight - 1, relativeBoardX), Invert(Game.BoardHeight - 1, relativeBoardY));
+                }
+
+                if (_board[pieceIndex.Y][pieceIndex.X] == null)
+                {
+                    return;
+                }
+
+                _movingPoint = new Point(e.X, e.Y);
+                _movingIndex = pieceIndex;
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                _indicatorMoveDrawing = true;
+
+                Point movingIndex;
+
+                movingIndex = new Point(relativeBoardX, relativeBoardY);
+
+                _movingPoint = new Point(e.X, e.Y);
+                _movingIndex = movingIndex;
+            }
 
             Invalidate();
         }
@@ -668,61 +786,147 @@ namespace BerldChess.View
 
             if (relativeBoardX < 0 || relativeBoardX > 7 || relativeBoardY < 0 || relativeBoardY > 7)
             {
-                _movingPieceIndex = new Point(-1, -1);
+                _movingIndex = new Point(-1, -1);
                 _selectedIndex = new Point(-1, -1);
                 Invalidate();
+                _indicatorMoveDrawing = false;
                 return;
             }
 
-            Point currentIndex = new Point(relativeBoardX, relativeBoardY);
-
-            if (_movingPieceIndex.X != -1 && !_movingPieceIndex.Equals(currentIndex))
+            if (e.Button == MouseButtons.Left)
             {
-                PieceMoved?.Invoke(this, new PieceMovedEventArgs(_movingPieceIndex, currentIndex));
-                _movingPieceIndex = new Point(-1, -1);
-                _selectedIndex = new Point(-1, -1);
-            }
-            else
-            {
-                _movingPieceIndex = new Point(-1, -1);
+                Point currentIndex = new Point(relativeBoardX, relativeBoardY);
 
-                if (_selectedIndex.X == -1)
+                if (_movingIndex.X != -1 && !_movingIndex.Equals(currentIndex))
                 {
-                    if (_board[currentIndex.Y][currentIndex.X] != null && _board[currentIndex.Y][currentIndex.X].Owner == Game.WhoseTurn)
+                    PieceMoved?.Invoke(this, new PieceMovedEventArgs(_movingIndex, currentIndex));
+                    _movingIndex = new Point(-1, -1);
+                    _selectedIndex = new Point(-1, -1);
+                }
+                else
+                {
+                    _movingIndex = new Point(-1, -1);
+
+                    if (_selectedIndex.X == -1)
                     {
-                        _selectedIndex = currentIndex;
+                        if (_board[currentIndex.Y][currentIndex.X] != null && _board[currentIndex.Y][currentIndex.X].Owner == Game.WhoseTurn)
+                        {
+                            _selectedIndex = currentIndex;
+                        }
+                    }
+                    else if (!_selectedIndex.Equals(currentIndex))
+                    {
+                        if (_board[currentIndex.Y][currentIndex.X] != null &&
+                            _board[_selectedIndex.Y][_selectedIndex.X] != null &&
+                            _board[currentIndex.Y][currentIndex.X].Owner == _board[_selectedIndex.Y][_selectedIndex.X].Owner)
+                        {
+                            _selectedIndex = currentIndex;
+                        }
+                        else
+                        {
+                            PieceMoved?.Invoke(this, new PieceMovedEventArgs(_selectedIndex, currentIndex));
+
+                            _movingIndex = new Point(-1, -1);
+                            _selectedIndex = new Point(-1, -1);
+                        }
                     }
                 }
-                else if (!_selectedIndex.Equals(currentIndex))
+
+                _moveTrigger = false;
+                Invalidate();
+            }
+            else if (e.Button == MouseButtons.Right && _indicatorMoveDrawing)
+            {
+                Point initialMovingIndex = _movingIndex;
+                Point moveIndex = new Point(relativeBoardX, relativeBoardY);
+
+                if (IsFlipped)
                 {
-                    if (_board[currentIndex.Y][currentIndex.X] != null &&
-                        _board[_selectedIndex.Y][_selectedIndex.X] != null &&
-                        _board[currentIndex.Y][currentIndex.X].Owner == _board[_selectedIndex.Y][_selectedIndex.X].Owner)
+                    _movingIndex.X = Invert(Game.BoardHeight - 1, _movingIndex.X);
+                    _movingIndex.Y = Invert(Game.BoardHeight - 1, _movingIndex.Y);
+                }
+
+                if (_movingIndex == moveIndex)
+                {
+                    _movingIndex = initialMovingIndex;
+
+                    int squareIndex = _movingIndex.Y * Game.BoardHeight + _movingIndex.X;
+                    int counterPart;
+
+                    if (ModifierKeys == Keys.Control)
                     {
-                        _selectedIndex = currentIndex;
+                        counterPart = squareIndex;
+                        squareIndex += Game.BoardHeight * Game.BoardWidth;
                     }
                     else
                     {
-                        PieceMoved?.Invoke(this, new PieceMovedEventArgs(_selectedIndex, currentIndex));
+                        counterPart = squareIndex + Game.BoardHeight * Game.BoardWidth;
+                    }
 
-                        _movingPieceIndex = new Point(-1, -1);
-                        _selectedIndex = new Point(-1, -1);
+                    if (_indicatedSquares.Contains(squareIndex))
+                    {
+                        _indicatedSquares.Remove(squareIndex);
+                    }
+                    else if(_indicatedSquares.Contains(counterPart))
+                    {
+                        _indicatedSquares.Remove(counterPart);
+                    }
+                    else
+                    {
+                        _indicatedSquares.Add(squareIndex);
                     }
                 }
+                else
+                {
+                    string moveString = GetMoveStringFromRelPositions(new Point[] { _movingIndex, moveIndex });
+
+                    bool wasExisting = false;
+
+                    for (int i = 0; i < _indicatedMoves.Count; i++)
+                    {
+                        if (_indicatedMoves[i].Move == moveString)
+                        {
+                            _indicatedMoves.RemoveAt(i);
+                            wasExisting = true;
+                            break;
+                        }
+                    }
+
+                    if (!wasExisting)
+                    {
+                        Color arrowColor;
+
+                        if (ModifierKeys == Keys.Control)
+                        {
+                            arrowColor = Color.Red;
+                        }
+                        else
+                        {
+                            arrowColor = Color.Green;
+                        }
+
+                        MoveArrow indicatorArrow = new MoveArrow(moveString, 2.5, Color.FromArgb(160, arrowColor));
+                        _indicatedMoves.Add(indicatorArrow);
+                    }
+                }
+
+                _movingIndex = new Point(-1, -1);
             }
 
-            Invalidate();
+            _indicatorMoveDrawing = false;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
 
-            if (_movingPieceIndex.X != -1)
+            if (_movingIndex.X != -1)
             {
+                _moveTrigger = !_indicatorMoveDrawing;
                 _movingPoint = new Point(e.X, e.Y);
                 Invalidate();
             }
+
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -736,6 +940,12 @@ namespace BerldChess.View
         #endregion
 
         #region Other Methods
+
+        public void ClearIndicators()
+        {
+            _indicatedMoves.Clear();
+            _indicatedSquares.Clear();
+        }
 
         public void InvalidateRender()
         {
@@ -1049,6 +1259,19 @@ namespace BerldChess.View
             }
 
             return index;
+        }
+
+        private string GetMoveStringFromRelPositions(Point[] position)
+        {
+            string moveString = "";
+
+            for (int i = 0; i < 2; i++)
+            {
+                moveString += (char)(position[i].X + 97);
+                moveString += Invert(Game.BoardWidth, position[i].Y);
+            }
+
+            return moveString;
         }
 
         private Bitmap[] GetPiecesFromFontFamily(string fontFamily, double fieldSize)

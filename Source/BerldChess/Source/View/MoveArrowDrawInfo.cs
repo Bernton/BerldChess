@@ -3,9 +3,9 @@ using System.Drawing;
 
 namespace BerldChess.View
 {
-    public class ArrowDrawInfo
+    public class MoveArrowDrawInfo
     {
-        public Arrow Arrow { get; set; }
+        public MoveArrow Arrow { get; set; }
         public PointF[] Positions { get; set; }
 
         public float Length

@@ -2,7 +2,6 @@
 using System.IO;
 using ilf.pgn.Data;
 using ilf.pgn.PgnParsers;
-using Microsoft.FSharp.Core;
 using Game = ilf.pgn.Data.Game;
 
 namespace ilf.pgn

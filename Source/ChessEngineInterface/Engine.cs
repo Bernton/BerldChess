@@ -225,7 +225,10 @@ namespace ChessEngineInterface
                         {
                             if (infoComponents[i] == _infoTypeNames[typeI])
                             {
-                                OutputDataInfoReceived?.Invoke(isCurrMove, currentInfoData, (InfoType)currentType);
+                                if (currentInfoData != "" && currentType != -1)
+                                {
+                                    OutputDataInfoReceived?.Invoke(isCurrMove, currentInfoData, (InfoType)currentType);
+                                }
 
                                 if (!isCurrMove)
                                 {

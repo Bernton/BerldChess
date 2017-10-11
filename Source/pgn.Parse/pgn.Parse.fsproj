@@ -9,12 +9,12 @@
     <OutputType>Library</OutputType>
     <RootNamespace>pgn.Parse</RootNamespace>
     <AssemblyName>pgn.Parse</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <Name>pgn.Parse</Name>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -71,19 +71,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
-      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.2\lib\net40-client\FParsec.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.3\lib\net40-client\FParsec.dll</HintPath>
     </Reference>
     <Reference Include="FParsecCS">
-      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.2\lib\net40-client\FParsecCS.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.3\lib\net40-client\FParsecCS.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\packages\FSharp.Core.4.2.3\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.4.8\lib\net40\NLog.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <ProjectReference Include="..\pgn.Data\pgn.Data.csproj">

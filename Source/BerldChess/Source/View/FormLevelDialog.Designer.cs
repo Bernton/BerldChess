@@ -36,39 +36,34 @@
             this._radioButtonTimePerMove = new System.Windows.Forms.RadioButton();
             this._radioButtonFixedDepth = new System.Windows.Forms.RadioButton();
             this._groupBoxModeSetting = new System.Windows.Forms.GroupBox();
+            this._panelFixedDepth = new System.Windows.Forms.Panel();
+            this._textBoxPlies = new System.Windows.Forms.TextBox();
+            this._labelPlies = new System.Windows.Forms.Label();
             this._panelTotalTime = new System.Windows.Forms.Panel();
+            this._textBoxIncrement = new System.Windows.Forms.TextBox();
+            this._textBoxTotalTimeSeconds = new System.Windows.Forms.TextBox();
+            this._textBoxTotalTimeMinutes = new System.Windows.Forms.TextBox();
             this._labelIncrementSeconds = new System.Windows.Forms.Label();
-            this._numericIncrement = new System.Windows.Forms.NumericUpDown();
             this._labelIncrement = new System.Windows.Forms.Label();
             this._labelTotalTimeSeconds = new System.Windows.Forms.Label();
-            this._numericTotalTimeSeconds = new System.Windows.Forms.NumericUpDown();
             this._labelTotalTimeMinutes = new System.Windows.Forms.Label();
-            this._numericTotalTimeMinutes = new System.Windows.Forms.NumericUpDown();
             this._labelTotalTime = new System.Windows.Forms.Label();
             this._panelNodes = new System.Windows.Forms.Panel();
             this._numericNodes = new System.Windows.Forms.NumericUpDown();
             this._labelNodes = new System.Windows.Forms.Label();
             this._panelTimePerMove = new System.Windows.Forms.Panel();
+            this._textBoxTimePerMove = new System.Windows.Forms.TextBox();
             this._labelTimePerMoveSeconds = new System.Windows.Forms.Label();
             this._labelTimePerMove = new System.Windows.Forms.Label();
-            this._numericTimePerMove = new System.Windows.Forms.NumericUpDown();
-            this._panelFixedDepth = new System.Windows.Forms.Panel();
-            this._labelPlies = new System.Windows.Forms.Label();
-            this._numericPlies = new System.Windows.Forms.NumericUpDown();
             this._buttonCancel = new System.Windows.Forms.Button();
             this._buttonApply = new System.Windows.Forms.Button();
             this._groupBoxMode.SuspendLayout();
             this._groupBoxModeSetting.SuspendLayout();
+            this._panelFixedDepth.SuspendLayout();
             this._panelTotalTime.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._numericIncrement)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeSeconds)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeMinutes)).BeginInit();
             this._panelNodes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._numericNodes)).BeginInit();
             this._panelTimePerMove.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._numericTimePerMove)).BeginInit();
-            this._panelFixedDepth.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._numericPlies)).BeginInit();
             this.SuspendLayout();
             // 
             // _groupBoxMode
@@ -116,7 +111,7 @@
             this._radioButtonTotalTime.AutoSize = true;
             this._radioButtonTotalTime.Location = new System.Drawing.Point(22, 98);
             this._radioButtonTotalTime.Name = "_radioButtonTotalTime";
-            this._radioButtonTotalTime.Size = new System.Drawing.Size(95, 25);
+            this._radioButtonTotalTime.Size = new System.Drawing.Size(97, 25);
             this._radioButtonTotalTime.TabIndex = 2;
             this._radioButtonTotalTime.TabStop = true;
             this._radioButtonTotalTime.Text = "Total time";
@@ -149,10 +144,10 @@
             // 
             // _groupBoxModeSetting
             // 
+            this._groupBoxModeSetting.Controls.Add(this._panelNodes);
             this._groupBoxModeSetting.Controls.Add(this._panelTimePerMove);
             this._groupBoxModeSetting.Controls.Add(this._panelFixedDepth);
             this._groupBoxModeSetting.Controls.Add(this._panelTotalTime);
-            this._groupBoxModeSetting.Controls.Add(this._panelNodes);
             this._groupBoxModeSetting.Location = new System.Drawing.Point(263, 14);
             this._groupBoxModeSetting.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this._groupBoxModeSetting.Name = "_groupBoxModeSetting";
@@ -162,20 +157,66 @@
             this._groupBoxModeSetting.TabStop = false;
             this._groupBoxModeSetting.Text = "Mode Name";
             // 
+            // _panelFixedDepth
+            // 
+            this._panelFixedDepth.Controls.Add(this._textBoxPlies);
+            this._panelFixedDepth.Controls.Add(this._labelPlies);
+            this._panelFixedDepth.Location = new System.Drawing.Point(7, 23);
+            this._panelFixedDepth.Name = "_panelFixedDepth";
+            this._panelFixedDepth.Size = new System.Drawing.Size(261, 245);
+            this._panelFixedDepth.TabIndex = 5;
+            // 
+            // _textBoxPlies
+            // 
+            this._textBoxPlies.Location = new System.Drawing.Point(12, 43);
+            this._textBoxPlies.Name = "_textBoxPlies";
+            this._textBoxPlies.Size = new System.Drawing.Size(130, 29);
+            this._textBoxPlies.TabIndex = 6;
+            // 
+            // _labelPlies
+            // 
+            this._labelPlies.AutoSize = true;
+            this._labelPlies.Location = new System.Drawing.Point(8, 13);
+            this._labelPlies.Name = "_labelPlies";
+            this._labelPlies.Size = new System.Drawing.Size(134, 21);
+            this._labelPlies.TabIndex = 1;
+            this._labelPlies.Text = "Half moves (Plies)";
+            // 
             // _panelTotalTime
             // 
+            this._panelTotalTime.Controls.Add(this._textBoxIncrement);
+            this._panelTotalTime.Controls.Add(this._textBoxTotalTimeSeconds);
+            this._panelTotalTime.Controls.Add(this._textBoxTotalTimeMinutes);
             this._panelTotalTime.Controls.Add(this._labelIncrementSeconds);
-            this._panelTotalTime.Controls.Add(this._numericIncrement);
             this._panelTotalTime.Controls.Add(this._labelIncrement);
             this._panelTotalTime.Controls.Add(this._labelTotalTimeSeconds);
-            this._panelTotalTime.Controls.Add(this._numericTotalTimeSeconds);
             this._panelTotalTime.Controls.Add(this._labelTotalTimeMinutes);
-            this._panelTotalTime.Controls.Add(this._numericTotalTimeMinutes);
             this._panelTotalTime.Controls.Add(this._labelTotalTime);
             this._panelTotalTime.Location = new System.Drawing.Point(7, 23);
             this._panelTotalTime.Name = "_panelTotalTime";
             this._panelTotalTime.Size = new System.Drawing.Size(261, 245);
             this._panelTotalTime.TabIndex = 7;
+            // 
+            // _textBoxIncrement
+            // 
+            this._textBoxIncrement.Location = new System.Drawing.Point(12, 162);
+            this._textBoxIncrement.Name = "_textBoxIncrement";
+            this._textBoxIncrement.Size = new System.Drawing.Size(130, 29);
+            this._textBoxIncrement.TabIndex = 15;
+            // 
+            // _textBoxTotalTimeSeconds
+            // 
+            this._textBoxTotalTimeSeconds.Location = new System.Drawing.Point(12, 81);
+            this._textBoxTotalTimeSeconds.Name = "_textBoxTotalTimeSeconds";
+            this._textBoxTotalTimeSeconds.Size = new System.Drawing.Size(130, 29);
+            this._textBoxTotalTimeSeconds.TabIndex = 14;
+            // 
+            // _textBoxTotalTimeMinutes
+            // 
+            this._textBoxTotalTimeMinutes.Location = new System.Drawing.Point(12, 39);
+            this._textBoxTotalTimeMinutes.Name = "_textBoxTotalTimeMinutes";
+            this._textBoxTotalTimeMinutes.Size = new System.Drawing.Size(130, 29);
+            this._textBoxTotalTimeMinutes.TabIndex = 13;
             // 
             // _labelIncrementSeconds
             // 
@@ -185,13 +226,6 @@
             this._labelIncrementSeconds.Size = new System.Drawing.Size(66, 21);
             this._labelIncrementSeconds.TabIndex = 12;
             this._labelIncrementSeconds.Text = "seconds";
-            // 
-            // _numericIncrement
-            // 
-            this._numericIncrement.Location = new System.Drawing.Point(12, 159);
-            this._numericIncrement.Name = "_numericIncrement";
-            this._numericIncrement.Size = new System.Drawing.Size(130, 29);
-            this._numericIncrement.TabIndex = 11;
             // 
             // _labelIncrement
             // 
@@ -211,13 +245,6 @@
             this._labelTotalTimeSeconds.TabIndex = 9;
             this._labelTotalTimeSeconds.Text = "seconds";
             // 
-            // _numericTotalTimeSeconds
-            // 
-            this._numericTotalTimeSeconds.Location = new System.Drawing.Point(12, 78);
-            this._numericTotalTimeSeconds.Name = "_numericTotalTimeSeconds";
-            this._numericTotalTimeSeconds.Size = new System.Drawing.Size(130, 29);
-            this._numericTotalTimeSeconds.TabIndex = 8;
-            // 
             // _labelTotalTimeMinutes
             // 
             this._labelTotalTimeMinutes.AutoSize = true;
@@ -227,19 +254,12 @@
             this._labelTotalTimeMinutes.TabIndex = 6;
             this._labelTotalTimeMinutes.Text = "minutes";
             // 
-            // _numericTotalTimeMinutes
-            // 
-            this._numericTotalTimeMinutes.Location = new System.Drawing.Point(12, 40);
-            this._numericTotalTimeMinutes.Name = "_numericTotalTimeMinutes";
-            this._numericTotalTimeMinutes.Size = new System.Drawing.Size(130, 29);
-            this._numericTotalTimeMinutes.TabIndex = 5;
-            // 
             // _labelTotalTime
             // 
             this._labelTotalTime.AutoSize = true;
             this._labelTotalTime.Location = new System.Drawing.Point(8, 13);
             this._labelTotalTime.Name = "_labelTotalTime";
-            this._labelTotalTime.Size = new System.Drawing.Size(80, 21);
+            this._labelTotalTime.Size = new System.Drawing.Size(82, 21);
             this._labelTotalTime.TabIndex = 1;
             this._labelTotalTime.Text = "Total Time";
             // 
@@ -254,6 +274,11 @@
             // 
             // _numericNodes
             // 
+            this._numericNodes.Increment = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
             this._numericNodes.Location = new System.Drawing.Point(12, 40);
             this._numericNodes.Maximum = new decimal(new int[] {
             -727379968,
@@ -263,6 +288,7 @@
             this._numericNodes.Name = "_numericNodes";
             this._numericNodes.Size = new System.Drawing.Size(184, 29);
             this._numericNodes.TabIndex = 5;
+            this._numericNodes.ThousandsSeparator = true;
             // 
             // _labelNodes
             // 
@@ -275,13 +301,20 @@
             // 
             // _panelTimePerMove
             // 
+            this._panelTimePerMove.Controls.Add(this._textBoxTimePerMove);
             this._panelTimePerMove.Controls.Add(this._labelTimePerMoveSeconds);
             this._panelTimePerMove.Controls.Add(this._labelTimePerMove);
-            this._panelTimePerMove.Controls.Add(this._numericTimePerMove);
             this._panelTimePerMove.Location = new System.Drawing.Point(7, 23);
             this._panelTimePerMove.Name = "_panelTimePerMove";
             this._panelTimePerMove.Size = new System.Drawing.Size(261, 245);
             this._panelTimePerMove.TabIndex = 6;
+            // 
+            // _textBoxTimePerMove
+            // 
+            this._textBoxTimePerMove.Location = new System.Drawing.Point(12, 42);
+            this._textBoxTimePerMove.Name = "_textBoxTimePerMove";
+            this._textBoxTimePerMove.Size = new System.Drawing.Size(130, 29);
+            this._textBoxTimePerMove.TabIndex = 5;
             // 
             // _labelTimePerMoveSeconds
             // 
@@ -300,38 +333,6 @@
             this._labelTimePerMove.Size = new System.Drawing.Size(84, 21);
             this._labelTimePerMove.TabIndex = 3;
             this._labelTimePerMove.Text = "Move time";
-            // 
-            // _numericTimePerMove
-            // 
-            this._numericTimePerMove.Location = new System.Drawing.Point(12, 39);
-            this._numericTimePerMove.Name = "_numericTimePerMove";
-            this._numericTimePerMove.Size = new System.Drawing.Size(130, 29);
-            this._numericTimePerMove.TabIndex = 2;
-            // 
-            // _panelFixedDepth
-            // 
-            this._panelFixedDepth.Controls.Add(this._labelPlies);
-            this._panelFixedDepth.Controls.Add(this._numericPlies);
-            this._panelFixedDepth.Location = new System.Drawing.Point(7, 23);
-            this._panelFixedDepth.Name = "_panelFixedDepth";
-            this._panelFixedDepth.Size = new System.Drawing.Size(261, 245);
-            this._panelFixedDepth.TabIndex = 5;
-            // 
-            // _labelPlies
-            // 
-            this._labelPlies.AutoSize = true;
-            this._labelPlies.Location = new System.Drawing.Point(8, 13);
-            this._labelPlies.Name = "_labelPlies";
-            this._labelPlies.Size = new System.Drawing.Size(134, 21);
-            this._labelPlies.TabIndex = 1;
-            this._labelPlies.Text = "Half moves (Plies)";
-            // 
-            // _numericPlies
-            // 
-            this._numericPlies.Location = new System.Drawing.Point(12, 39);
-            this._numericPlies.Name = "_numericPlies";
-            this._numericPlies.Size = new System.Drawing.Size(130, 29);
-            this._numericPlies.TabIndex = 0;
             // 
             // _buttonCancel
             // 
@@ -373,20 +374,15 @@
             this._groupBoxMode.ResumeLayout(false);
             this._groupBoxMode.PerformLayout();
             this._groupBoxModeSetting.ResumeLayout(false);
+            this._panelFixedDepth.ResumeLayout(false);
+            this._panelFixedDepth.PerformLayout();
             this._panelTotalTime.ResumeLayout(false);
             this._panelTotalTime.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._numericIncrement)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeSeconds)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this._numericTotalTimeMinutes)).EndInit();
             this._panelNodes.ResumeLayout(false);
             this._panelNodes.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this._numericNodes)).EndInit();
             this._panelTimePerMove.ResumeLayout(false);
             this._panelTimePerMove.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._numericTimePerMove)).EndInit();
-            this._panelFixedDepth.ResumeLayout(false);
-            this._panelFixedDepth.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._numericPlies)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -406,20 +402,20 @@
         private System.Windows.Forms.Panel _panelTimePerMove;
         private System.Windows.Forms.Label _labelTimePerMoveSeconds;
         private System.Windows.Forms.Label _labelTimePerMove;
-        private System.Windows.Forms.NumericUpDown _numericTimePerMove;
         private System.Windows.Forms.Label _labelPlies;
-        private System.Windows.Forms.NumericUpDown _numericPlies;
         private System.Windows.Forms.Panel _panelTotalTime;
         private System.Windows.Forms.Label _labelIncrementSeconds;
-        private System.Windows.Forms.NumericUpDown _numericIncrement;
         private System.Windows.Forms.Label _labelIncrement;
         private System.Windows.Forms.Label _labelTotalTimeSeconds;
-        private System.Windows.Forms.NumericUpDown _numericTotalTimeSeconds;
         private System.Windows.Forms.Label _labelTotalTimeMinutes;
-        private System.Windows.Forms.NumericUpDown _numericTotalTimeMinutes;
         private System.Windows.Forms.Label _labelTotalTime;
         private System.Windows.Forms.Panel _panelNodes;
         private System.Windows.Forms.NumericUpDown _numericNodes;
         private System.Windows.Forms.Label _labelNodes;
+        private System.Windows.Forms.TextBox _textBoxIncrement;
+        private System.Windows.Forms.TextBox _textBoxTotalTimeSeconds;
+        private System.Windows.Forms.TextBox _textBoxTotalTimeMinutes;
+        private System.Windows.Forms.TextBox _textBoxTimePerMove;
+        private System.Windows.Forms.TextBox _textBoxPlies;
     }
 }

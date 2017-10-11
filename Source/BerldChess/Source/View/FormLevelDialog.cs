@@ -54,11 +54,11 @@ namespace BerldChess.View
 
             TimeSpan totalTime = TimeSpan.FromMilliseconds(_level.TotalTime);
 
-            _numericPlies.Value = _level.Plies;
-            _numericTimePerMove.Value = (decimal)TimeSpan.FromMilliseconds(_level.TimePerMove).TotalSeconds;
-            _numericTotalTimeMinutes.Value = (int)totalTime.TotalMinutes;
-            _numericTotalTimeSeconds.Value = totalTime.Seconds;
-            _numericIncrement.Value = (decimal)TimeSpan.FromMilliseconds(_level.Increment).TotalSeconds;
+            _textBoxPlies.Text = _level.Plies.ToString();
+            _textBoxTimePerMove.Text = TimeSpan.FromMilliseconds(_level.TimePerMove).TotalSeconds.ToString();
+            _textBoxTotalTimeMinutes.Text = totalTime.TotalMinutes.ToString();
+            _textBoxTotalTimeSeconds.Text = totalTime.Seconds.ToString();
+            _textBoxIncrement.Text = TimeSpan.FromMilliseconds(_level.Increment).TotalSeconds.ToString();
             _numericNodes.Value = _level.Nodes;
 
             _radioButtons[(int)_level.SelectedLevelType].Checked = true;
@@ -101,11 +101,34 @@ namespace BerldChess.View
 
         private void OnButtonApplyClick(object sender, EventArgs e)
         {
-            _level.Plies = (int)_numericPlies.Value;
-            _level.TimePerMove = (int)TimeSpan.FromSeconds((double)_numericTimePerMove.Value).TotalMilliseconds;
-            TimeSpan totalTime = new TimeSpan(0, (int)_numericTotalTimeMinutes.Value, (int)_numericTotalTimeSeconds.Value);
-            _level.TotalTime = (int)totalTime.TotalMilliseconds;
-            _level.Increment = (int)TimeSpan.FromSeconds((double)_numericIncrement.Value).TotalMilliseconds;
+            int plies;
+            double timePerMove;
+            int totalMinutes;
+            int totalSeconds;
+            double increment;
+
+            if (int.TryParse(_textBoxPlies.Text, out plies))
+            {
+                _level.Plies = plies;
+            }
+
+            if(double.TryParse(_textBoxTimePerMove.Text, out timePerMove))
+            {
+                _level.TimePerMove = (int)TimeSpan.FromSeconds(timePerMove).TotalMilliseconds;
+            }
+
+            if(int.TryParse(_textBoxTotalTimeMinutes.Text, out totalMinutes) &&
+                int.TryParse(_textBoxTotalTimeSeconds.Text, out totalSeconds))
+            {
+                TimeSpan totalTime = new TimeSpan(0, totalMinutes, totalSeconds);
+                _level.TotalTime = (int)totalTime.TotalMilliseconds;
+            }
+
+            if(double.TryParse(_textBoxIncrement.Text, out increment))
+            {
+                _level.Increment = (int)TimeSpan.FromSeconds(increment).TotalMilliseconds;
+            }
+
             _level.Nodes = (int)_numericNodes.Value;
             _level.SelectedLevelType = _selectedLevelType;
 

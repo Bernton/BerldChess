@@ -3,13 +3,13 @@ using System.Drawing;
 
 namespace BerldChess.View
 {
-    public class Arrow
+    public class MoveArrow
     {
         public double ThicknessPercent { get; set; }
         public string Move { get; set; }
         public Color Color { get; set; }
 
-        public Arrow(string move, double thickness, Color color)
+        public MoveArrow(string move, double thickness, Color color)
         {
             if(move.Length != 4)
             {
