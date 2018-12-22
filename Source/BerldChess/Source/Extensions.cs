@@ -29,7 +29,7 @@ namespace BerldChess
             double factorWidth = control.Width * widthFactor;
             double factorHeight = control.Height * heightFactor;
 
-            while (size.Width < factorWidth && size.Height < factorHeight)
+            while (size.Width < factorWidth && size.Height < factorHeight && size.Width != 0 && size.Height != 0)
             {
                 fontSize++;
                 size = TextRenderer.MeasureText(control.Text, new Font(control.Font.FontFamily, fontSize));

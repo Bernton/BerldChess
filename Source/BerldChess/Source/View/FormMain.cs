@@ -53,7 +53,8 @@ namespace BerldChess.View
         private SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
         private SoundPlayer _illegalPlayer = new SoundPlayer(Resources.Ilegal);
         private InputSimulator _inputSimulator = new InputSimulator();
-        private CancellationTokenSource _depthTaskTS;
+        private PieceMovedEventArgs _moveOnHold = null;
+        private CancellationTokenSource _analysisTaskTokenSource;
         private FormMainViewModel _vm;
         private FormPieceSettings _pieceDialog;
         private FormBoardSetting _boardDialog;
@@ -193,8 +194,8 @@ namespace BerldChess.View
             };
 
             ResetEvaluationGridColumns(_columnOrder);
-            ResetEvaluationData(SerializedInfo.Instance.MultiPV);
-            ResetEvaluationGridRows(SerializedInfo.Instance.MultiPV);
+            ResetEvaluationData(SerializedInfo.Instance.MultiPv);
+            ResetEvaluationGridRows(SerializedInfo.Instance.MultiPv);
         }
 
         private void InitializeFormAndControls()
@@ -279,7 +280,7 @@ namespace BerldChess.View
 
                 if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
                 {
-                    if((!_switched && _vm.Game.WhoseTurn == ChessPlayer.White) || (_switched && _vm.Game.WhoseTurn == ChessPlayer.Black))
+                    if ((!_switched && _vm.Game.WhoseTurn == ChessPlayer.White) || (_switched && _vm.Game.WhoseTurn == ChessPlayer.Black))
                     {
                         _engineWins[1]++;
                     }
@@ -385,7 +386,7 @@ namespace BerldChess.View
 
         private void OnDialogFontSelected()
         {
-            ChessFont currentFont = SerializedInfo.Instance.SelectedChessFont;
+            ChessFont currentFont = (ChessFont)SerializedInfo.Instance.SelectedChessFont;
 
             _chessPanel.IsUnicodeFont = currentFont.IsUnicode;
             _chessPanel.ChessFontChars = currentFont.PieceCharacters;
@@ -402,9 +403,44 @@ namespace BerldChess.View
             _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
             _chessPanel.LightSquare = SerializedInfo.Instance.BoardLightSquare;
             _chessPanel.DisplayGridBorders = SerializedInfo.Instance.DisplayGridBorder;
-            _chessPanel.InvalidateRender();
+            _chessPanel.IvoryMode = SerializedInfo.Instance.IvoryMode;
+            _chessPanel.UseBoardImages = SerializedInfo.Instance.UseImages;
 
+            if (SerializedInfo.Instance.UseImages)
+            {
+                TryApplyBoardImages();
+            }
+
+            _chessPanel.InvalidateRender();
             SetDarkMode(this, SerializedInfo.Instance.DarkMode);
+        }
+
+        private void TryApplyBoardImages()
+        {
+            Image lightSquareImage = TryGetImage(SerializedInfo.Instance.LightSquarePath);
+            Image darkSquareImage = TryGetImage(SerializedInfo.Instance.DarkSquarePath);
+
+            if (lightSquareImage != null && darkSquareImage != null)
+            {
+                _chessPanel.DarkSquareImage = darkSquareImage;
+                _chessPanel.LightSquareImage = lightSquareImage;
+            }
+        }
+
+        private Image TryGetImage(string path)
+        {
+            Image image;
+
+            try
+            {
+                image = new Bitmap(path);
+            }
+            catch
+            {
+                image = null;
+            }
+
+            return image;
         }
 
         private void OnEvaluationReceived(Evaluation evaluation)
@@ -427,7 +463,7 @@ namespace BerldChess.View
 
         private void OnFormMainLoad(object sender, EventArgs e)
         {
-            _menuItemMultiPv.Text = $"MultiPV [{SerializedInfo.Instance.MultiPV}]";
+            _menuItemMultiPv.Text = $"MultiPv [{SerializedInfo.Instance.MultiPv}]";
             _menuItemAnimationTime.Text = $"Animation Time [{_animationTime}]";
             _menuItemClickDelay.Text = $"Click Delay [{SerializedInfo.Instance.ClickDelay}]";
 
@@ -446,8 +482,10 @@ namespace BerldChess.View
         {
             if (SerializedInfo.Instance.Level.SelectedLevelType == LevelType.TotalTime)
             {
-                _menuItemWhiteTime.Text = TimeSpan.FromMilliseconds(GetRemainingTime(0)).ToString(@"mm\:ss\.ff");
-                _menuItemBlackTime.Text = TimeSpan.FromMilliseconds(GetRemainingTime(1)).ToString(@"mm\:ss\.ff");
+                var format = SerializedInfo.Instance.Level.TotalTime >= 3600000 ? @"h\:mm\:ss" : @"mm\:ss\.ff";
+
+                _menuItemWhiteTime.Text = TimeSpan.FromMilliseconds(GetRemainingTime(0)).ToString(format);
+                _menuItemBlackTime.Text = TimeSpan.FromMilliseconds(GetRemainingTime(1)).ToString(format);
             }
 
             if (!_vm.GameFinished && _evaluationEnabled)
@@ -471,7 +509,7 @@ namespace BerldChess.View
                 _computerPlayer = _vm.Game.WhoseTurn;
             }
 
-            if (_menuItemCheckAuto.Checked && _menuItemCheatMode.Checked)
+            if (_menuItemCheatMode.Checked)
             {
                 CheckExternBoard();
             }
@@ -622,7 +660,20 @@ namespace BerldChess.View
 
         private void OnMenuItemAutoMoveClick(object sender, EventArgs e)
         {
-            CheckExternBoard();
+            if (_moveOnHold != null)
+            {
+                Bitmap currentImage = Recognizer.GetBoardSnap();
+
+                if (PlayMove(_moveOnHold, 'q', true))
+                {
+                    _movePlayed = true;
+                    GetPlayingEngine().RequestStop();
+                }
+
+                Recognizer.UpdateBoardImage(currentImage);
+
+                _moveOnHold = null;
+            }
         }
 
         private void OnMenuItemUpdateClick(object sender, EventArgs e)
@@ -683,8 +734,9 @@ namespace BerldChess.View
 
         private void OnMenuItemMultiPvClick(object sender, EventArgs e)
         {
-            string input = Interaction.InputBox("Enter MultiPV:", "BerldChess - MultiPV");
+            string input = Interaction.InputBox("Enter MultiPv:", "BerldChess - MultiPv");
             int multiPV;
+
 
             for (int i = 0; i < _vm.Engines.Length; i++)
             {
@@ -697,14 +749,14 @@ namespace BerldChess.View
                             _evaluationEnabled = false;
                             _movePlayed = true;
 
-                            SerializedInfo.Instance.MultiPV = multiPV;
-                            _menuItemMultiPv.Text = $"MultiPV [{SerializedInfo.Instance.MultiPV}]";
-                            _vm.Engines[i].Query($"setoption name MultiPV value {SerializedInfo.Instance.MultiPV}");
+                            SerializedInfo.Instance.MultiPv = multiPV;
+                            _menuItemMultiPv.Text = $"MultiPv [{SerializedInfo.Instance.MultiPv}]";
+                            _vm.Engines[i].Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
                             _vm.Engines[i].RequestStop();
                             _chessPanel.Invalidate();
 
                             ResetEvaluationData(multiPV);
-                            ResetEvaluationGridRows(SerializedInfo.Instance.MultiPV);
+                            ResetEvaluationGridRows(SerializedInfo.Instance.MultiPv);
 
                             _evaluationEnabled = true;
                         }
@@ -729,7 +781,50 @@ namespace BerldChess.View
             }
         }
 
-        private void StartTimeAnalysis(int milliSeconds)
+        private void StartTimeAnalysis(int milliseconds)
+        {
+            if (SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible) return;
+            if (_vm.PlyList.Count <= 0) return;
+
+
+            var dialog = new ProgressDialog($"Time analysis ({milliseconds} ms/ply)", "Analyzing...");
+            dialog.ClosedByInterface += OnDepthAnalysisCancel;
+
+            _analysisTaskTokenSource?.Cancel();
+            _analysisTaskTokenSource = new CancellationTokenSource();
+
+            var analysisTask = new Task(() =>
+            {
+                for (var i = _vm.NavigationIndex; i < _vm.PlyList.Count; i++)
+                {
+                    Invoke((MethodInvoker)delegate
+                    {
+                        Navigate(i);
+                    });
+
+                    Invoke((MethodInvoker)delegate
+                    {
+                        dialog.StatusText = $"Analyzing ply {i}...";
+                        dialog.ProgressBarPercentage = (int)Math.Ceiling((double)i / _vm.PlyList.Count * 100.0);
+                    });
+
+                    if (_analysisTaskTokenSource.Token.IsCancellationRequested)
+                    {
+                        Invoke((MethodInvoker)delegate { dialog.Hide(); });
+                        return;
+                    }
+
+                    Thread.Sleep(milliseconds);
+                }
+
+                Invoke((MethodInvoker)delegate { dialog.Hide(); });
+            }, _analysisTaskTokenSource.Token);
+
+            analysisTask.Start();
+            dialog.Show();
+        }
+
+        private void StartDepthAnalysis(int depth)
         {
             if (SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible)
             {
@@ -738,54 +833,16 @@ namespace BerldChess.View
 
             if (_vm.PlyList.Count > 0)
             {
-                _depthTaskTS = new CancellationTokenSource();
-
-                ProgressDialog dialog = new ProgressDialog($"Time analysis ({milliSeconds} ms/ply)", "Analyzing...", true);
-                dialog.ClosedByInterface += OnDepthAnalysisCancel;
-
-                Task anaylsisTask = new Task(() =>
-                {
-                    for (int i = _vm.NavigationIndex; i < _vm.PlyList.Count; i++)
-                    {
-                        Invoke((MethodInvoker)delegate
-                        {
-                            Navigate(i);
-                        });
-
-                        Invoke((MethodInvoker)delegate
-                        {
-                            dialog.StatusText = $"Analyzing ply {i}...";
-                            dialog.ProgressBarPercentage = (int)Math.Ceiling((double)i / _vm.PlyList.Count * 100.0);
-                        });
-
-                        Thread.Sleep(milliSeconds);
-                    }
-
-                    Invoke((MethodInvoker)delegate { dialog.Hide(); });
-                });
-
-                anaylsisTask.Start();
-                dialog.Show();
-            }
-        }
-
-        private void StartDepthAnalysis(int depth)
-        {
-            if(SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible)
-            {
-                return;
-            }
-
-            if (_vm.PlyList.Count > 0)
-            {
-                _depthTaskTS = new CancellationTokenSource();
 
                 ProgressDialog dialog = new ProgressDialog($"Analysis to depth {depth}", "Analyzing...", true);
                 dialog.ClosedByInterface += OnDepthAnalysisCancel;
 
-                Task anaylsisTask = new Task(() =>
+                _analysisTaskTokenSource?.Cancel();
+                _analysisTaskTokenSource = new CancellationTokenSource();
+
+                var analysisTask = new Task(() =>
                 {
-                    for (int i = _vm.NavigationIndex; i < _vm.PlyList.Count; i++)
+                    for (var i = _vm.NavigationIndex; i < _vm.PlyList.Count; i++)
                     {
                         Invoke((MethodInvoker)delegate
                         {
@@ -802,7 +859,7 @@ namespace BerldChess.View
                         {
                             Thread.Sleep(10);
 
-                            if (_depthTaskTS.Token.IsCancellationRequested)
+                            if (_analysisTaskTokenSource.Token.IsCancellationRequested)
                             {
                                 Invoke((MethodInvoker)delegate { dialog.Hide(); });
                                 return;
@@ -811,16 +868,16 @@ namespace BerldChess.View
                     }
 
                     Invoke((MethodInvoker)delegate { dialog.Hide(); });
-                });
+                }, _analysisTaskTokenSource.Token);
 
-                anaylsisTask.Start();
+                analysisTask.Start();
                 dialog.Show();
             }
         }
 
         private void OnDepthAnalysisCancel(object sender, EventArgs e)
         {
-            _depthTaskTS.Cancel();
+            _analysisTaskTokenSource.Cancel();
         }
 
         private void OnMenuItemCheatModeCheckedChanged(object sender, EventArgs e)
@@ -916,6 +973,11 @@ namespace BerldChess.View
 
             List<ChessPly> positions = _vm.PlyList.ToList();
 
+            while (positions.Count < 8)
+            {
+                positions.Add(new ChessPly(""));
+            }
+
             if (!_totalChartView && positions.Count > ChartShownPlies)
             {
                 positions.RemoveRange(0, positions.Count - ChartShownPlies);
@@ -932,16 +994,28 @@ namespace BerldChess.View
                 playStartIndex = _vm.PlyList.Count - positions.Count;
             }
 
-            double highestValue = positions.Max(c => c.Evaluation);
-            double lowestValue = positions.Min(c => c.Evaluation);
+            double highestValue = 0;
+            double lowestValue = 0;
+
+            foreach (var position in positions)
+            {
+                if (position.Evaluation > highestValue)
+                {
+                    highestValue = position.Evaluation;
+                }
+                else if (position.Evaluation < lowestValue)
+                {
+                    lowestValue = position.Evaluation;
+                }
+            }
 
             if (highestValue > Math.Abs(lowestValue))
             {
-                peak = (int)Math.Ceiling(highestValue + 0.25);
+                peak = (int)Math.Ceiling(highestValue * 1.05);
             }
             else
             {
-                peak = (int)Math.Ceiling(Math.Abs(lowestValue + 0.25));
+                peak = (int)Math.Ceiling(Math.Abs(lowestValue) * 1.05);
             }
 
             if (peak < 2)
@@ -1015,7 +1089,7 @@ namespace BerldChess.View
                 string text = valueY.ToString("+0;-0");
                 float offSet = g.MeasureString(text, labelFont).Height / 2F;
 
-                g.DrawString(text, labelFont, fontBrush, labelFont.Size / 2, Round(_panelEvaluationChart.Height / (double)rowCount * i) - offSet);
+                g.DrawString(text, labelFont, fontBrush, labelFont.Size / 2, (int)(_panelEvaluationChart.Height / (double)rowCount * i) - offSet);
             }
 
             g.DrawLine(middleLinePen, 0, chartYMiddle, _panelEvaluationChart.Width, chartYMiddle);
@@ -1131,7 +1205,7 @@ namespace BerldChess.View
         {
             if (e.KeyCode == Keys.V)
             {
-                
+
                 MessageBox.Show($"{SerializedInfo.Instance.EngineList.SelectedSetting1.Name}: {_engineWins[0].ToString()}\n\n{SerializedInfo.Instance.EngineList.SelectedSetting2.Name}: {_engineWins[1].ToString()}\n\nDraws: {_draws.ToString()}", "BerldChess - Score");
 
                 e.Handled = true;
@@ -1200,8 +1274,12 @@ namespace BerldChess.View
             _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
             _chessPanel.LightSquare = SerializedInfo.Instance.BoardLightSquare;
             _chessPanel.Gradient = SerializedInfo.Instance.Gradient;
+            _chessPanel.IvoryMode = SerializedInfo.Instance.IvoryMode;
             _chessPanel.DisplayLegalMoves = SerializedInfo.Instance.DisplayLegalMoves;
             _chessPanel.DisplayCoordinates = SerializedInfo.Instance.DisplayCoordinates;
+            _chessPanel.UseBoardImages = SerializedInfo.Instance.UseImages;
+
+            TryApplyBoardImages();
 
             _menuItemHideOutput.Checked = SerializedInfo.Instance.HideOutput;
             _menuItemHideArrows.Checked = SerializedInfo.Instance.HideArrows;
@@ -1251,7 +1329,7 @@ namespace BerldChess.View
                     PieceCharacters = ""
                 });
             }
-            else if(SerializedInfo.Instance.ChessFonts.Count > 2)
+            else if (SerializedInfo.Instance.ChessFonts.Count > 2)
             {
                 SerializedInfo.Instance.ChessFonts[0].Name = "Default";
                 SerializedInfo.Instance.ChessFonts[0].FontFamily = "Default";
@@ -1310,7 +1388,7 @@ namespace BerldChess.View
                 SerializedInfo.Instance.EngineList.SelectedIndex1 = SerializedInfo.Instance.EngineList.Settings.IndexOf(selectedSetting1);
                 SerializedInfo.Instance.EngineList.SelectedIndex2 = SerializedInfo.Instance.EngineList.Settings.IndexOf(selectedSetting2);
 
-                if(SerializedInfo.Instance.ChessFonts.Count > 3)
+                if (SerializedInfo.Instance.ChessFonts.Count > 3)
                 {
                     ChessFont fontDefault = SerializedInfo.Instance.ChessFonts[0];
                     ChessFont fontSimple = SerializedInfo.Instance.ChessFonts[1];
@@ -1430,13 +1508,21 @@ namespace BerldChess.View
 
                 PieceMovedEventArgs args = new PieceMovedEventArgs(source, destination);
 
-                if (PlayMove(args, 'q', true))
-                {
-                    _movePlayed = true;
-                    GetPlayingEngine().RequestStop();
-                }
 
-                Recognizer.UpdateBoardImage(_currentImage);
+                if (_menuItemCheckAuto.Checked)
+                {
+                    if (PlayMove(args, 'q', true))
+                    {
+                        _movePlayed = true;
+                        GetPlayingEngine().RequestStop();
+                    }
+
+                    Recognizer.UpdateBoardImage(_currentImage);
+                }
+                else
+                {
+                    _moveOnHold = args;
+                }
             }
 
             _comparisonSnap = _currentImage;
@@ -1483,7 +1569,20 @@ namespace BerldChess.View
             ProcessPawnValue(pawnValue, out centipawn, out isMate);
 
             _labelDepth.Text = depth.ToString();
+
+            long tbHits = long.Parse(_evaluations[0][InfoType.TBHits]);
+
+            if (tbHits > 0)
+            {
+                _labelShowEvaluation.Text = "Score [" + FormatNumber(tbHits) + " TBHits]";
+            }
+            else
+            {
+                _labelShowEvaluation.Text = "Score";
+            }
+
             _labelNodes.Text = FormatNumber(long.Parse(_evaluations[0][InfoType.Nodes]));
+
             _labelTime.Text = GetFormattedEngineInfo(InfoType.Time, _evaluations[0][InfoType.Time]);
             _labelNPS.Text = ToKiloFormat(int.Parse(_evaluations[0][InfoType.NPS]));
             SetExtendedInfoEnabled(true);
@@ -1916,7 +2015,7 @@ namespace BerldChess.View
                 multiPV = 1;
             }
 
-            if (multiPV > SerializedInfo.Instance.MultiPV)
+            if (multiPV > SerializedInfo.Instance.MultiPv)
             {
                 return;
             }
@@ -2032,7 +2131,7 @@ namespace BerldChess.View
             _dataGridViewMoves.Rows.Clear();
             _movePlayed = true;
 
-            ResetEvaluationData(SerializedInfo.Instance.MultiPV);
+            ResetEvaluationData(SerializedInfo.Instance.MultiPv);
 
             if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
             {
@@ -2469,7 +2568,7 @@ namespace BerldChess.View
             {
                 engine.EvaluationReceived += OnEvaluationReceived;
                 engine.BestMoveFound += OnBestMoveFound;
-                engine.Query($"setoption name MultiPV value {SerializedInfo.Instance.MultiPV}");
+                engine.Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
                 engine.Query("ucinewgame");
 
                 if (startAnalysis)
@@ -2775,13 +2874,12 @@ namespace BerldChess.View
 
         private void OnMenuItemLevelClick(object sender, EventArgs e)
         {
-            FormLevelDialog levelDialog = new FormLevelDialog(SerializedInfo.Instance.Level);
+            var levelDialog = new FormLevelDialog(SerializedInfo.Instance.Level);
 
-            if(levelDialog.ShowDialog() == DialogResult.OK)
-            {
-                SerializedInfo.Instance.Level = levelDialog.Level;
-                SetLevel();
-            }
+            if (levelDialog.ShowDialog() != DialogResult.OK) return;
+
+            SerializedInfo.Instance.Level = levelDialog.Level;
+            SetLevel();
         }
 
         private void OnMenuItemTimeAnalysisClick(object sender, EventArgs e)
@@ -2791,10 +2889,9 @@ namespace BerldChess.View
                 return;
             }
 
-            string input = Interaction.InputBox("Enter Time per ply in ms:", "BerldChess - Time Analysis");
-            int time;
+            var input = Interaction.InputBox("Enter Time per ply in ms:", "BerldChess - Time Analysis");
 
-            if (int.TryParse(input, out time))
+            if (int.TryParse(input, out var time))
             {
                 StartTimeAnalysis(time);
             }

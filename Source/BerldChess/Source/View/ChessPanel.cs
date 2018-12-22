@@ -29,6 +29,7 @@ namespace BerldChess.View
         private Color _darkSquare = Color.Brown;
         private Color _lightSquare = Color.WhiteSmoke;
         private Color _borderColor = Color.White;
+        private Color _ivory = Color.FromArgb(241, 236, 203);
         private Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(80, 6, 6, 6));
         private Point _boardLocation;
         private Point _selectedIndex = new Point(-1, -1);
@@ -40,11 +41,15 @@ namespace BerldChess.View
         private List<MoveArrow> _arrows = new List<MoveArrow>();
         private List<int> _indicatedSquares = new List<int>();
         private List<MoveArrow> _indicatedMoves = new List<MoveArrow>();
+        private List<Image> _resizedDarkSquareImages = new List<Image>();
+        private List<Image> _resizedLightSquareImages = new List<Image>();
 
         #endregion
 
         #region Properties
 
+        public bool UseBoardImages { get; set; } = false;
+        public bool IvoryMode { get; set; } = false;
         public bool AllowIndicators { get; set; } = true;
         public bool Gradient { get; set; } = true;
         public bool BorderHighlight { get; set; } = false;
@@ -55,6 +60,8 @@ namespace BerldChess.View
         public double PieceSizeFactor { get; set; } = 1;
         public string ChessFontChars { get; set; }
         public List<Point> HighlighedSquares { get; set; } = new List<Point>();
+        public Image DarkSquareImage { get; set; }
+        public Image LightSquareImage { get; set; }
 
         public bool DisplayCoordinates
         {
@@ -309,11 +316,9 @@ namespace BerldChess.View
                 {
                     for (int i = 0; i < _scaledPieceImages.Length; i++)
                     {
-                        _scaledPieceImages[i] = GradientBitmap(_scaledPieceImages[i]);
+                        _scaledPieceImages[i] = GradientBitmap(_scaledPieceImages[i], i > 5);
                     }
                 }
-
-                _renderImages = false;
             }
 
             SolidBrush figureBrush = null;
@@ -332,33 +337,93 @@ namespace BerldChess.View
                 yLinePositions[i] = iPosition + _boardLocation.Y;
             }
 
-            Color evenSquare;
-            Color oddSquare;
-
-            evenSquare = LightSquare;
-            oddSquare = DarkSquare;
-
             g.SmoothingMode = SmoothingMode.Default;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
-            // Drawing squares
-            for (int y = 0; y < Game.BoardHeight; y++)
+            if (UseBoardImages && DarkSquareImage != null && LightSquareImage != null)
             {
-                for (int x = 0; x < Game.BoardHeight; x++)
+                if (_renderImages)
                 {
-                    int index = y * Game.BoardHeight + x + y;
+                    _resizedDarkSquareImages.Clear();
+                    _resizedLightSquareImages.Clear();
+                }
 
-                    if (index % 2 == 0)
+                // Drawing image squares
+                for (int y = 0; y < Game.BoardHeight; y++)
+                {
+                    for (int x = 0; x < Game.BoardHeight; x++)
                     {
-                        g.FillRectangle(new SolidBrush(evenSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
-                    }
-                    else
-                    {
-                        g.FillRectangle(new SolidBrush(oddSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
+                        int index = y * Game.BoardHeight + x + y;
+
+                        int width = xLinePositions[x + 1] - xLinePositions[x] + 1;
+                        int height = xLinePositions[y + 1] - xLinePositions[y] + 1;
+                        Image drawnImage = null;
+
+                        if (index % 2 == 0)
+                        {
+                            foreach (Image image in _resizedLightSquareImages)
+                            {
+                                if(image.Width == width && image.Height == height)
+                                {
+                                    drawnImage = image;
+                                    break;
+                                }
+                            }
+
+                            if(drawnImage == null)
+                            {
+                                drawnImage = ResizeImage(LightSquareImage, width, height);
+                                _resizedLightSquareImages.Add(drawnImage);
+                            }
+                        }
+                        else
+                        {
+                            foreach (Image image in _resizedDarkSquareImages)
+                            {
+                                if (image.Width == width && image.Height == height)
+                                {
+                                    drawnImage = image;
+                                    break;
+                                }
+                            }
+
+                            if (drawnImage == null)
+                            {
+                                drawnImage = ResizeImage(DarkSquareImage, width, height);
+                                _resizedDarkSquareImages.Add(drawnImage);
+                            }
+                        }
+
+                        g.DrawImage(drawnImage, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
                     }
                 }
             }
+            else
+            {
+                Color evenSquare;
+                Color oddSquare;
 
+                evenSquare = LightSquare;
+                oddSquare = DarkSquare;
+
+                // Drawing squares
+                for (int y = 0; y < Game.BoardHeight; y++)
+                {
+                    for (int x = 0; x < Game.BoardHeight; x++)
+                    {
+                        int index = y * Game.BoardHeight + x + y;
+
+                        if (index % 2 == 0)
+                        {
+                            g.FillRectangle(new SolidBrush(evenSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
+                        }
+                        else
+                        {
+                            g.FillRectangle(new SolidBrush(oddSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
+                        }
+                    }
+                }
+            }
 
             // Last move highlight
             for (int y = 0; y < Game.BoardHeight; y++)
@@ -551,6 +616,8 @@ namespace BerldChess.View
 
                     g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(_board[y][x].GetFENLetter())], absX, absY);
                 }
+
+                _renderImages = false;
             }
 
 
@@ -867,7 +934,7 @@ namespace BerldChess.View
                     {
                         _indicatedSquares.Remove(squareIndex);
                     }
-                    else if(_indicatedSquares.Contains(counterPart))
+                    else if (_indicatedSquares.Contains(counterPart))
                     {
                         _indicatedSquares.Remove(counterPart);
                     }
@@ -1068,7 +1135,16 @@ namespace BerldChess.View
         private Bitmap FillTransparentSectors(Bitmap image)
         {
             Bitmap filledImage;
-            filledImage = TransparentToColor(image, Color.White);
+
+            if (IvoryMode)
+            {
+                filledImage = TransparentToColor(image, _ivory);
+            }
+            else
+            {
+                filledImage = TransparentToColor(image, Color.White);
+            }
+
             FloodFill(filledImage, 0, 0);
             return filledImage;
         }
@@ -1087,7 +1163,7 @@ namespace BerldChess.View
             return filledImage;
         }
 
-        private Bitmap GradientBitmap(Bitmap image)
+        private Bitmap GradientBitmap(Bitmap image, bool transformDark = false)
         {
             unsafe
             {
@@ -1116,6 +1192,34 @@ namespace BerldChess.View
                                 }
 
                                 pointer[i] = (byte)value;
+                            }
+                        }
+                    }
+                }
+
+                if (transformDark)
+                {
+                    for (int y = 0; y < image.Height; y++)
+                    {
+                        for (int x = 0; x < image.Width; x++)
+                        {
+                            int diffValue = Math.Max(43 - x / 2, 0);
+
+                            pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
+
+                            if (pointer[1] < diffValue + 1)
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    int value = pointer[i] + diffValue;
+
+                                    if (value > 255)
+                                    {
+                                        value = 255;
+                                    }
+
+                                    pointer[i] = (byte)value;
+                                }
                             }
                         }
                     }

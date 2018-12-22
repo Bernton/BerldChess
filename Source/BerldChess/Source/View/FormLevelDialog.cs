@@ -1,30 +1,24 @@
 ﻿using BerldChess.Model;
 using System;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace BerldChess.View
 {
     public partial class FormLevelDialog : Form
     {
-        public Level Level
-        {
-            get
-            {
-                return _level;
-            }
-        }
+        public Level Level { get; }
 
-        private RadioButton[] _radioButtons;
-        private Panel[] _panels;
-        private Level _level;
         private LevelType _selectedLevelType = LevelType.Infinite;
+        private readonly Panel[] _panels;
 
         public FormLevelDialog(Level initialLevel)
         {
-            _level = initialLevel;
+            Level = initialLevel;
 
             InitializeComponent();
-            _radioButtons = new RadioButton[]
+
+            var radioButtons = new[]
             {
                 _radioButtonFixedDepth,
                 _radioButtonTimePerMove,
@@ -33,7 +27,7 @@ namespace BerldChess.View
                 _radioButtonNodes
             };
 
-            _panels = new Panel[]
+            _panels = new[]
             {
                 _panelFixedDepth,
                 _panelTimePerMove,
@@ -42,9 +36,9 @@ namespace BerldChess.View
                 _panelNodes,
             };
 
-            for (int i = 0; i < _radioButtons.Length; i++)
+            for (var i = 0; i < radioButtons.Length; i++)
             {
-                _radioButtons[i].Tag = i;
+                radioButtons[i].Tag = i;
 
                 if (_panels[i] != null)
                 {
@@ -52,16 +46,16 @@ namespace BerldChess.View
                 }
             }
 
-            TimeSpan totalTime = TimeSpan.FromMilliseconds(_level.TotalTime);
+            var totalTime = TimeSpan.FromMilliseconds(Level.TotalTime);
 
-            _textBoxPlies.Text = _level.Plies.ToString();
-            _textBoxTimePerMove.Text = TimeSpan.FromMilliseconds(_level.TimePerMove).TotalSeconds.ToString();
-            _textBoxTotalTimeMinutes.Text = totalTime.TotalMinutes.ToString();
+            _textBoxPlies.Text = Level.Plies.ToString();
+            _textBoxTimePerMove.Text = TimeSpan.FromMilliseconds(Level.TimePerMove).TotalSeconds.ToString(CultureInfo.CurrentCulture);
+            _textBoxTotalTimeMinutes.Text = Math.Floor(totalTime.TotalMinutes).ToString(CultureInfo.CurrentCulture);
             _textBoxTotalTimeSeconds.Text = totalTime.Seconds.ToString();
-            _textBoxIncrement.Text = TimeSpan.FromMilliseconds(_level.Increment).TotalSeconds.ToString();
-            _numericNodes.Value = _level.Nodes;
+            _textBoxIncrement.Text = TimeSpan.FromMilliseconds(Level.Increment).TotalSeconds.ToString(CultureInfo.CurrentCulture);
+            _numericNodes.Value = Level.Nodes;
 
-            _radioButtons[(int)_level.SelectedLevelType].Checked = true;
+            radioButtons[(int)Level.SelectedLevelType].Checked = true;
         }
 
         private void HidePanels()
@@ -109,28 +103,28 @@ namespace BerldChess.View
 
             if (int.TryParse(_textBoxPlies.Text, out plies))
             {
-                _level.Plies = plies;
+                Level.Plies = plies;
             }
 
             if(double.TryParse(_textBoxTimePerMove.Text, out timePerMove))
             {
-                _level.TimePerMove = (int)TimeSpan.FromSeconds(timePerMove).TotalMilliseconds;
+                Level.TimePerMove = (int)TimeSpan.FromSeconds(timePerMove).TotalMilliseconds;
             }
 
             if(int.TryParse(_textBoxTotalTimeMinutes.Text, out totalMinutes) &&
                 int.TryParse(_textBoxTotalTimeSeconds.Text, out totalSeconds))
             {
                 TimeSpan totalTime = new TimeSpan(0, totalMinutes, totalSeconds);
-                _level.TotalTime = (int)totalTime.TotalMilliseconds;
+                Level.TotalTime = (int)totalTime.TotalMilliseconds;
             }
 
             if(double.TryParse(_textBoxIncrement.Text, out increment))
             {
-                _level.Increment = (int)TimeSpan.FromSeconds(increment).TotalMilliseconds;
+                Level.Increment = (int)TimeSpan.FromSeconds(increment).TotalMilliseconds;
             }
 
-            _level.Nodes = (int)_numericNodes.Value;
-            _level.SelectedLevelType = _selectedLevelType;
+            Level.Nodes = (int)_numericNodes.Value;
+            Level.SelectedLevelType = _selectedLevelType;
 
             DialogResult = DialogResult.OK;
         }

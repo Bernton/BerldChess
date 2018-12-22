@@ -72,7 +72,7 @@ namespace BerldChess.View
             _textBoxName.Enabled = notDefault;
             _buttonRemove.Enabled = notDefault;
 
-            ChessFont font = _chessFonts[index];
+            ChessFont font = (ChessFont)_chessFonts[index];
 
             _textBoxName.Text = font.Name;
             _textBoxSizeFactor.Text = font.SizeFactor.ToString();
@@ -88,7 +88,7 @@ namespace BerldChess.View
         {
             double factor;
             string name = _textBoxName.Text;
-            ChessFont font = _chessFonts[_listBoxSettings.SelectedIndex];
+            ChessFont font = (ChessFont)_chessFonts[_listBoxSettings.SelectedIndex];
             bool nameChanged = name != font.Name;
 
             if (nameChanged && _listBoxSettings.Items.Contains(name))
@@ -138,7 +138,7 @@ namespace BerldChess.View
             {
                 _textBoxFontChars.Font = new Font(_comboBoxFont.Text, _textBoxFontChars.Font.Size);
 
-                if (_chessFonts[_listBoxSettings.SelectedIndex].PieceCharacters == "")
+                if (((ChessFont)_chessFonts[_listBoxSettings.SelectedIndex]).PieceCharacters == "")
                 {
                     _textBoxFontChars.Text = (string)_textBoxFontChars.Tag;
                 }
