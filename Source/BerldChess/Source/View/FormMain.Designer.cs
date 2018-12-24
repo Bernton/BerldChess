@@ -48,7 +48,6 @@
             this._menuItemComputerMove = new System.Windows.Forms.ToolStripMenuItem();
             this._menuItemAutoPlay = new System.Windows.Forms.ToolStripMenuItem();
             this._menuItemDepthAnalysis = new System.Windows.Forms.ToolStripMenuItem();
-            this.startTimeAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._menuItemCheatMode = new System.Windows.Forms.ToolStripMenuItem();
             this._menuItemAnimationTime = new System.Windows.Forms.ToolStripMenuItem();
             this._menuItemClickDelay = new System.Windows.Forms.ToolStripMenuItem();

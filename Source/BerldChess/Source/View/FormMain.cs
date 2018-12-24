@@ -736,7 +736,6 @@ namespace BerldChess.View
             string input = Interaction.InputBox("Enter MultiPv:", "BerldChess - MultiPv");
             int multiPV;
 
-
             for (int i = 0; i < _vm.Engines.Length; i++)
             {
                 if (_vm.Engines[i] != null)
@@ -748,6 +747,7 @@ namespace BerldChess.View
                             _evaluationEnabled = false;
                             _movePlayed = true;
 
+                            SerializedInfo.Instance.MultiPv = multiPV;
                             _menuItemMultiPv.Text = $"MultiPv [{SerializedInfo.Instance.MultiPv}]";
                             _vm.Engines[i].Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
                             _vm.Engines[i].RequestStop();
