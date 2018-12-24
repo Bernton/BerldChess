@@ -12,21 +12,18 @@ namespace BerldChess.Model
         #region Fields
 
         private const int SideLength = 8;
-        private static Color _darkSquare;
-        private static Color _lightSquare;
         private static Bitmap _lastBoardSnap;
 
         #endregion
 
         #region Properties
 
-        public static bool BoardFound { get; private set; } = false;
+        public static bool BoardFound { get; private set; }
         public static int ScreenIndex { get; private set; } = -1;
         public static int MinimumSize { get; set; } = 32;
         public static Point BoardLocation { get; private set; }
         public static Size BoardSize { get; private set; }
         public static SizeF FieldSize { get; set; }
-        public static PointF CenterPixelLocation { get; set; } = new PointF(0.5F, 0.73F);
 
         #endregion
 
@@ -44,7 +41,6 @@ namespace BerldChess.Model
         {
             if (BoardFound)
             {
-                Debug.WriteLine("# Update #");
                 _lastBoardSnap = image;
             }
         }
@@ -62,8 +58,6 @@ namespace BerldChess.Model
 
                     BoardFound = true;
                     ScreenIndex = i;
-                    _darkSquare = darkSquareColor;
-                    _lightSquare = lightSquareColor;
                     _lastBoardSnap = GetBoardSnap();
                     return true;
                 }
@@ -74,59 +68,66 @@ namespace BerldChess.Model
 
         public static Point[] GetChangedSquares(Bitmap boardSnap)
         {
-            if (BoardFound)
+            if (!BoardFound)
+                return null;
+
+            double fieldWidth = boardSnap.Width / (double)SideLength;
+            double fieldHeight = boardSnap.Height / (double)SideLength;
+            var changedSquares = new List<Point>();
+
+            unsafe
             {
-                List<Point> changedSquares = new List<Point>();
+                BitmapData snapData = LockBits(boardSnap);
+                BitmapData lastSnapData = LockBits(_lastBoardSnap);
+                var scan0 = (byte*)snapData.Scan0;
+                var lastScan0 = (byte*)lastSnapData.Scan0;
 
-                double fieldWidth = boardSnap.Width / 8.0;
-                double fieldHeight = boardSnap.Height / 8.0;
-
-                unsafe
+                for (int y = 0; y < SideLength; y++)
                 {
-                    BitmapData _data = boardSnap.LockBits(new Rectangle(0, 0, boardSnap.Width, boardSnap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-                    BitmapData _lastData = _lastBoardSnap.LockBits(new Rectangle(0, 0, _lastBoardSnap.Width, _lastBoardSnap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-
-                    byte* dataScan0 = (byte*)_data.Scan0;
-                    byte* lastDataScan0 = (byte*)_lastData.Scan0;
-
-                    for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < SideLength; x++)
                     {
-                        for (int x = 0; x < 8; x++)
+                        Point border = new Point()
                         {
-                            int borderX = Round((x * fieldWidth + 4));
-                            int borderY = Round((y * fieldHeight + 4));
-                            int centerX = Round((x * fieldWidth + (fieldWidth / 2.0)));
-                            int centerY = Round((y * fieldHeight + fieldHeight * 0.73));
+                            X = Round((x * fieldWidth + 4)),
+                            Y = Round((y * fieldHeight + 4))
+                        };
 
-                            int borderColor = GetPixel(dataScan0, _data.Stride, borderX, borderY);
-                            int centerColor = GetPixel(dataScan0, _data.Stride, centerX, centerY);
-                            bool same = borderColor == centerColor;
+                        Point center = new Point()
+                        {
+                            X = Round((x * fieldWidth + (fieldWidth / 2.0))),
+                            Y = Round((y * fieldHeight + fieldHeight * 0.73))
+                        };
 
-                            int lastBorderColor = GetPixel(lastDataScan0, _lastData.Stride, borderX, borderY);
-                            int lastCenterColor = GetPixel(lastDataScan0, _lastData.Stride, centerX, centerY);
-                            bool lastSame = lastBorderColor == lastCenterColor;
+                        int borderColor = GetPixel(scan0, snapData.Stride, border);
+                        int centerColor = GetPixel(scan0, snapData.Stride, center);
+                        bool same = borderColor == centerColor;
 
-                            if (same != lastSame)
-                            {
-                                changedSquares.Add(new Point(x, y));
-                            }
-                            else if (same == false && centerColor != lastCenterColor)
-                            {
-                                changedSquares.Add(new Point(x, y));
-                            }
+                        int lastBorderColor = GetPixel(lastScan0, lastSnapData.Stride, border);
+                        int lastCenterColor = GetPixel(lastScan0, lastSnapData.Stride, center);
+                        bool lastSame = lastBorderColor == lastCenterColor;
+
+                        if (same != lastSame)
+                        {
+                            changedSquares.Add(new Point(x, y));
+                        }
+                        else if (!same && centerColor != lastCenterColor)
+                        {
+                            changedSquares.Add(new Point(x, y));
                         }
                     }
-
-                    boardSnap.UnlockBits(_data);
-                    _lastBoardSnap.UnlockBits(_lastData);
                 }
 
-                return changedSquares.ToArray();
+                boardSnap.UnlockBits(snapData);
+                _lastBoardSnap.UnlockBits(lastSnapData);
             }
 
-            return null;
+            return changedSquares.ToArray();
         }
 
+        private static BitmapData LockBits(Bitmap bitmap)
+        {
+            return bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+        }
 
         public static bool CompareBitmaps(Bitmap bitmap1, Bitmap bitmap2)
         {
@@ -140,24 +141,26 @@ namespace BerldChess.Model
 
                 unsafe
                 {
-                    byte* ptr1 = (byte*)bitmapData1.Scan0.ToPointer();
-                    byte* ptr2 = (byte*)bitmapData2.Scan0.ToPointer();
+                    var pointer1 = (byte*)bitmapData1.Scan0.ToPointer();
+                    var pointer2 = (byte*)bitmapData2.Scan0.ToPointer();
                     int width = rect.Width * 3;
 
                     for (int y = 0; equals && y < rect.Height; y++)
                     {
                         for (int x = 0; x < width; x++)
                         {
-                            if (*ptr1 != *ptr2)
+                            if (*pointer1 != *pointer2)
                             {
                                 equals = false;
                                 break;
                             }
-                            ptr1++;
-                            ptr2++;
+
+                            pointer1++;
+                            pointer2++;
                         }
-                        ptr1 += bitmapData1.Stride - width;
-                        ptr2 += bitmapData2.Stride - width;
+
+                        pointer1 += bitmapData1.Stride - width;
+                        pointer2 += bitmapData2.Stride - width;
                     }
                 }
 
@@ -174,60 +177,65 @@ namespace BerldChess.Model
             return false;
         }
 
-        private unsafe static int GetPixel(byte* scan0, int stride, int x, int y)
+        private static unsafe int GetPixel(byte* scan0, int stride, Point location)
         {
-            byte* colPointer = scan0;
-            colPointer += y * stride + x * 3;
-
-            return colPointer[0] * 255 * 255 + colPointer[1] * 255 + (int)colPointer[2];
+            var pointer = scan0;
+            pointer += location.Y * stride + location.X * 3;
+            return pointer[0] * 255 * 255 + pointer[1] * 255 + pointer[2];
         }
 
         public static Bitmap GetBoardSnap()
         {
-            if (BoardFound)
+            if (!BoardFound)
+                return null;
+
+            Screen screen = Screen.AllScreens[ScreenIndex];
+            Bitmap scrennshot = new Bitmap(BoardSize.Width, BoardSize.Height, PixelFormat.Format24bppRgb);
+
+            using (Graphics g = Graphics.FromImage(scrennshot))
             {
-                Screen screen = Screen.AllScreens[ScreenIndex];
-                Bitmap screenshot = new Bitmap(BoardSize.Width, BoardSize.Height, PixelFormat.Format24bppRgb);
-                Graphics g = Graphics.FromImage(screenshot);
                 g.CopyFromScreen(screen.Bounds.X + BoardLocation.X, screen.Bounds.Y + BoardLocation.Y, 0, 0, BoardSize, CopyPixelOperation.SourceCopy);
-                return screenshot;
             }
 
-            return null;
+            return scrennshot;
         }
 
         public static Bitmap GetScreenshot(Screen screen)
         {
             Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height, PixelFormat.Format24bppRgb);
-            Graphics g = Graphics.FromImage(screenshot);
-            g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screen.Bounds.Size, CopyPixelOperation.SourceCopy);
+
+            using (Graphics g = Graphics.FromImage(screenshot))
+            {
+                g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screen.Bounds.Size, CopyPixelOperation.SourceCopy);
+            }
+
             return screenshot;
         }
 
         private static bool SearchBoard(Bitmap image, Color darkSquareColor, Color lightSquareColor)
         {
-            BitmapData imageData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData imageData = LockBits(image);
 
             bool matchFound = false;
             bool widthFound = false;
             bool heightFound = false;
-            int boardX = -1;
-            int boardY = -1;
-            int boardWidth = 0;
-            int boardHeight = 0;
-            int matchTolerance = 0;
-            int initSuccTol = 4;
-            int successivelyTolerance = -1;
-            int imageStride = imageData.Stride;
+            Rectangle board = new Rectangle(-1, -1, 0, 0);
+            const int matchTolerance = 0;
+            int initialTolerance = 4;
+            int tolerance = -1;
             int imageWidth = image.Width * 3;
             int imageHeight = image.Height;
-
-            Rectangle location = Rectangle.Empty;
 
             unsafe
             {
                 byte* imagePointer = (byte*)(void*)imageData.Scan0;
                 byte* startPointer = null;
+
+                if (imagePointer == null)
+                {
+                    image.UnlockBits(imageData);
+                    return false;
+                }
 
                 for (int y = 0; y < imageHeight; y++)
                 {
@@ -237,66 +245,65 @@ namespace BerldChess.Model
 
                         if (IsSameColor(pixelColor, lightSquareColor, matchTolerance) || IsSameColor(pixelColor, darkSquareColor, matchTolerance))
                         {
-                            if (successivelyTolerance > 0)
+                            if (tolerance > 0)
                             {
-                                successivelyTolerance = initSuccTol;
+                                tolerance = initialTolerance;
                             }
 
                             if (!matchFound)
                             {
-                                boardX = x;
-                                boardY = y;
+                                board.X = x;
+                                board.Y = y;
                                 startPointer = imagePointer;
                                 matchFound = true;
                             }
                             else if (!widthFound)
                             {
-                                boardWidth++;
+                                board.Width++;
                             }
                             else
                             {
-                                boardHeight++;
+                                board.Height++;
                             }
                         }
                         else
                         {
-                            if (successivelyTolerance == -1 && matchFound)
+                            if (tolerance == -1 && matchFound)
                             {
-                                initSuccTol = (int)Math.Ceiling(boardWidth / 10.0);
-                                successivelyTolerance = initSuccTol;
+                                initialTolerance = (int)Math.Ceiling(board.Width / 10.0);
+                                tolerance = initialTolerance;
                             }
 
-                            if (successivelyTolerance > 0)
+                            if (tolerance > 0)
                             {
-                                successivelyTolerance--;
+                                tolerance--;
 
                                 if (widthFound)
                                 {
-                                    boardHeight++;
+                                    board.Height++;
                                 }
                                 else
                                 {
-                                    boardWidth++;
+                                    board.Width++;
                                 }
                             }
 
-
-                            if (widthFound && successivelyTolerance == 0)
+                            if (widthFound && tolerance == 0)
                             {
                                 heightFound = true;
-                                boardHeight -= initSuccTol;
+                                board.Height -= initialTolerance;
                                 break;
                             }
-                            else if (matchFound && successivelyTolerance == 0)
+
+                            if (matchFound && tolerance == 0)
                             {
                                 widthFound = true;
-                                boardWidth -= initSuccTol;
-                                successivelyTolerance = -1;
+                                board.Width -= initialTolerance;
+                                tolerance = -1;
 
                                 imagePointer = startPointer;
                                 imagePointer -= imageWidth;
-                                x = boardX;
-                                y = boardY;
+                                y = board.Y;
                                 break;
                             }
                         }
@@ -306,9 +313,7 @@ namespace BerldChess.Model
                             imagePointer += 3;
                         }
                         else
-                        {
                             break;
-                        }
                     }
 
                     if (widthFound)
@@ -317,9 +322,7 @@ namespace BerldChess.Model
                     }
 
                     if (heightFound)
-                    {
                         break;
-                    }
                 }
             }
 
@@ -327,8 +330,8 @@ namespace BerldChess.Model
 
             if (heightFound)
             {
-                BoardLocation = new Point(boardX, boardY);
-                BoardSize = new Size(boardWidth, boardHeight);
+                BoardLocation = new Point(board.X, board.Y);
+                BoardSize = new Size(board.Width, board.Height);
                 FieldSize = new SizeF(BoardSize.Width / (float)SideLength, BoardSize.Height / (float)SideLength);
             }
 

@@ -115,7 +115,7 @@ namespace BerldChess.View
 
                 case EngineMode.Analysis:
 
-                    SetEngineViewElementsVisible(SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting1, 0, true));
+                    SetEngineViewElementsVisible(SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting, 0, true));
                     _evaluationEnabled = true;
                     break;
 
@@ -127,24 +127,24 @@ namespace BerldChess.View
 
                     bool validEngines = true;
 
-                    if (!SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting1, 0, false))
+                    if (!SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting, 0, false))
                     {
                         validEngines = false;
                     }
 
-                    if (SerializedInfo.Instance.EngineList.SelectedSetting1 != null)
+                    if (SerializedInfo.Instance.EngineList.SelectedSetting != null)
                     {
-                        _enginePaths[0] = SerializedInfo.Instance.EngineList.SelectedSetting1.ExecutablePath;
+                        _enginePaths[0] = SerializedInfo.Instance.EngineList.SelectedSetting.ExecutablePath;
                     }
 
-                    if (!SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting2, 1, false))
+                    if (!SetupEngine(SerializedInfo.Instance.EngineList.SelectedOpponentSetting, 1, false))
                     {
                         validEngines = false;
                     }
 
-                    if (SerializedInfo.Instance.EngineList.SelectedSetting2 != null)
+                    if (SerializedInfo.Instance.EngineList.SelectedOpponentSetting != null)
                     {
-                        _enginePaths[1] = SerializedInfo.Instance.EngineList.SelectedSetting2.ExecutablePath;
+                        _enginePaths[1] = SerializedInfo.Instance.EngineList.SelectedOpponentSetting.ExecutablePath;
                     }
 
                     if (validEngines)
@@ -387,7 +387,6 @@ namespace BerldChess.View
         private void OnDialogFontSelected()
         {
             ChessFont currentFont = (ChessFont)SerializedInfo.Instance.SelectedChessFont;
-
             _chessPanel.IsUnicodeFont = currentFont.IsUnicode;
             _chessPanel.ChessFontChars = currentFont.PieceCharacters;
             _chessPanel.PieceSizeFactor = currentFont.SizeFactor;
@@ -749,7 +748,6 @@ namespace BerldChess.View
                             _evaluationEnabled = false;
                             _movePlayed = true;
 
-                            SerializedInfo.Instance.MultiPv = multiPV;
                             _menuItemMultiPv.Text = $"MultiPv [{SerializedInfo.Instance.MultiPv}]";
                             _vm.Engines[i].Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
                             _vm.Engines[i].RequestStop();
@@ -757,7 +755,6 @@ namespace BerldChess.View
 
                             ResetEvaluationData(multiPV);
                             ResetEvaluationGridRows(SerializedInfo.Instance.MultiPv);
-
                             _evaluationEnabled = true;
                         }
                     }
@@ -785,7 +782,6 @@ namespace BerldChess.View
         {
             if (SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible) return;
             if (_vm.PlyList.Count <= 0) return;
-
 
             var dialog = new ProgressDialog($"Time analysis ({milliseconds} ms/ply)", "Analyzing...");
             dialog.ClosedByInterface += OnDepthAnalysisCancel;
@@ -957,8 +953,8 @@ namespace BerldChess.View
             g.SmoothingMode = SmoothingMode.Default;
             g.TextRenderingHint = TextRenderingHint.AntiAlias;
 
-            Pen gridPen = new Pen(_panelEvaluationChart.ForeColor.OperateAll(200, !SerializedInfo.Instance.DarkMode), 1);
-            Pen middleLinePen = new Pen(_panelEvaluationChart.ForeColor.OperateAll(120, !SerializedInfo.Instance.DarkMode), 1);
+            Pen gridPen = new Pen(_panelEvaluationChart.ForeColor.AlterRgb(200, !SerializedInfo.Instance.DarkMode), 1);
+            Pen middleLinePen = new Pen(_panelEvaluationChart.ForeColor.AlterRgb(120, !SerializedInfo.Instance.DarkMode), 1);
             Pen chartBorderPen = new Pen(_panelEvaluationChart.ForeColor, 1);
 
             Font labelFont = new Font("Segoe UI", 10);
@@ -1205,9 +1201,7 @@ namespace BerldChess.View
         {
             if (e.KeyCode == Keys.V)
             {
-
-                MessageBox.Show($"{SerializedInfo.Instance.EngineList.SelectedSetting1.Name}: {_engineWins[0].ToString()}\n\n{SerializedInfo.Instance.EngineList.SelectedSetting2.Name}: {_engineWins[1].ToString()}\n\nDraws: {_draws.ToString()}", "BerldChess - Score");
-
+                MessageBox.Show($"{SerializedInfo.Instance.EngineList.SelectedSetting.Name}: {_engineWins[0].ToString()}\n\n{SerializedInfo.Instance.EngineList.SelectedOpponentSetting.Name}: {_engineWins[1].ToString()}\n\nDraws: {_draws.ToString()}", "BerldChess - Score");
                 e.Handled = true;
                 e.SuppressKeyPress = true;
                 return;
@@ -1268,7 +1262,6 @@ namespace BerldChess.View
                 _chessPanel.PieceFontFamily = "";
                 _chessPanel.PieceSizeFactor = DefaultSizeFactor;
             }
-
 
             _chessPanel.BorderHighlight = SerializedInfo.Instance.BorderHighlight;
             _chessPanel.DarkSquare = SerializedInfo.Instance.BoardDarkSquare;
@@ -1380,13 +1373,13 @@ namespace BerldChess.View
                 SerializedInfo.Instance.IllegalSound = _menuItemIllegalSound.Checked;
                 SerializedInfo.Instance.DisplayCoordinates = _menuItemDisplayCoordinates.Checked;
 
-                EngineSetting selectedSetting1 = SerializedInfo.Instance.EngineList.SelectedSetting1;
-                EngineSetting selectedSetting2 = SerializedInfo.Instance.EngineList.SelectedSetting2;
+                EngineSetting selectedSetting1 = SerializedInfo.Instance.EngineList.SelectedSetting;
+                EngineSetting selectedSetting2 = SerializedInfo.Instance.EngineList.SelectedOpponentSetting;
 
                 SerializedInfo.Instance.EngineList.Settings = SerializedInfo.Instance.EngineList.Settings.OrderBy(c => c.Name).ToList();
 
-                SerializedInfo.Instance.EngineList.SelectedIndex1 = SerializedInfo.Instance.EngineList.Settings.IndexOf(selectedSetting1);
-                SerializedInfo.Instance.EngineList.SelectedIndex2 = SerializedInfo.Instance.EngineList.Settings.IndexOf(selectedSetting2);
+                SerializedInfo.Instance.EngineList.SelectedIndex = SerializedInfo.Instance.EngineList.Settings.IndexOf(selectedSetting1);
+                SerializedInfo.Instance.EngineList.SelectedOpponentIndex = SerializedInfo.Instance.EngineList.Settings.IndexOf(selectedSetting2);
 
                 if (SerializedInfo.Instance.ChessFonts.Count > 3)
                 {
@@ -2022,7 +2015,8 @@ namespace BerldChess.View
 
             for (int i = 0; i < _columnOrder.Length; i++)
             {
-                _evaluations[multiPV - 1] = evaluation;
+                if (multiPV - 1 >= 0 && multiPV - 1 < _evaluations.Length)
+                    _evaluations[multiPV - 1] = evaluation;
             }
         }
 
@@ -2126,7 +2120,7 @@ namespace BerldChess.View
             _vm.PlyList.Add(new ChessPly(_vm.Game.GetFen()));
             _vm.NavigationIndex = 0;
             _chessPanel.Game = _vm.Game;
-            _chessPanel.HighlighedSquares.Clear();
+            _chessPanel.HighlightedSquares.Clear();
             _chessPanel.ClearIndicators();
             _dataGridViewMoves.Rows.Clear();
             _movePlayed = true;
@@ -2310,14 +2304,14 @@ namespace BerldChess.View
             _vm.Game = new ChessGame(_vm.CurrentPly.Fen);
 
             _chessPanel.Game = _vm.Game;
-            _chessPanel.HighlighedSquares.Clear();
+            _chessPanel.HighlightedSquares.Clear();
 
             string currentMoveString = _vm.CurrentPly.Move;
 
             if (!string.IsNullOrEmpty(currentMoveString))
             {
                 Point[] squareLocations = _chessPanel.GetRelPositionsFromMoveString(currentMoveString);
-                _chessPanel.HighlighedSquares.AddRange(squareLocations);
+                _chessPanel.HighlightedSquares.AddRange(squareLocations);
             }
 
             SelectMovesCell(navigation);
@@ -2517,9 +2511,9 @@ namespace BerldChess.View
 
             _chessPanel.ClearIndicators();
 
-            _chessPanel.HighlighedSquares.Clear();
-            _chessPanel.HighlighedSquares.Add(args.Position);
-            _chessPanel.HighlighedSquares.Add(args.NewPosition);
+            _chessPanel.HighlightedSquares.Clear();
+            _chessPanel.HighlightedSquares.Add(args.Position);
+            _chessPanel.HighlightedSquares.Add(args.NewPosition);
 
             string formattedMove = GetFormattedMove(move, moveType, validMoves);
             AddMoveToPlyList(move.ToString(""), formattedMove);
@@ -2803,7 +2797,7 @@ namespace BerldChess.View
 
             if (SerializedInfo.Instance.DarkMode)
             {
-                return Color.FromArgb(((int)(x * 255) + 70).Cap(255), ((int)((1 - x) * 255) + 70).Cap(255), 0);
+                return Color.FromArgb(Math.Max(((int)(x * 255) + 70), 255), Math.Max(((int)((1 - x) * 255) + 70), 255), 0);
             }
             else
             {
@@ -2875,7 +2869,6 @@ namespace BerldChess.View
         private void OnMenuItemLevelClick(object sender, EventArgs e)
         {
             var levelDialog = new FormLevelDialog(SerializedInfo.Instance.Level);
-
             if (levelDialog.ShowDialog() != DialogResult.OK) return;
 
             SerializedInfo.Instance.Level = levelDialog.Level;
@@ -2890,8 +2883,9 @@ namespace BerldChess.View
             }
 
             var input = Interaction.InputBox("Enter Time per ply in ms:", "BerldChess - Time Analysis");
+            int time;
 
-            if (int.TryParse(input, out var time))
+            if (int.TryParse(input, out time))
             {
                 StartTimeAnalysis(time);
             }

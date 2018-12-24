@@ -97,6 +97,7 @@ namespace BerldChess.View
 
         private void OnBoardSettingDialogShown(object sender, EventArgs e)
         {
+
             _initialDarkSquare = SerializedInfo.Instance.BoardDarkSquare;
             _initialLightSquare = SerializedInfo.Instance.BoardLightSquare;
             _initialGradient = SerializedInfo.Instance.Gradient;

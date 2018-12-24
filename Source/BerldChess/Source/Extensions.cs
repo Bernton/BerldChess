@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
+using ilf.pgn.Data;
+using Color = System.Drawing.Color;
 
 namespace BerldChess
 {
@@ -13,12 +12,10 @@ namespace BerldChess
         public static void SetDoubleBuffered(this Control control)
         {
             if (SystemInformation.TerminalServerSession)
-            {
                 return;
-            }
 
-            PropertyInfo doubleBufferedProperty = typeof(Control).GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance);
-            doubleBufferedProperty.SetValue(control, true, null);
+            PropertyInfo property = typeof(Control).GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance);
+            property?.SetValue(control, true, null);
         }
 
         public static void FitFont(this Control control, double widthFactor, double heightFactor)
@@ -38,139 +35,62 @@ namespace BerldChess
             control.Font = new Font(control.Font.FontFamily, fontSize);
         }
 
-        public static char GetPieceChar(this ilf.pgn.Data.PieceType? type)
+        public static char GetPieceChar(this PieceType? type)
         {
-            if (type == null)
-            {
-                return 'q';
-            }
-
             switch (type)
             {
-                case ilf.pgn.Data.PieceType.Queen:
-                    return 'q';
-
-                case ilf.pgn.Data.PieceType.Rook:
+                case PieceType.Rook:
                     return 'r';
-
-                case ilf.pgn.Data.PieceType.Bishop:
+                case PieceType.Bishop:
                     return 'b';
-
-                case ilf.pgn.Data.PieceType.Knight:
+                case PieceType.Knight:
                     return 'n';
-            }
-
-            return 'q';
-        }
-
-        public static char GetFenPieceChar(this ilf.pgn.Data.PieceType? type, bool isWhite)
-        {
-            switch (type)
-            {
-                case ilf.pgn.Data.PieceType.King:
-
-                    if (isWhite)
-                    {
-                        return 'K';
-                    }
-                    else
-                    {
-                        return 'k';
-                    }
-
-                case ilf.pgn.Data.PieceType.Bishop:
-
-                    if (isWhite)
-                    {
-                        return 'B';
-                    }
-                    else
-                    {
-                        return 'b';
-                    }
-
-                case ilf.pgn.Data.PieceType.Knight:
-
-                    if (isWhite)
-                    {
-                        return 'N';
-                    }
-                    else
-                    {
-                        return 'n';
-                    }
-
-                case ilf.pgn.Data.PieceType.Pawn:
-
-                    if (isWhite)
-                    {
-                        return 'P';
-                    }
-                    else
-                    {
-                        return 'p';
-                    }
-
-                case ilf.pgn.Data.PieceType.Queen:
-
-                    if (isWhite)
-                    {
-                        return 'Q';
-                    }
-                    else
-                    {
-                        return 'q';
-                    }
-
-                case ilf.pgn.Data.PieceType.Rook:
-
-                    if (isWhite)
-                    {
-                        return 'R';
-                    }
-                    else
-                    {
-                        return 'r';
-                    }
+                case PieceType.King:
+                    return 'k';
+                case PieceType.Pawn:
+                    return 'p';
             }
 
             throw new ArgumentException("PieceType invalid.");
         }
 
-        public static int Cap(this int number, int cap)
+        public static char GetFenPieceChar(this PieceType? type, bool isWhite)
         {
-            if (number > cap)
+            switch (type)
             {
-                return cap;
+                case PieceType.King:
+                    return isWhite ? 'K' : 'k';
+                case PieceType.Bishop:
+                    return isWhite ? 'B' : 'b';
+                case PieceType.Knight:
+                    return isWhite ? 'N' : 'n';
+                case PieceType.Pawn:
+                    return isWhite ? 'P' : 'p';
+                case PieceType.Queen:
+                    return isWhite ? 'Q' : 'q';
+                case PieceType.Rook:
+                    return isWhite ? 'R' : 'r';
             }
-            else
-            {
-                return number;
-            }
+
+            throw new ArgumentException("PieceType invalid.");
         }
 
-        public static int BotCap(this int number, int cap)
+        public static int CapRange(this int number, int bottomCap, int topCap)
         {
-            if (number < cap)
-            {
-                return cap;
-            }
-            else
-            {
-                return number;
-            }
+            number = Math.Min(number, topCap);
+            number = Math.Max(number, bottomCap);
+            return number;
         }
 
-        public static Color OperateAll(this Color color, int number, bool isAdd)
+        public static Color AlterRgb(this Color color, int amount, bool isAddition)
         {
-            if (isAdd)
-            {
-                return Color.FromArgb((color.R + number).Cap(255), (color.G + number).Cap(255), (color.B + number).Cap(255));
-            }
-            else
-            {
-                return Color.FromArgb((color.R - number).BotCap(0), (color.G - number).BotCap(0), (color.B - number).BotCap(0));
-            }
+            if (!isAddition)
+                amount = -amount;
+
+            int r = (color.R + amount).CapRange(0, 255);
+            int g = (color.G + amount).CapRange(0, 255);
+            int b = (color.B + amount).CapRange(0, 255);
+            return Color.FromArgb(r, g, b);
         }
     }
 }

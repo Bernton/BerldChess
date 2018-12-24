@@ -48,29 +48,29 @@ namespace BerldChess.Model
         [XmlElement("EngineDarkSquare")]
         public int EngineDarkSquareAsArgb
         {
-            get => EngineDarkSquare.ToArgb();
-            set => EngineDarkSquare = Color.FromArgb(value);
+            get { return EngineDarkSquare.ToArgb(); }
+            set { EngineDarkSquare = Color.FromArgb(value); }
         }
 
         [XmlElement("EngineLightSquare")]
         public int EngineLightSquareAsArgb
         {
-            get => EngineLightSquare.ToArgb();
-            set => EngineLightSquare = Color.FromArgb(value);
+            get { return EngineLightSquare.ToArgb(); }
+            set { EngineLightSquare = Color.FromArgb(value); }
         }
 
         [XmlElement("BoardDarkSquare")]
         public int BoardDarkSquareAsArgb
         {
-            get => BoardDarkSquare.ToArgb();
-            set => BoardDarkSquare = Color.FromArgb(value);
+            get { return BoardDarkSquare.ToArgb(); }
+            set { BoardDarkSquare = Color.FromArgb(value); }
         }
 
         [XmlElement("BoardLightSquare")]
         public int BoardLightSquareAsArgb
         {
-            get => BoardLightSquare.ToArgb();
-            set => BoardLightSquare = Color.FromArgb(value);
+            get { return BoardLightSquare.ToArgb(); }
+            set { BoardLightSquare = Color.FromArgb(value); }
         }
 
         [XmlIgnore] public Color BoardDarkSquare { get; set; } = Color.FromArgb(140, 162, 173);

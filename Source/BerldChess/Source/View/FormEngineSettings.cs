@@ -27,7 +27,7 @@ namespace BerldChess.View
             InitializeComponent();
             _listBoxSettings.SetDoubleBuffered();
             _engineList = engineList;
-            UpdateUI(_engineList.SelectedIndex1);
+            UpdateUI(_engineList.SelectedIndex);
             InitializeRadioButtons();
         }
 
@@ -131,14 +131,14 @@ namespace BerldChess.View
 
             _engineList.Settings.RemoveAt(selected);
 
-            if (_engineList.SelectedIndex1 == selected)
+            if (_engineList.SelectedIndex == selected)
             {
-                _engineList.SelectedIndex1 = 0;
+                _engineList.SelectedIndex = 0;
             }
 
-            if (_engineList.SelectedIndex2 == selected)
+            if (_engineList.SelectedOpponentIndex == selected)
             {
-                _engineList.SelectedIndex2 = 0;
+                _engineList.SelectedOpponentIndex = 0;
             }
 
             EngineSelected?.Invoke();
@@ -161,13 +161,13 @@ namespace BerldChess.View
 
         private void OnComboBoxEngine1SelectedIndexChanged(object sender, EventArgs e)
         {
-            _engineList.SelectedIndex1 = _comboBoxEngine1.SelectedIndex;
+            _engineList.SelectedIndex = _comboBoxEngine1.SelectedIndex;
             EngineSelected?.Invoke();
         }
 
         private void OnComboBoxEngine2SelectedIndexChanged(object sender, EventArgs e)
         {
-            _engineList.SelectedIndex2 = _comboBoxEngine2.SelectedIndex;
+            _engineList.SelectedOpponentIndex = _comboBoxEngine2.SelectedIndex;
             EngineSelected?.Invoke();
         }
 
@@ -286,8 +286,8 @@ namespace BerldChess.View
                 OpenEngineConfig(initialSelect);
             }
 
-            TrySelect(_comboBoxEngine1, _engineList.SelectedIndex1);
-            TrySelect(_comboBoxEngine2, _engineList.SelectedIndex2);
+            TrySelect(_comboBoxEngine1, _engineList.SelectedIndex);
+            TrySelect(_comboBoxEngine2, _engineList.SelectedOpponentIndex);
         }
 
         private void SetUIToEngineMode(EngineMode mode)

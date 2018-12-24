@@ -6,63 +6,50 @@ namespace BerldChess.Model
     [Serializable]
     public class EngineList
     {
-        public int SelectedIndex1 { get; set; }
-        public int SelectedIndex2 { get; set; }
+        public bool SettingAvailable => Settings.Count > 0;
+        public int SelectedIndex { get; set; }
+        public int SelectedOpponentIndex { get; set; }
         public List<EngineSetting> Settings { get; set; }
         public List<string> LastPaths { get; set; } = new List<string>();
 
-        public bool SettingAvailable
+        public EngineSetting SelectedSetting
         {
             get
             {
-                return Settings.Count > 0;
-            }
-        }
-
-        public EngineSetting SelectedSetting1
-        {
-            get
-            {
-                if(SelectedIndex1 == -1 || Settings.Count == 0)
-                {
+                if (SelectedIndex == -1 || Settings.Count == 0)
                     return null;
-                }
 
-                return Settings[SelectedIndex1];
+                return Settings[SelectedIndex];
             }
         }
 
-        public EngineSetting SelectedSetting2
+        public EngineSetting SelectedOpponentSetting
         {
             get
             {
-                if (SelectedIndex2 == -1 || Settings.Count == 0)
-                {
+                if (SelectedOpponentIndex == -1 || Settings.Count == 0)
                     return null;
-                }
 
-                return Settings[SelectedIndex2];
+                return Settings[SelectedOpponentIndex];
             }
         }
-
 
         public EngineList()
         {
             Settings = new List<EngineSetting>();
-            SelectedIndex1 = -1;
+            SelectedIndex = -1;
         }
-
 
         public void TryAddPath(string path)
         {
-            if (!(string.IsNullOrWhiteSpace(path) || LastPaths.Contains(path)))
-            {
-                LastPaths.Add(path);
+            if (string.IsNullOrWhiteSpace(path) || LastPaths.Contains(path))
+                return;
 
-                if (LastPaths.Count > 8)
-                {
-                    LastPaths.RemoveRange(8, LastPaths.Count - 8);
-                }
+            LastPaths.Add(path);
+
+            if (LastPaths.Count > 8)
+            {
+                LastPaths.RemoveRange(8, LastPaths.Count - 8);
             }
         }
     }

@@ -19,44 +19,10 @@ namespace BerldChess.ViewModel
         public Engine[] Engines { get; set; }
         public ChessGame Game { get; set; }
         public List<ChessPly> PlyList { get; set; }
+        public bool GameFinished => Game.IsCheckmated(Game.WhoseTurn) || Game.IsDraw;
+        public ChessPly LatestPly => PlyList.Count > 0 ? PlyList[PlyList.Count - 1] : null;
 
-        public bool GameFinished
-        {
-            get
-            {
-                return Game.IsCheckmated(Game.WhoseTurn) || Game.IsDraw;
-            }
-        }
-
-        public ChessPly LatestPly
-        {
-            get
-            {
-                if(PlyList.Count > 0)
-                {
-                    return PlyList[PlyList.Count - 1];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        public ChessPly CurrentPly
-        {
-            get
-            {
-                if(PlyList.Count > 0)
-                {
-                    return PlyList[NavigationIndex];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        public ChessPly CurrentPly => PlyList.Count > 0 ? PlyList[NavigationIndex] : null;
 
         #endregion
 
@@ -65,10 +31,8 @@ namespace BerldChess.ViewModel
         public FormMainViewModel()
         {
             Engines = new Engine[2];
-
             NavigationIndex = 0;
             PlyList = new List<ChessPly>();
-
             Game = new ChessGame();
             PlyList.Add(new ChessPly(Game.GetFen()));
         }

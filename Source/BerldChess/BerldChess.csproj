@@ -305,6 +305,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
+    <Content Include="Resources\Sounds\MP3\Capture.mp3" />
+    <Content Include="Resources\Sounds\MP3\Ilegal.mp3" />
+    <Content Include="Resources\Sounds\MP3\Move.mp3" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
