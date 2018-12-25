@@ -39,10 +39,11 @@ namespace BerldChess.View
         private int _draws = 0;
         private const int CentipawnTolerance = 85;
         private const int ChartShownPlies = 25;
-        private const double DefaultSizeFactor = 0.82;
+        private const double DefaultSizeFactor = 0.91;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
         private InfoType[] _columnOrder;
         private Random _random = new Random();
+        private Color _lastMoveArrowColor = Color.FromArgb(100, 30, 10, 200);
         private Color _darkModeColor = Color.FromArgb(49, 46, 43);
         private Color _selectionColor = Color.FromArgb(160, 177, 199, 208);
         private Bitmap _comparisonSnap = null;
@@ -64,7 +65,9 @@ namespace BerldChess.View
         private string[] _enginePaths = new string[2];
         private volatile Evaluation[] _evaluations;
         private Control[] _engineViewElements;
-        bool _switched = false;
+        private bool _switched = false;
+        private readonly List<MoveArrow> _engineEvalArrows = new List<MoveArrow>();
+        private MoveArrow _lastMoveArrow = null;
 
         #endregion
 
@@ -405,6 +408,8 @@ namespace BerldChess.View
             _chessPanel.IvoryMode = SerializedInfo.Instance.IvoryMode;
             _chessPanel.UseBoardImages = SerializedInfo.Instance.UseImages;
 
+            ApplyLastMoveHighlight();
+
             if (SerializedInfo.Instance.UseImages)
             {
                 TryApplyBoardImages();
@@ -414,16 +419,77 @@ namespace BerldChess.View
             SetDarkMode(this, SerializedInfo.Instance.DarkMode);
         }
 
+        private void AddMoveArrow(string move)
+        {
+            _lastMoveArrow = new MoveArrow(move, 2.2, _lastMoveArrowColor, false, false);
+        }
+
+        private void AddLastMoveArrow()
+        {
+            string currentMoveString = _vm.CurrentPly.Move;
+
+            if (!string.IsNullOrEmpty(currentMoveString))
+            {
+                AddMoveArrow(currentMoveString);
+            }
+        }
+
+        private void RemoveLastMoveArrow()
+        {
+            if (_lastMoveArrow != null)
+            {
+                _chessPanel.Arrows.Remove(_lastMoveArrow);
+            }
+
+            _lastMoveArrow = null;
+        }
+
+        private void ApplyLastMoveHighlight()
+        {
+            if (SerializedInfo.Instance.ArrowHighlight)
+            {
+                _chessPanel.HighlightedSquares.Clear();
+                AddLastMoveArrow();
+            }
+            else
+            {
+                RemoveLastMoveArrow();
+
+                if (_chessPanel.HighlightedSquares.Count == 0)
+                {
+                    string currentMoveString = _vm.CurrentPly.Move;
+
+                    if (!string.IsNullOrEmpty(currentMoveString))
+                    {
+                        Point[] squareLocations = _chessPanel.GetRelPositionsFromMoveString(currentMoveString);
+                        _chessPanel.HighlightedSquares.AddRange(squareLocations);
+                    }
+                }
+            }
+
+            if (SerializedInfo.Instance.NoHighlight)
+            {
+                _chessPanel.NoHighlight = true;
+            }
+            else if (SerializedInfo.Instance.BorderHighlight)
+            {
+                _chessPanel.NoHighlight = false;
+                _chessPanel.BorderHighlight = true;
+            }
+            else
+            {
+                _chessPanel.NoHighlight = false;
+                _chessPanel.BorderHighlight = false;
+            }
+        }
+
         private void TryApplyBoardImages()
         {
             Image lightSquareImage = TryGetImage(SerializedInfo.Instance.LightSquarePath);
             Image darkSquareImage = TryGetImage(SerializedInfo.Instance.DarkSquarePath);
 
-            if (lightSquareImage != null && darkSquareImage != null)
-            {
-                _chessPanel.DarkSquareImage = darkSquareImage;
-                _chessPanel.LightSquareImage = lightSquareImage;
-            }
+            _chessPanel.DarkSquareImage = darkSquareImage;
+            _chessPanel.LightSquareImage = lightSquareImage;
         }
 
         private Image TryGetImage(string path)
@@ -492,8 +558,24 @@ namespace BerldChess.View
                 UpdateUI();
             }
 
+            UpdateArrows();
             _panelEvaluationChart.Invalidate();
             _chessPanel.Invalidate();
+        }
+
+        private void UpdateArrows()
+        {
+            _chessPanel.Arrows.Clear();
+
+            if (!_menuItemHideArrows.Checked)
+            {
+                _chessPanel.Arrows.AddRange(_engineEvalArrows);
+            }
+
+            if (_lastMoveArrow != null)
+            {
+                _chessPanel.Arrows.Add(_lastMoveArrow);
+            }
         }
 
         private void OnTimerAutoCheckTick(object sender, EventArgs e)
@@ -589,15 +671,6 @@ namespace BerldChess.View
             if (!_menuItemLocalMode.Checked)
             {
                 _chessPanel.IsFlipped = _menuItemFlipBoard.Checked;
-                _chessPanel.Invalidate();
-            }
-        }
-
-        private void OnMenuItemHideArrowsCheckedChanged(object sender, EventArgs e)
-        {
-            if (_menuItemHideArrows.Checked && _chessPanel != null && _chessPanel.Arrows != null)
-            {
-                _chessPanel.Arrows.Clear();
                 _chessPanel.Invalidate();
             }
         }
@@ -780,8 +853,15 @@ namespace BerldChess.View
 
         private void StartTimeAnalysis(int milliseconds)
         {
-            if (SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible) return;
-            if (_vm.PlyList.Count <= 0) return;
+            if (SerializedInfo.Instance.EngineMode == EngineMode.Disabled || !_labelEvaluation.Visible)
+            {
+                return;
+            }
+
+            if (_vm.PlyList.Count <= 0)
+            {
+                return;
+            }
 
             var dialog = new ProgressDialog($"Time analysis ({milliseconds} ms/ply)", "Analyzing...");
             dialog.ClosedByInterface += OnDepthAnalysisCancel;
@@ -957,7 +1037,7 @@ namespace BerldChess.View
             Pen middleLinePen = new Pen(_panelEvaluationChart.ForeColor.AlterRgb(120, !SerializedInfo.Instance.DarkMode), 1);
             Pen chartBorderPen = new Pen(_panelEvaluationChart.ForeColor, 1);
 
-            Font labelFont = new Font("Segoe UI", 10);
+            Font labelFont = new Font("Segoe UI", 11);
 
             SolidBrush fontBrush = new SolidBrush(_panelEvaluationChart.ForeColor);
             SolidBrush chartLightBrush = new SolidBrush(Color.White);
@@ -1040,10 +1120,11 @@ namespace BerldChess.View
             }
 
             float lineWidth = (float)_panelEvaluationChart.Width / lineCount;
+            float yCapHeight = _panelEvaluationChart.Height - labelFont.Size * 2.25F;
 
             for (int i = 1; i <= lineCount; i++)
             {
-                if (i % 3 != 0)
+                if (i % 2 == 1)
                 {
                     continue;
                 }
@@ -1055,18 +1136,11 @@ namespace BerldChess.View
                     valueX += _vm.PlyList.Count - ChartShownPlies;
                 }
 
-                if (valueX > 2 || i == lineCount)
-                {
-                    string text = valueX.ToString();
-                    float offSet = g.MeasureString(text, labelFont).Width / lineCount * i;
+                string text = valueX.ToString();
+                SizeF size = g.MeasureString(text, labelFont);
+                size.Width *= 2.25F;
 
-                    if (i == lineCount)
-                    {
-                        offSet += lineWidth * 0.15F;
-                    }
-
-                    g.DrawString(text, labelFont, fontBrush, lineWidth * i - offSet, _panelEvaluationChart.Height - labelFont.Size * 2.25F);
-                }
+                g.DrawString(text, labelFont, fontBrush, lineWidth * i - size.Width / 2, yCapHeight);
             }
 
             for (int i = 1; i < rowCount; i++)
@@ -1083,7 +1157,7 @@ namespace BerldChess.View
 
                 int valueY = peak - i;
                 string text = valueY.ToString("+0;-0");
-                float offSet = g.MeasureString(text, labelFont).Height / 2F;
+                float offSet = g.MeasureString(text, labelFont).Height / 1.99F;
 
                 g.DrawString(text, labelFont, fontBrush, labelFont.Size / 2, (int)(_panelEvaluationChart.Height / (double)rowCount * i) - offSet);
             }
@@ -1273,6 +1347,8 @@ namespace BerldChess.View
             _chessPanel.UseBoardImages = SerializedInfo.Instance.UseImages;
 
             TryApplyBoardImages();
+
+            ApplyLastMoveHighlight();
 
             _menuItemHideOutput.Checked = SerializedInfo.Instance.HideOutput;
             _menuItemHideArrows.Checked = SerializedInfo.Instance.HideArrows;
@@ -1652,14 +1728,14 @@ namespace BerldChess.View
 
             if (!_menuItemHideArrows.Checked)
             {
-                for (int iPV = 0; iPV < _evaluations.Length; iPV++)
+                for (int iPv = 0; iPv < _evaluations.Length; iPv++)
                 {
-                    if (_evaluations[iPV] == null)
+                    if (_evaluations[iPv] == null)
                     {
                         continue;
                     }
 
-                    pawnValue = _evaluations[iPV][InfoType.Score];
+                    pawnValue = _evaluations[iPv][InfoType.Score];
                     ProcessPawnValue(pawnValue, out centipawn, out isMate);
 
                     if (isMate)
@@ -1667,26 +1743,26 @@ namespace BerldChess.View
                         centipawn = centipawn * 20 + 12000;
                     }
 
-                    if (iPV == 0 || (!isMate && _mainPvReference - centipawn < CentipawnTolerance) || _chessPanel.Arrows.Count < 3)
+                    if (iPv == 0 || (!isMate && _mainPvReference - centipawn < CentipawnTolerance) || _engineEvalArrows.Count < 3)
                     {
-                        if (iPV == 0)
+                        if (iPv == 0)
                         {
                             _mainPvReference = centipawn;
                         }
 
-                        if (_chessPanel.Arrows.Count <= iPV)
+                        if (_engineEvalArrows.Count <= iPv)
                         {
-                            _chessPanel.Arrows.Add(new MoveArrow((_evaluations[iPV][InfoType.PV]).Substring(0, 4), 0.9, GetReferenceColor(centipawn, _mainPvReference)));
+                            _engineEvalArrows.Add(new MoveArrow((_evaluations[iPv][InfoType.PV]).Substring(0, 4), 0.9, GetReferenceColor(centipawn, _mainPvReference)));
                         }
                         else
                         {
-                            _chessPanel.Arrows[iPV].Move = (_evaluations[iPV][InfoType.PV]).Substring(0, 4);
-                            _chessPanel.Arrows[iPV].Color = GetReferenceColor(centipawn, _mainPvReference);
+                            _engineEvalArrows[iPv].Move = (_evaluations[iPv][InfoType.PV]).Substring(0, 4);
+                            _engineEvalArrows[iPv].Color = GetReferenceColor(centipawn, _mainPvReference);
                         }
 
-                        if (iPV == 0)
+                        if (iPv == 0)
                         {
-                            _chessPanel.Arrows[iPV].Color = Color.DarkBlue;
+                            _engineEvalArrows[iPv].Color = Color.DarkBlue;
                         }
                     }
                 }
@@ -2016,7 +2092,9 @@ namespace BerldChess.View
             for (int i = 0; i < _columnOrder.Length; i++)
             {
                 if (multiPV - 1 >= 0 && multiPV - 1 < _evaluations.Length)
+                {
                     _evaluations[multiPV - 1] = evaluation;
+                }
             }
         }
 
@@ -2121,6 +2199,7 @@ namespace BerldChess.View
             _vm.NavigationIndex = 0;
             _chessPanel.Game = _vm.Game;
             _chessPanel.HighlightedSquares.Clear();
+            RemoveLastMoveArrow();
             _chessPanel.ClearIndicators();
             _dataGridViewMoves.Rows.Clear();
             _movePlayed = true;
@@ -2305,13 +2384,22 @@ namespace BerldChess.View
 
             _chessPanel.Game = _vm.Game;
             _chessPanel.HighlightedSquares.Clear();
+            RemoveLastMoveArrow();
 
             string currentMoveString = _vm.CurrentPly.Move;
 
             if (!string.IsNullOrEmpty(currentMoveString))
             {
-                Point[] squareLocations = _chessPanel.GetRelPositionsFromMoveString(currentMoveString);
-                _chessPanel.HighlightedSquares.AddRange(squareLocations);
+
+                if (SerializedInfo.Instance.ArrowHighlight)
+                {
+                    AddMoveArrow(currentMoveString);
+                }
+                else
+                {
+                    Point[] squareLocations = _chessPanel.GetRelPositionsFromMoveString(currentMoveString);
+                    _chessPanel.HighlightedSquares.AddRange(squareLocations);
+                }
             }
 
             SelectMovesCell(navigation);
@@ -2496,6 +2584,7 @@ namespace BerldChess.View
                 {
                     _playerTimes[0].Start();
                     _playerTimes[1].Stop();
+                    _playerTimes[1].Stop();
                 }
                 else
                 {
@@ -2511,9 +2600,17 @@ namespace BerldChess.View
 
             _chessPanel.ClearIndicators();
 
-            _chessPanel.HighlightedSquares.Clear();
-            _chessPanel.HighlightedSquares.Add(args.Position);
-            _chessPanel.HighlightedSquares.Add(args.NewPosition);
+            if (SerializedInfo.Instance.ArrowHighlight)
+            {
+                RemoveLastMoveArrow();
+                AddMoveArrow(move.ToString(""));
+            }
+            else
+            {
+                _chessPanel.HighlightedSquares.Clear();
+                _chessPanel.HighlightedSquares.Add(args.Position);
+                _chessPanel.HighlightedSquares.Add(args.NewPosition);
+            }
 
             string formattedMove = GetFormattedMove(move, moveType, validMoves);
             AddMoveToPlyList(move.ToString(""), formattedMove);
@@ -2728,22 +2825,34 @@ namespace BerldChess.View
         private string FormatNumber(long number)
         {
             if (number >= 100000000000)
+            {
                 return (number / 1000000000).ToString("#,0 B");
+            }
 
             if (number >= 10000000000)
+            {
                 return (number / 1000000000).ToString("0.#") + " B";
+            }
 
             if (number >= 100000000)
+            {
                 return (number / 1000000).ToString("#,0 M");
+            }
 
             if (number >= 10000000)
+            {
                 return (number / 1000000).ToString("0.#") + " M";
+            }
 
             if (number >= 100000)
+            {
                 return (number / 1000).ToString("#,0 k");
+            }
 
             if (number >= 10000)
+            {
                 return (number / 1000).ToString("0.#") + " k";
+            }
 
             return number.ToString("#,0");
         }
@@ -2869,7 +2978,10 @@ namespace BerldChess.View
         private void OnMenuItemLevelClick(object sender, EventArgs e)
         {
             var levelDialog = new FormLevelDialog(SerializedInfo.Instance.Level);
-            if (levelDialog.ShowDialog() != DialogResult.OK) return;
+            if (levelDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
 
             SerializedInfo.Instance.Level = levelDialog.Level;
             SetLevel();

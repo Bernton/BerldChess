@@ -20,6 +20,8 @@ namespace BerldChess.Model
         public bool IllegalSound { get; set; } = true;
         public bool Gradient { get; set; } = true;
         public bool DarkMode { get; set; } = false;
+        public bool NoHighlight { get; set; } = false;
+        public bool ArrowHighlight { get; set; } = false;
         public bool BorderHighlight { get; set; } = false;
         public bool AutoCheck { get; set; } = false;
         public bool LocalMode { get; set; } = false;

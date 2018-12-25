@@ -51,7 +51,7 @@ namespace BerldChess
                     return 'p';
             }
 
-            throw new ArgumentException("PieceType invalid.");
+            return 'q';
         }
 
         public static char GetFenPieceChar(this PieceType? type, bool isWhite)

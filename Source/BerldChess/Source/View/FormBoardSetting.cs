@@ -11,9 +11,11 @@ namespace BerldChess.View
         private bool _initialGrid;
         private bool _initialDarkMode;
         private bool _initialHighlightBorder;
+        private bool _initialNoHighlight;
+        private bool _initialArrowHighlight;
         private bool _initialIvoryMode;
         private bool _initialUseImages;
-        private bool _applied = false;
+        private bool _applied;
 
         private string _initialDarkSquarePath;
         private string _initialLightSquarePath;
@@ -35,8 +37,7 @@ namespace BerldChess.View
 
         private void OnButtonDarkSquareClick(object sender, EventArgs e)
         {
-            ColorDialog colorDialog = new ColorDialog();
-            colorDialog.Color = _buttonDarkSquare.BackColor;
+            ColorDialog colorDialog = new ColorDialog { Color = _buttonDarkSquare.BackColor };
 
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
@@ -83,6 +84,8 @@ namespace BerldChess.View
                 SerializedInfo.Instance.DisplayGridBorder = _initialGrid;
                 SerializedInfo.Instance.DarkMode = _initialDarkMode;
                 SerializedInfo.Instance.BorderHighlight = _initialHighlightBorder;
+                SerializedInfo.Instance.NoHighlight = _initialNoHighlight;
+                SerializedInfo.Instance.ArrowHighlight = _initialArrowHighlight;
                 SerializedInfo.Instance.IvoryMode = _initialIvoryMode;
                 SerializedInfo.Instance.UseImages = _initialUseImages;
                 SerializedInfo.Instance.DarkSquarePath = _initialDarkSquarePath;
@@ -104,6 +107,8 @@ namespace BerldChess.View
             _initialGrid = SerializedInfo.Instance.DisplayGridBorder;
             _initialDarkMode = SerializedInfo.Instance.DarkMode;
             _initialHighlightBorder = SerializedInfo.Instance.BorderHighlight;
+            _initialNoHighlight = SerializedInfo.Instance.NoHighlight;
+            _initialArrowHighlight = SerializedInfo.Instance.ArrowHighlight;
             _initialIvoryMode = SerializedInfo.Instance.IvoryMode;
             _initialUseImages = SerializedInfo.Instance.UseImages;
             _initialLightSquarePath = SerializedInfo.Instance.LightSquarePath;
@@ -119,7 +124,24 @@ namespace BerldChess.View
             _textBoxDarkSquarePath.Text = _initialDarkSquarePath;
             _textBoxLightSquarePath.Text = _initialLightSquarePath;
 
-            applyUseImageUI(_initialUseImages);
+            if (_initialNoHighlight)
+            {
+                _radioButtonNoHighlight.Checked = true;
+            }
+            else if (_initialHighlightBorder)
+            {
+                _radioButtonBorderHighlight.Checked = true;
+            }
+            else if (_initialArrowHighlight)
+            {
+                _radioButtonArrow.Checked = true;
+            }
+            else
+            {
+                _radioButtonYellowGlow.Checked = true;
+            }
+
+            ApplyUseImageUi(_initialUseImages);
         }
 
         private void OnCheckBoxDarkModeCheckedChanged(object sender, EventArgs e)
@@ -131,12 +153,6 @@ namespace BerldChess.View
         private void OnCheckBoxGradientCheckedChanged(object sender, EventArgs e)
         {
             SerializedInfo.Instance.Gradient = _checkBoxGradient.Checked;
-            BoardSettingAltered?.Invoke();
-        }
-
-        private void OnCheckBoxHighlightBorderCheckedChanged(object sender, EventArgs e)
-        {
-            SerializedInfo.Instance.BorderHighlight = _checkBoxHighlightBorder.Checked;
             BoardSettingAltered?.Invoke();
         }
 
@@ -155,10 +171,10 @@ namespace BerldChess.View
             SerializedInfo.Instance.UseImages = useImages;
             BoardSettingAltered?.Invoke();
 
-            applyUseImageUI(useImages);
+            ApplyUseImageUi(useImages);
         }
 
-        private void applyUseImageUI(bool useImages)
+        private void ApplyUseImageUi(bool useImages)
         {
             _labelShowDarkSquarePath.Enabled = useImages;
             _labelShowLightSquarePath.Enabled = useImages;
@@ -212,12 +228,59 @@ namespace BerldChess.View
                 Title = title
             };
 
-            if (dialog.ShowDialog() == DialogResult.OK)
+            return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : null;
+        }
+
+        private void OnRadioButtonNoHighlightCheckedChanged(object sender, EventArgs e)
+        {
+            if (!_radioButtonNoHighlight.Checked)
             {
-                return dialog.FileName;
+                return;
             }
 
-            return null;
+            SerializedInfo.Instance.NoHighlight = true;
+            SerializedInfo.Instance.BorderHighlight = false;
+            SerializedInfo.Instance.ArrowHighlight = false;
+            BoardSettingAltered?.Invoke();
+        }
+
+        private void OnRadioButtonYellowGlowCheckedChanged(object sender, EventArgs e)
+        {
+            if (!_radioButtonYellowGlow.Checked)
+            {
+                return;
+            }
+
+            SerializedInfo.Instance.NoHighlight = false;
+            SerializedInfo.Instance.BorderHighlight = false;
+            SerializedInfo.Instance.ArrowHighlight = false;
+            BoardSettingAltered?.Invoke();
+        }
+
+        private void OnRadioButtonBorderHighlightCheckedChanged(object sender, EventArgs e)
+        {
+            if (!_radioButtonBorderHighlight.Checked)
+            {
+                return;
+            }
+
+            SerializedInfo.Instance.NoHighlight = false;
+            SerializedInfo.Instance.ArrowHighlight = false;
+            SerializedInfo.Instance.BorderHighlight = true;
+            BoardSettingAltered?.Invoke();
+        }
+
+        private void OnRadioButtonArrowCheckedChanged(object sender, EventArgs e)
+        {
+            if (!_radioButtonArrow.Checked)
+            {
+                return;
+            }
+
+            SerializedInfo.Instance.NoHighlight = false;
+            SerializedInfo.Instance.ArrowHighlight = true;
+            SerializedInfo.Instance.BorderHighlight = false;
+            BoardSettingAltered?.Invoke();
         }
     }
 }

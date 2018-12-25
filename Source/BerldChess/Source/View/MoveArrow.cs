@@ -5,11 +5,13 @@ namespace BerldChess.View
 {
     public class MoveArrow
     {
+        public bool HasStartCircle { get; set; }
+        public bool IsAbovePieces { get; set; }
         public double ThicknessPercent { get; set; }
         public string Move { get; set; }
         public Color Color { get; set; }
 
-        public MoveArrow(string move, double thickness, Color color)
+        public MoveArrow(string move, double thickness, Color color, bool abovePieces = true, bool hasStartCircle = true)
         {
             if(move.Length != 4)
             {
@@ -19,6 +21,8 @@ namespace BerldChess.View
             Move = move;
             ThicknessPercent = thickness;
             Color = color;
+            IsAbovePieces = abovePieces;
+            HasStartCircle = hasStartCircle;
         }
     }
 }
