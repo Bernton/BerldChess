@@ -2408,6 +2408,12 @@ namespace BerldChess.View
 
             var wasFinished = _vm.GameFinished;
             _evaluationEnabled = false;
+
+            for (var i = 0; i < _evaluations.Length; i++)
+            {
+                _evaluations[i] = null;
+            }
+
             _analyzingMode = true;
 
             _computerPlayer = ChessPlayer.None;
