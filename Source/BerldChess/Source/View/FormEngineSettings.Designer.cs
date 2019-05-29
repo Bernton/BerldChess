@@ -30,11 +30,11 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEngineSettings));
             this._listBoxSettings = new System.Windows.Forms.ListBox();
-            this._labelArguments = new System.Windows.Forms.Label();
+            this._labelArguments = new BerldChess.View.SmoothLabel();
             this._textBoxArguments = new System.Windows.Forms.TextBox();
-            this._labelName = new System.Windows.Forms.Label();
+            this._labelName = new BerldChess.View.SmoothLabel();
             this._textBoxName = new System.Windows.Forms.TextBox();
-            this._labelPath = new System.Windows.Forms.Label();
+            this._labelPath = new BerldChess.View.SmoothLabel();
             this._comboBoxPath = new System.Windows.Forms.ComboBox();
             this._buttonAddNew = new System.Windows.Forms.Button();
             this._buttonApply = new System.Windows.Forms.Button();
@@ -44,8 +44,8 @@
             this._radioButtonCompetitive = new System.Windows.Forms.RadioButton();
             this._comboBoxEngine1 = new System.Windows.Forms.ComboBox();
             this._comboBoxEngine2 = new System.Windows.Forms.ComboBox();
-            this._labelEngine1 = new System.Windows.Forms.Label();
-            this._labelEngine2 = new System.Windows.Forms.Label();
+            this._labelEngine1 = new BerldChess.View.SmoothLabel();
+            this._labelEngine2 = new BerldChess.View.SmoothLabel();
             this._buttonPathDialog = new System.Windows.Forms.Button();
             this._groupBoxProperties = new System.Windows.Forms.GroupBox();
             this._groupBoxEngineMode = new System.Windows.Forms.GroupBox();
@@ -321,11 +321,11 @@
         #endregion
 
         private System.Windows.Forms.ListBox _listBoxSettings;
-        private System.Windows.Forms.Label _labelArguments;
+        private BerldChess.View.SmoothLabel _labelArguments;
         private System.Windows.Forms.TextBox _textBoxArguments;
-        private System.Windows.Forms.Label _labelName;
+        private BerldChess.View.SmoothLabel _labelName;
         private System.Windows.Forms.TextBox _textBoxName;
-        private System.Windows.Forms.Label _labelPath;
+        private BerldChess.View.SmoothLabel _labelPath;
         private System.Windows.Forms.ComboBox _comboBoxPath;
         private System.Windows.Forms.Button _buttonAddNew;
         private System.Windows.Forms.Button _buttonApply;
@@ -335,8 +335,8 @@
         private System.Windows.Forms.RadioButton _radioButtonCompetitive;
         private System.Windows.Forms.ComboBox _comboBoxEngine1;
         private System.Windows.Forms.ComboBox _comboBoxEngine2;
-        private System.Windows.Forms.Label _labelEngine1;
-        private System.Windows.Forms.Label _labelEngine2;
+        private BerldChess.View.SmoothLabel _labelEngine1;
+        private BerldChess.View.SmoothLabel _labelEngine2;
         private System.Windows.Forms.Button _buttonPathDialog;
         private System.Windows.Forms.GroupBox _groupBoxProperties;
         private System.Windows.Forms.GroupBox _groupBoxEngineMode;

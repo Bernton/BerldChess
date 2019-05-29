@@ -31,11 +31,11 @@
             this._buttonLoad = new System.Windows.Forms.Button();
             this._buttonCancel = new System.Windows.Forms.Button();
             this._textBoxPgnInput = new System.Windows.Forms.TextBox();
-            this._labelPgnInput = new System.Windows.Forms.Label();
+            this._labelPgnInput = new BerldChess.View.SmoothLabel();
             this._buttonChooseFile = new System.Windows.Forms.Button();
             this._checkBoxAnalysis = new System.Windows.Forms.CheckBox();
             this._textBoxDepth = new System.Windows.Forms.TextBox();
-            this._labelDepth = new System.Windows.Forms.Label();
+            this._labelDepth = new BerldChess.View.SmoothLabel();
             this.SuspendLayout();
             // 
             // _buttonLoad
@@ -149,9 +149,9 @@
         private System.Windows.Forms.Button _buttonCancel;
         private System.Windows.Forms.TextBox _textBoxPgnInput;
         private System.Windows.Forms.Button _buttonChooseFile;
-        private System.Windows.Forms.Label _labelPgnInput;
+        private BerldChess.View.SmoothLabel _labelPgnInput;
         private System.Windows.Forms.CheckBox _checkBoxAnalysis;
         private System.Windows.Forms.TextBox _textBoxDepth;
-        private System.Windows.Forms.Label _labelDepth;
+        private BerldChess.View.SmoothLabel _labelDepth;
     }
 }

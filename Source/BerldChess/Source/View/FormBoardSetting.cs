@@ -140,8 +140,6 @@ namespace BerldChess.View
             {
                 _radioButtonYellowGlow.Checked = true;
             }
-
-            ApplyUseImageUi(_initialUseImages);
         }
 
         private void OnCheckBoxDarkModeCheckedChanged(object sender, EventArgs e)
@@ -170,21 +168,6 @@ namespace BerldChess.View
 
             SerializedInfo.Instance.UseImages = useImages;
             BoardSettingAltered?.Invoke();
-
-            ApplyUseImageUi(useImages);
-        }
-
-        private void ApplyUseImageUi(bool useImages)
-        {
-            _labelShowDarkSquarePath.Enabled = useImages;
-            _labelShowLightSquarePath.Enabled = useImages;
-            _labelShowDarkSquarePath.Enabled = useImages;
-            _labelShowLightSquarePath.Enabled = useImages;
-
-            _labelShowDarkSquareColor.Enabled = !useImages;
-            _labelShowLightSquareColor.Enabled = !useImages;
-            _buttonDarkSquare.Enabled = !useImages;
-            _buttonLightSquare.Enabled = !useImages;
         }
 
         private void OnTextBoxDarkSquarePathTextChanged(object sender, EventArgs e)

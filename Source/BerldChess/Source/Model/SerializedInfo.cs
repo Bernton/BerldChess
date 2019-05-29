@@ -13,8 +13,9 @@ namespace BerldChess.Model
         public bool UseImages { get; set; } = false;
         public bool IvoryMode { get; set; } = false;
         public bool PgnAnalysis { get; set; } = false;
-        public bool HideArrows { get; set; }
-        public bool BoardFlipped { get; set; }
+        public bool HideArrows { get; set; } = false;
+        public bool FilterArrows { get; set; } = true;
+        public bool BoardFlipped { get; set; } = false;
         public bool DisplayCoordinates { get; set; } = false;
         public bool DisplayLegalMoves { get; set; } = true;
         public bool IllegalSound { get; set; } = true;
@@ -29,7 +30,7 @@ namespace BerldChess.Model
         public bool DisplayGridBorder { get; set; }
         public bool IsMaximized { get; set; } = true;
         public bool Sound { get; set; } = true;
-        public bool CheatMode { get; set; }
+        public bool CheatMode { get; set; } = false;
         public int PgnAnalysisDepth { get; set; }
         public int MultiPv { get; set; } = 250;
         public int ClickDelay { get; set; } = 120;

@@ -32,30 +32,37 @@ namespace BerldChess.View
 
         #region Fields
 
-        private bool _moveTrigger;
+        private bool _pieceMoveTrigger;
         private bool _indicatorMoveDrawing;
         private bool _displayCoordinates = true;
-        private bool _renderImages = true;
+        private bool _sizeChanged = true;
+        private int _squareDimension;
         private int _boardDimension;
+        private int _coordinateWidth;
         private double _fieldSize;
         private double? _fontSizeFactor;
         private string _pieceFontFamily = string.Empty;
         private Color _darkSquare = Color.Brown;
         private Color _borderColor = Color.White;
+        private readonly Stopwatch _frameWatch = new Stopwatch();
         private readonly Brush _legalMoveCircleBrush = new SolidBrush(Color.FromArgb(80, 6, 6, 6));
-        private Color _ivory = Color.FromArgb(241, 236, 203);
+        private readonly Color _ivory = Color.FromArgb(241, 236, 203);
+        private Point _squareLocation;
         private Point _boardLocation;
         private Point _selectedIndex = new Point(-1, -1);
         private Point _movingIndex = new Point(-1, -1);
         private Point _movingPoint = new Point(-1, -1);
         private ChessGame _game;
+        private int _maxHeight;
+        private int _heightOffset;
+        private int[] _columnWidths;
+        private int[] _rowHeights;
         private Bitmap[] _scaledPieceImages = new Bitmap[12];
-        private List<Image> _resizedDarkSquareImages = new List<Image>();
-        private List<Image> _resizedLightSquareImages = new List<Image>();
-
-        private Color _indicatorPositiveColor = Color.FromArgb(160, Color.Green);
-        private Color _indicatorNegativeColor = Color.FromArgb(160, Color.Red);
-        private Color _indicatorNeutralColor = Color.FromArgb(160, Color.Blue);
+        private readonly List<Image> _resizedDarkSquareImages = new List<Image>();
+        private readonly List<Image> _resizedLightSquareImages = new List<Image>();
+        private readonly Color _indicatorPositiveColor = Color.FromArgb(160, Color.Green);
+        private readonly Color _indicatorNegativeColor = Color.FromArgb(160, Color.Red);
+        private readonly Color _indicatorNeutralColor = Color.FromArgb(160, Color.Blue);
         private readonly List<int> _indicatedPositiveSquares = new List<int>();
         private readonly List<int> _indicatedNegativeSquares = new List<int>();
         private readonly List<int> _indicatedNeutralSquares = new List<int>();
@@ -82,7 +89,7 @@ namespace BerldChess.View
 
         public bool DisplayCoordinates
         {
-            get { return _displayCoordinates; }
+            get => _displayCoordinates;
             set
             {
                 InvalidateRender();
@@ -92,28 +99,18 @@ namespace BerldChess.View
 
         public string PieceFontFamily
         {
-            get { return _pieceFontFamily; }
+            get => _pieceFontFamily;
             set
             {
                 _pieceFontFamily = value;
                 _fontSizeFactor = null;
-
-                if (_pieceFontFamily != "")
-                {
-                    _scaledPieceImages = GetPiecesFromFontFamily(value, _fieldSize);
-                }
-                else
-                {
-                    _renderImages = true;
-                }
-
-                Invalidate();
+                InvalidateRender();
             }
         }
 
         public Color DarkSquare
         {
-            get { return _darkSquare; }
+            get => _darkSquare;
 
             set
             {
@@ -141,13 +138,26 @@ namespace BerldChess.View
 
         public ChessGame Game
         {
-            get { return _game; }
+            get => _game;
+
             set
             {
                 _movingIndex = new Point(-1, -1);
                 _selectedIndex = new Point(-1, -1);
 
                 _game = value;
+
+                var gridSize = _game.GetBoard().Length + 1;
+
+                if (_columnWidths == null || _columnWidths.Length != gridSize)
+                {
+                    _columnWidths = new int[gridSize];
+                }
+
+                if (_rowHeights == null || _rowHeights.Length != gridSize)
+                {
+                    _rowHeights = new int[gridSize];
+                }
             }
         }
 
@@ -167,168 +177,415 @@ namespace BerldChess.View
             }
 
             var g = e.Graphics;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
             Board = Game.GetBoard();
 
-            if (Width > Height)
+            if (_sizeChanged)
             {
-                _boardLocation = new Point(Round((Width - Height) / 2.0), 0);
-                _boardDimension = Height - 1;
-            }
-            else
-            {
-                _boardLocation = new Point(0, Round((Height - Width) / 2.0));
-                _boardDimension = Width - 1;
+                UpdateSquareAndBoardBounds();
+                _fieldSize = _boardDimension / (double)Board.Length;
+                RenderPieceImages();
+                UpdateGrid();
+                UpdatePieceOffsets();
             }
 
-            // Drawing Coordinates
-            if (DisplayCoordinates)
-            {
-                var borderBrush = new SolidBrush(_borderColor);
-                var borderThickness = Round(_boardDimension * 0.025);
-
-                g.FillRectangle(borderBrush, _boardLocation.X, _boardLocation.Y, _boardDimension + 1,
-                    _boardDimension + 1);
-                g.DrawRectangle(Pens.Black, _boardLocation.X - 1, _boardLocation.Y - 1, _boardDimension + 2,
-                    _boardDimension + 2);
-
-                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-
-                var coordinateFontSize = (int)(borderThickness * 0.5);
-
-                if (coordinateFontSize >= 1)
-                {
-                    var coordinateFont = new Font("Arial", coordinateFontSize, FontStyle.Bold);
-
-                    for (var i = 0; i < Board.Length; i++)
-                    {
-                        string rank;
-                        string file;
-
-                        if (IsFlipped)
-                        {
-                            rank = (i + 1).ToString();
-                            file = ((char)(Invert(i, 7) + 65)).ToString();
-                        }
-                        else
-                        {
-                            rank = (Invert(i, 7) + 1).ToString();
-                            file = ((char)(i + 65)).ToString();
-                        }
-
-                        g.DrawString(rank, coordinateFont, Brushes.White,
-                            _boardLocation.X + Round(borderThickness * 0.18),
-                            _boardLocation.Y + Round(borderThickness + _fieldSize / 2.2 + _fieldSize * i));
-
-                        g.DrawString(file, coordinateFont, Brushes.White,
-                            _boardLocation.X + Round(borderThickness + _fieldSize / 2.37 + _fieldSize * i),
-                            _boardLocation.Y + _boardDimension - Round(borderThickness * 0.85));
-                    }
-                }
-
-                _boardLocation.X += borderThickness;
-                _boardLocation.Y += borderThickness;
-
-                _boardDimension -= 2 * borderThickness;
-
-                g.DrawRectangle(Pens.Black, _boardLocation.X - 1, _boardLocation.Y - 1, _boardDimension + 2,
-                    _boardDimension + 2);
-            }
-
-            _fieldSize = _boardDimension / (double)Board.Length;
-
-            // Image rendering if required
-            if (_renderImages)
-            {
-                _scaledPieceImages = new Bitmap[12];
-
-                var defaultFont = false;
-
-                if (PieceFontFamily == "" || PieceFontFamily == "Default")
-                {
-                    PieceImageProvider.Inititalize(Resources.ChessPiecesSprite1, 0);
-                    defaultFont = true;
-                }
-                else if (PieceFontFamily == "Simple")
-                {
-                    PieceImageProvider.Inititalize(Resources.ChessPiecesSprite2, 1);
-                    defaultFont = true;
-                }
-                else if (PieceFontFamily == "Pixel")
-                {
-                    PieceImageProvider.Inititalize(Resources.ChessPiecesSprite3, 2);
-                    defaultFont = true;
-                }
-
-                if (defaultFont)
-                {
-                    for (var i = 0; i < _scaledPieceImages.Length; i++)
-                    {
-                        if (PieceSizeFactor > 1.5)
-                        {
-                            PieceSizeFactor = 1.5;
-                        }
-
-                        _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i],
-                            (int)(_fieldSize * PieceSizeFactor), (int)(_fieldSize * PieceSizeFactor));
-                    }
-                }
-                else
-                {
-                    _scaledPieceImages = GetPiecesFromFontFamily(_pieceFontFamily, _fieldSize);
-
-                    if (_scaledPieceImages == null)
-                    {
-                        return;
-                    }
-                }
-
-                if (Gradient)
-                {
-                    for (var i = 0; i < _scaledPieceImages.Length; i++)
-                    {
-                        _scaledPieceImages[i] = GradientBitmap(_scaledPieceImages[i], i > 5);
-                    }
-                }
-            }
-
-            float absX;
-            float absY;
-
-            var xLinePositions = new int[Board.Length + 1];
-            var yLinePositions = new int[Board.Length + 1];
-
-            for (int i = 0; i < Board.Length + 1; i++)
-            {
-                int iPosition = Round(_fieldSize * i);
-                xLinePositions[i] = iPosition + _boardLocation.X;
-                yLinePositions[i] = iPosition + _boardLocation.Y;
-            }
+            DrawCoordinates(g);
 
             g.SmoothingMode = SmoothingMode.Default;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
+            DrawSquares(g);
+            DrawSquareHighlights(g);
+
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            DrawIndicatorSquares(g);
+            DrawCheckEffect(g);
+            DrawGridBorders(g);
+            DrawArrows(g, false);
+            DrawPieces(g);
+            DrawLegalMoveHints(g);
+            DrawIndicatorArrows(g);
+            DrawArrows(g, true);
+            DrawMovingIndex(g);
+        }
+
+        private void DrawMovingIndex(Graphics g)
+        {
+            if (_movingIndex.X == -1 || _movingPoint.X == -1)
+            {
+                return;
+            }
+
+            var indexRelPosition = new Point((int)((_movingPoint.X - _boardLocation.X) / _fieldSize),
+                (int)((_movingPoint.Y - _boardLocation.Y) / _fieldSize));
+
+            if (_indicatorMoveDrawing && indexRelPosition != _movingIndex && indexRelPosition != _movingIndex)
+            {
+                var sourcePosX = (float)((_movingIndex.X + 0.5) * _fieldSize + _boardLocation.X);
+                var sourcePosY = (float)((_movingIndex.Y + 0.5) * _fieldSize + _boardLocation.Y);
+                var source = new PointF(sourcePosX, sourcePosY);
+
+                Color arrowColor;
+
+                if (ModifierKeys == Keys.Shift)
+                {
+                    arrowColor = _indicatorNegativeColor;
+                }
+                else if (ModifierKeys == Keys.Control)
+                {
+                    arrowColor = _indicatorNeutralColor;
+                }
+                else
+                {
+                    arrowColor = _indicatorPositiveColor;
+                }
+
+                var arrowPen = new Pen(Color.Black, _boardDimension * 0.025F)
+                {
+                    Brush = new SolidBrush(arrowColor),
+                    EndCap = LineCap.ArrowAnchor,
+                    StartCap = LineCap.Round
+                };
+
+                g.DrawLine(arrowPen, source, _movingPoint);
+            }
+            else if (Board[_movingIndex.Y][_movingIndex.X] != null && _pieceMoveTrigger)
+            {
+                var absX = _movingPoint.X - (float)(_fieldSize / 2.0);
+                var absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
+
+                absX += (float)((_fieldSize -
+                                  _scaledPieceImages[
+                                      GetPieceIndexFromFenChar(
+                                          Board[_movingIndex.Y][_movingIndex.X].GetFENLetter())].Width) / 2);
+                absY += (float)((_fieldSize -
+                                  _scaledPieceImages[
+                                      GetPieceIndexFromFenChar(
+                                          Board[_movingIndex.Y][_movingIndex.X].GetFENLetter())].Height) / 2);
+
+                g.DrawImageUnscaled(
+                    _scaledPieceImages[
+                        GetPieceIndexFromFenChar(Board[_movingIndex.Y][_movingIndex.X].GetFENLetter())],
+                    Round(absX),
+                    Round(absY));
+            }
+        }
+
+        private void DrawIndicatorArrows(Graphics g)
+        {
+            if (_indicatedMoves.Count <= 0)
+            {
+                return;
+            }
+
+            var drawInfo = new MoveArrowDrawInfo[_indicatedMoves.Count];
+
+            for (var i = 0; i < _indicatedMoves.Count; i++)
+            {
+                drawInfo[i] = new MoveArrowDrawInfo
+                {
+                    Arrow = _indicatedMoves[i],
+                    Positions = GetAbsPositionsFromMoveString(_indicatedMoves[i].Move)
+                };
+            }
+
+            drawInfo = drawInfo.OrderBy(c => c.Length).ToArray();
+
+            for (var i = drawInfo.Length - 1; i >= 0; i--)
+            {
+                var arrowThickness = (float)(drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension);
+
+                if (drawInfo[i].Length / _fieldSize > 1.45)
+                {
+                    arrowThickness -= 0.85F;
+                }
+
+                var arrowPen = new Pen(Color.Black, arrowThickness)
+                {
+                    Brush = new SolidBrush(drawInfo[i].Arrow.Color),
+                    EndCap = LineCap.ArrowAnchor,
+                    StartCap = drawInfo[i].Arrow.HasStartCircle ? LineCap.RoundAnchor : LineCap.Round
+                };
+
+                g.DrawLine(arrowPen, drawInfo[i].Positions[0], drawInfo[i].Positions[1]);
+            }
+        }
+
+        private void DrawLegalMoveHints(Graphics g)
+        {
+            if (!DisplayLegalMoves || _indicatorMoveDrawing)
+            {
+                return;
+            }
+
+            var possibleMovePieceIndex = new Point(-1, -1);
+
+            if (_movingIndex.X != -1)
+            {
+                possibleMovePieceIndex = _movingIndex;
+            }
+            else if (_selectedIndex.X != -1)
+            {
+                possibleMovePieceIndex = _selectedIndex;
+            }
+
+            if (possibleMovePieceIndex.X == -1 ||
+                Board[possibleMovePieceIndex.Y][possibleMovePieceIndex.X] == null)
+            {
+                return;
+            }
+
+            var startPosition = new BoardPosition((ChessFile)possibleMovePieceIndex.X,
+                Invert(Game.BoardHeight, possibleMovePieceIndex.Y));
+
+            var validMoves = Game.GetValidMoves(startPosition);
+
+            foreach (var validMove in validMoves)
+            {
+                if (!IsFlipped)
+                {
+                    g.FillEllipse(_legalMoveCircleBrush,
+                        Round((int)validMove.NewPosition.File * _fieldSize + _fieldSize * 0.4) +
+                        _boardLocation.X,
+                        Round(Invert(Game.BoardHeight, validMove.NewPosition.Rank) * _fieldSize +
+                              _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2),
+                        Round(_fieldSize * 0.2));
+                }
+                else
+                {
+                    g.FillEllipse(_legalMoveCircleBrush,
+                        Round(Invert(Game.BoardHeight - 1, (int)validMove.NewPosition.File) * _fieldSize +
+                              _fieldSize * 0.4) + _boardLocation.X,
+                        Round((validMove.NewPosition.Rank - 1) * _fieldSize + _fieldSize * 0.4) +
+                        _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
+                }
+            }
+        }
+
+        private void DrawPieces(Graphics g)
+        {
+            for (var y = 0; y < Board.Length; y++)
+            {
+                for (var x = 0; x < Board.Length; x++)
+                {
+                    if (Board[y][x] == null || y == _movingIndex.Y && x == _movingIndex.X && !_indicatorMoveDrawing &&
+                        _pieceMoveTrigger)
+                    {
+                        continue;
+                    }
+
+                    float absX;
+                    float absY;
+
+                    if (!IsFlipped)
+                    {
+                        absX = (float)(x * _fieldSize) + _boardLocation.X;
+                        absY = (float)(y * _fieldSize) + _boardLocation.Y;
+                    }
+                    else
+                    {
+                        absX = (float)(Invert(Game.BoardHeight - 1, x) * _fieldSize) + _boardLocation.X;
+                        absY = (float)(Invert(Game.BoardHeight - 1, y) * _fieldSize) + _boardLocation.Y;
+                    }
+
+                    var pieceWidth = _scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())].Width;
+
+                    absX += (float)((_fieldSize - pieceWidth) / 2.0);
+                    absY += _heightOffset + _maxHeight -
+                            _scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())].Height;
+
+                    g.DrawImageUnscaled(_scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())],
+                        Round(absX), Round(absY));
+
+                    _sizeChanged = false;
+                }
+            }
+        }
+
+        private void UpdatePieceOffsets()
+        {
+            _maxHeight = 0;
+
+            foreach (var image in _scaledPieceImages)
+            {
+                if (image.Height > _maxHeight)
+                {
+                    _maxHeight = image.Height;
+                }
+            }
+
+            _heightOffset = (int)Math.Ceiling((_fieldSize - _maxHeight) / 2.0);
+        }
+
+        private void DrawGridBorders(Graphics g)
+        {
+            if (!DisplayGridBorders)
+            {
+                return;
+            }
+
+            for (var i = 0; i < Board.Length + 1; i++)
+            {
+                g.DrawLine(Pens.Black, _boardLocation.X, _rowHeights[i], _boardDimension + _boardLocation.X,
+                    _rowHeights[i]);
+                g.DrawLine(Pens.Black, _columnWidths[i], _boardLocation.Y, _columnWidths[i],
+                    _boardDimension + _boardLocation.Y);
+            }
+        }
+
+        private void DrawCheckEffect(Graphics g)
+        {
+            if (!Game.IsInCheck(Game.WhoseTurn))
+            {
+                return;
+            }
+
+            var king = Game.WhoseTurn == ChessPlayer.White ? 'K' : 'k';
+            var kingFound = false;
+
+            for (var y = 0; y < Board.Length; y++)
+            {
+                for (var x = 0; x < Board.Length; x++)
+                {
+                    if (Board[y][x] == null)
+                    {
+                        continue;
+                    }
+
+                    if (Board[y][x].GetFENLetter() == king)
+                    {
+                        var widthCorrection = 0;
+                        var heightCorrection = 0;
+
+                        if (x == Game.BoardWidth - 1 && !IsFlipped || x == 0 && IsFlipped)
+                        {
+                            widthCorrection = 1;
+                        }
+
+                        if (y == Game.BoardWidth - 1 && !IsFlipped || y == 0 && IsFlipped)
+                        {
+                            heightCorrection = 1;
+                        }
+
+                        if (IsFlipped)
+                        {
+                            x = Invert(Game.BoardHeight - 1, x);
+                            y = Invert(Game.BoardHeight - 1, y);
+                        }
+
+                        float width = _columnWidths[x + 1] - _columnWidths[x] + widthCorrection;
+                        float height = _columnWidths[y + 1] - _columnWidths[y] + heightCorrection;
+
+                        var path = new GraphicsPath();
+                        path.AddEllipse(_columnWidths[x], _rowHeights[y], width, height);
+
+                        var strongRed = Color.FromArgb(255, 255, 40, 50);
+                        var lightRed = Color.FromArgb(0, 255, 80, 80);
+
+                        var checkedWarn = new PathGradientBrush(path)
+                        {
+                            CenterColor = strongRed,
+                            FocusScales = new PointF(0.5F, 0.5F),
+                            SurroundColors = new[] { lightRed }
+                        };
+
+                        g.FillEllipse(checkedWarn, _columnWidths[x], _rowHeights[y], width, height);
+                        kingFound = true;
+                        break;
+                    }
+                }
+
+                if (kingFound)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void DrawSquareHighlights(Graphics g)
+        {
+            if (NoHighlight)
+            {
+                return;
+            }
+
+            for (var y = 0; y < Game.BoardHeight; y++)
+            {
+                for (var x = 0; x < Game.BoardHeight; x++)
+                {
+                    foreach (var square in HighlightedSquares)
+                    {
+                        if ((square.X != x || square.Y != y || IsFlipped) &&
+                            (square.X != Invert(Game.BoardHeight - 1, x) ||
+                             square.Y != Invert(Game.BoardHeight - 1, y) || !IsFlipped))
+                        {
+                            continue;
+                        }
+
+                        var widthCorrection = 0;
+                        var heightCorrection = 0;
+
+                        if (square.X == Game.BoardWidth - 1 && !IsFlipped ||
+                            square.X == 0 && IsFlipped)
+                        {
+                            widthCorrection = 1;
+                        }
+
+                        if (square.Y == Game.BoardWidth - 1 && !IsFlipped ||
+                        square.Y == 0 && IsFlipped)
+                        {
+                            heightCorrection = 1;
+                        }
+
+                        if (BorderHighlight)
+                        {
+                            var borderThickness = Round(_fieldSize / 18.0);
+                            var offSet = borderThickness / 2;
+                            borderThickness = offSet * 2;
+
+                            var borderPen = new Pen(Color.Red, borderThickness);
+
+                            g.DrawRectangle(borderPen, _columnWidths[x] + offSet, _rowHeights[y] + offSet,
+                                _columnWidths[x + 1] - _columnWidths[x] + widthCorrection - borderThickness,
+                                _columnWidths[y + 1] - _columnWidths[y] + heightCorrection - borderThickness);
+                        }
+                        else
+                        {
+                            var highLight = new SolidBrush(Color.FromArgb(85, 255, 255, 0));
+
+                            g.FillRectangle(highLight, _columnWidths[x], _rowHeights[y],
+                                _columnWidths[x + 1] - _columnWidths[x] + widthCorrection,
+                                _columnWidths[y + 1] - _columnWidths[y] + heightCorrection);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawSquares(Graphics g)
+        {
             if (UseBoardImages && DarkSquareImage != null && LightSquareImage != null)
             {
-                if (_renderImages)
+                if (_sizeChanged)
                 {
                     _resizedDarkSquareImages.Clear();
                     _resizedLightSquareImages.Clear();
                 }
 
-                // Drawing image squares
-                for (int y = 0; y < Game.BoardHeight; y++)
+                for (var y = 0; y < Game.BoardHeight; y++)
                 {
-                    for (int x = 0; x < Game.BoardHeight; x++)
+                    for (var x = 0; x < Game.BoardHeight; x++)
                     {
-                        int index = y * Game.BoardHeight + x + y;
+                        var index = y * Game.BoardHeight + x + y;
 
-                        int width = xLinePositions[x + 1] - xLinePositions[x] + 1;
-                        int height = xLinePositions[y + 1] - xLinePositions[y] + 1;
+                        var width = _columnWidths[x + 1] - _columnWidths[x] + 1;
+                        var height = _columnWidths[y + 1] - _columnWidths[y] + 1;
                         Image drawnImage = null;
 
                         if (index % 2 == 0)
                         {
-                            foreach (Image image in _resizedLightSquareImages)
+                            foreach (var image in _resizedLightSquareImages)
                             {
                                 if (image.Width == width && image.Height == height)
                                 {
@@ -345,7 +602,7 @@ namespace BerldChess.View
                         }
                         else
                         {
-                            foreach (Image image in _resizedDarkSquareImages)
+                            foreach (var image in _resizedDarkSquareImages)
                             {
                                 if (image.Width == width && image.Height == height)
                                 {
@@ -361,7 +618,9 @@ namespace BerldChess.View
                             }
                         }
 
-                        g.DrawImage(drawnImage, xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
+                        g.DrawImageUnscaled(drawnImage, _columnWidths[x], _rowHeights[y],
+                            _columnWidths[x + 1] - _columnWidths[x] + 1,
+                            _columnWidths[y + 1] - _columnWidths[y] + 1);
                     }
                 }
             }
@@ -369,477 +628,278 @@ namespace BerldChess.View
             {
                 Image drawnImage = null;
 
-                if (_renderImages)
+                if (_sizeChanged)
                 {
                     _resizedDarkSquareImages.Clear();
                     _resizedLightSquareImages.Clear();
                 }
 
-                foreach (Image image in _resizedDarkSquareImages)
+                foreach (var image in _resizedDarkSquareImages)
                 {
-                    if (image.Width == _boardDimension && image.Height == _boardDimension)
+                    if (image.Width != _boardDimension + 1 || image.Height != _boardDimension + 1)
                     {
-                        drawnImage = image;
-                        break;
+                        continue;
                     }
+
+                    drawnImage = image;
+                    break;
                 }
 
                 if (drawnImage == null)
                 {
-                    drawnImage = ResizeImage(DarkSquareImage, _boardDimension, _boardDimension);
+                    drawnImage = ResizeImage(DarkSquareImage, _boardDimension + 1, _boardDimension + 1);
                     _resizedDarkSquareImages.Add(drawnImage);
                 }
 
-                g.DrawImage(drawnImage, _boardLocation.X, _boardLocation.Y, _boardDimension + 1, _boardDimension + 1);
+                g.DrawImageUnscaled(drawnImage, _boardLocation.X, _boardLocation.Y);
             }
             else
             {
-                Color evenSquare;
-                Color oddSquare;
+                var evenSquare = LightSquare;
+                var oddSquare = DarkSquare;
 
-                evenSquare = LightSquare;
-                oddSquare = DarkSquare;
-
-                // Drawing squares
-                for (int y = 0; y < Game.BoardHeight; y++)
-                {
-                    for (int x = 0; x < Game.BoardHeight; x++)
-                    {
-                        int index = y * Game.BoardHeight + x + y;
-
-                        if (index % 2 == 0)
-                        {
-                            g.FillRectangle(new SolidBrush(evenSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
-                        }
-                        else
-                        {
-                            g.FillRectangle(new SolidBrush(oddSquare), xLinePositions[x], yLinePositions[y], xLinePositions[x + 1] - xLinePositions[x] + 1, xLinePositions[y + 1] - xLinePositions[y] + 1);
-                        }
-                    }
-                }
-            }
-
-            if (!NoHighlight)
-            {
-                // Last move highlight
                 for (var y = 0; y < Game.BoardHeight; y++)
                 {
                     for (var x = 0; x < Game.BoardHeight; x++)
                     {
-                        foreach (var square in HighlightedSquares)
-                        {
-                            if ((square.X != x || square.Y != y || IsFlipped) &&
-                                (square.X != Invert(Game.BoardHeight - 1, x) ||
-                                 square.Y != Invert(Game.BoardHeight - 1, y) || !IsFlipped))
-                            {
-                                continue;
-                            }
+                        var index = y * Game.BoardHeight + x + y;
 
-                            var widthCorrection = 0;
-                            var heightCorrection = 0;
-
-                            if (square.X == Game.BoardWidth - 1 && !IsFlipped ||
-                                square.X == 0 && IsFlipped)
-                            {
-                                widthCorrection = 1;
-                            }
-
-                            if (square.Y == Game.BoardWidth - 1 && !IsFlipped ||
-                                square.Y == 0 && IsFlipped)
-                            {
-                                heightCorrection = 1;
-                            }
-
-                            if (BorderHighlight)
-                            {
-                                var borderThickness = Round(_fieldSize / 18.0);
-                                var offSet = borderThickness / 2;
-                                borderThickness = offSet * 2;
-
-                                var borderPen = new Pen(Color.Red, borderThickness);
-
-                                g.DrawRectangle(borderPen, xLinePositions[x] + offSet, yLinePositions[y] + offSet,
-                                    xLinePositions[x + 1] - xLinePositions[x] + widthCorrection - borderThickness,
-                                    xLinePositions[y + 1] - xLinePositions[y] + heightCorrection - borderThickness);
-                            }
-                            else
-                            {
-                                var highLight = new SolidBrush(Color.FromArgb(85, 255, 255, 0));
-
-                                g.FillRectangle(highLight, xLinePositions[x], yLinePositions[y],
-                                    xLinePositions[x + 1] - xLinePositions[x] + widthCorrection,
-                                    xLinePositions[y + 1] - xLinePositions[y] + heightCorrection);
-                            }
-                        }
+                        g.FillRectangle(index % 2 == 0 ? new SolidBrush(evenSquare) : new SolidBrush(oddSquare),
+                            _columnWidths[x], _rowHeights[y],
+                            _columnWidths[x + 1] - _columnWidths[x] + 1,
+                            _columnWidths[y + 1] - _columnWidths[y] + 1);
                     }
                 }
             }
+        }
 
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            DrawIndicatorSquares(g, xLinePositions, yLinePositions);
-
-            // Draw king check effect
-            if (Game.IsInCheck(Game.WhoseTurn))
+        private void UpdateGrid()
+        {
+            for (var i = 0; i < Board.Length + 1; i++)
             {
-                var king = Game.WhoseTurn == ChessPlayer.White ? 'K' : 'k';
-                var kingFound = false;
-
-                for (var y = 0; y < Board.Length; y++)
-                {
-                    for (var x = 0; x < Board.Length; x++)
-                    {
-                        if (Board[y][x] == null)
-                        {
-                            continue;
-                        }
-
-                        if (Board[y][x].GetFENLetter() == king)
-                        {
-                            var widthCorrection = 0;
-                            var heightCorrection = 0;
-
-                            if (x == Game.BoardWidth - 1 && !IsFlipped || x == 0 && IsFlipped)
-                            {
-                                widthCorrection = 1;
-                            }
-
-                            if (y == Game.BoardWidth - 1 && !IsFlipped || y == 0 && IsFlipped)
-                            {
-                                heightCorrection = 1;
-                            }
-
-                            if (IsFlipped)
-                            {
-                                x = Invert(Game.BoardHeight - 1, x);
-                                y = Invert(Game.BoardHeight - 1, y);
-                            }
-
-                            float width = xLinePositions[x + 1] - xLinePositions[x] + widthCorrection;
-                            float height = xLinePositions[y + 1] - xLinePositions[y] + heightCorrection;
-
-                            var path = new GraphicsPath();
-                            path.AddEllipse(xLinePositions[x], yLinePositions[y], width, height);
-
-                            var strongRed = Color.FromArgb(255, 255, 40, 50);
-                            var lightRed = Color.FromArgb(0, 255, 80, 80);
-
-                            var checkedWarn = new PathGradientBrush(path);
-                            checkedWarn.CenterColor = strongRed;
-                            checkedWarn.FocusScales = new PointF(0.5F, 0.5F);
-                            checkedWarn.SurroundColors = new[] { lightRed };
-
-                            g.FillEllipse(checkedWarn, xLinePositions[x], yLinePositions[y], width, height);
-                            kingFound = true;
-                            break;
-                        }
-                    }
-
-                    if (kingFound)
-                    {
-                        break;
-                    }
-                }
+                var iPosition = Round(_fieldSize * i);
+                _columnWidths[i] = iPosition + _boardLocation.X;
+                _rowHeights[i] = iPosition + _boardLocation.Y;
             }
+        }
 
-            // Draw grid borders
-            if (DisplayGridBorders)
+        private void RenderPieceImages()
+        {
+            _scaledPieceImages = new Bitmap[12];
+            var defaultFont = false;
+
+            switch (PieceFontFamily)
             {
-                for (var i = 0; i < Board.Length + 1; i++)
-                {
-                    g.DrawLine(Pens.Black, _boardLocation.X, yLinePositions[i], _boardDimension + _boardLocation.X,
-                        yLinePositions[i]);
-                    g.DrawLine(Pens.Black, xLinePositions[i], _boardLocation.Y, xLinePositions[i],
-                        _boardDimension + _boardLocation.Y);
-                }
+                case "":
+                case "Default":
+                    PieceImageProvider.Initialize(Resources.ChessPiecesSprite1, 0);
+                    defaultFont = true;
+                    break;
+                case "Simple":
+                    PieceImageProvider.Initialize(Resources.ChessPiecesSprite2, 1);
+                    defaultFont = true;
+                    break;
+                case "Pixel":
+                    PieceImageProvider.Initialize(Resources.ChessPiecesSprite3, 2);
+                    defaultFont = true;
+                    break;
             }
 
-            var maxHeight = 0;
-            var heightOffset = 0;
+            if (defaultFont)
+            {
+                for (var i = 0; i < _scaledPieceImages.Length; i++)
+                {
+                    if (PieceSizeFactor > 1.5)
+                    {
+                        PieceSizeFactor = 1.5;
+                    }
+
+                    _scaledPieceImages[i] = ResizeImage(PieceImageProvider.PieceImages[i],
+                        (int)(_fieldSize * PieceSizeFactor), (int)(_fieldSize * PieceSizeFactor));
+                }
+            }
+            else
+            {
+                _scaledPieceImages = GetPiecesFromFontFamily(_pieceFontFamily, _fieldSize);
+            }
+
+            if (!Gradient)
+            {
+                return;
+            }
 
             for (var i = 0; i < _scaledPieceImages.Length; i++)
             {
-                if (_scaledPieceImages[i].Height > maxHeight)
-                {
-                    maxHeight = _scaledPieceImages[i].Height;
-                }
-            }
-
-            heightOffset = (int)Math.Ceiling((_fieldSize - maxHeight) / 2.0);
-
-            // Draw input arrows that are above pieces
-            DrawArrows(g, false);
-
-            // Draw pieces
-            for (var y = 0; y < Board.Length; y++)
-            {
-                for (var x = 0; x < Board.Length; x++)
-                {
-                    if (Board[y][x] == null || y == _movingIndex.Y && x == _movingIndex.X && !_indicatorMoveDrawing &&
-                        _moveTrigger)
-                    {
-                        continue;
-                    }
-
-                    if (Board[y][x].Owner == ChessPlayer.White)
-                    {
-                        new SolidBrush(Color.White);
-                    }
-                    else
-                    {
-                        new SolidBrush(Color.Black);
-                    }
-
-                    if (!IsFlipped)
-                    {
-                        absX = (float)(x * _fieldSize) + _boardLocation.X;
-                        absY = (float)(y * _fieldSize) + _boardLocation.Y;
-                    }
-                    else
-                    {
-                        absX = (float)(Invert(Game.BoardHeight - 1, x) * _fieldSize) + _boardLocation.X;
-                        absY = (float)(Invert(Game.BoardHeight - 1, y) * _fieldSize) + _boardLocation.Y;
-                    }
-
-                    var pieceWidth = _scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())].Width;
-
-                    absX += (float)((_fieldSize - pieceWidth) / 2.0);
-                    absY += heightOffset + maxHeight -
-                            _scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())].Height;
-
-                    g.DrawImage(_scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())], absX, absY);
-
-                    _renderImages = false;
-                }
-            }
-
-            // Draw legal moves from moved index
-            if (DisplayLegalMoves && !_indicatorMoveDrawing)
-            {
-                var _possibleMovePieceIndex = new Point(-1, -1);
-
-                if (_movingIndex.X != -1)
-                {
-                    _possibleMovePieceIndex = _movingIndex;
-                }
-                else if (_selectedIndex.X != -1)
-                {
-                    _possibleMovePieceIndex = _selectedIndex;
-                }
-
-                if (_possibleMovePieceIndex.X != -1 &&
-                    Board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X] != null)
-                {
-                    if (Board[_possibleMovePieceIndex.Y][_possibleMovePieceIndex.X].Owner == ChessPlayer.White)
-                    {
-                        new SolidBrush(Color.White);
-                    }
-                    else
-                    {
-                        new SolidBrush(Color.Black);
-                    }
-
-                    var startPosition = new BoardPosition((ChessFile)_possibleMovePieceIndex.X,
-                        Invert(Game.BoardHeight, _possibleMovePieceIndex.Y));
-
-                    var validMoves = Game.GetValidMoves(startPosition);
-
-                    for (var i = 0; i < validMoves.Count; i++)
-                    {
-                        var current = validMoves[i];
-
-                        if (!IsFlipped)
-                        {
-                            g.FillEllipse(_legalMoveCircleBrush,
-                                Round((int)current.NewPosition.File * _fieldSize + _fieldSize * 0.4) +
-                                _boardLocation.X,
-                                Round(Invert(Game.BoardHeight, current.NewPosition.Rank) * _fieldSize +
-                                      _fieldSize * 0.4) + _boardLocation.Y, Round(_fieldSize * 0.2),
-                                Round(_fieldSize * 0.2));
-                        }
-                        else
-                        {
-                            g.FillEllipse(_legalMoveCircleBrush,
-                                Round(Invert(Game.BoardHeight - 1, (int)current.NewPosition.File) * _fieldSize +
-                                      _fieldSize * 0.4) + _boardLocation.X,
-                                Round((current.NewPosition.Rank - 1) * _fieldSize + _fieldSize * 0.4) +
-                                _boardLocation.Y, Round(_fieldSize * 0.2), Round(_fieldSize * 0.2));
-                        }
-                    }
-                }
-            }
-
-            // Draw indicated move arrows
-            if (_indicatedMoves.Count > 0)
-            {
-                var drawInfo = new MoveArrowDrawInfo[_indicatedMoves.Count];
-
-                for (var i = 0; i < _indicatedMoves.Count; i++)
-                {
-                    drawInfo[i] = new MoveArrowDrawInfo();
-                    drawInfo[i].Arrow = _indicatedMoves[i];
-                    drawInfo[i].Positions = GetAbsPositionsFromMoveString(_indicatedMoves[i].Move);
-                }
-
-                drawInfo = drawInfo.OrderBy(c => c.Length).ToArray();
-
-                for (var i = drawInfo.Length - 1; i >= 0; i--)
-                {
-                    var arrowThickness = (float)(drawInfo[i].Arrow.ThicknessPercent / 100.0 * _boardDimension);
-
-                    if (drawInfo[i].Length / _fieldSize > 1.45)
-                    {
-                        arrowThickness -= 0.85F;
-                    }
-
-                    var arrowPen = new Pen(Color.Black, arrowThickness);
-                    arrowPen.Brush = new SolidBrush(drawInfo[i].Arrow.Color);
-                    arrowPen.EndCap = LineCap.ArrowAnchor;
-
-                    if (drawInfo[i].Arrow.HasStartCircle)
-                    {
-                        arrowPen.StartCap = LineCap.RoundAnchor;
-                    }
-                    else
-                    {
-                        arrowPen.StartCap = LineCap.Round;
-                    }
-
-                    g.DrawLine(arrowPen, drawInfo[i].Positions[0], drawInfo[i].Positions[1]);
-                }
-            }
-
-            // Draw input arrows that are above pieces
-            DrawArrows(g, true);
-
-            // Draw moving index
-            if (_movingIndex.X != -1 && _movingPoint.X != -1)
-            {
-                var indexRelPosition = new Point((int)((_movingPoint.X - _boardLocation.X) / _fieldSize),
-                    (int)((_movingPoint.Y - _boardLocation.Y) / _fieldSize));
-
-                if (_indicatorMoveDrawing && indexRelPosition != _movingIndex && indexRelPosition != _movingIndex)
-                {
-                    var sourcePosX = (float)((_movingIndex.X + 0.5) * _fieldSize + _boardLocation.X);
-                    var sourcePosY = (float)((_movingIndex.Y + 0.5) * _fieldSize + _boardLocation.Y);
-                    var source = new PointF(sourcePosX, sourcePosY);
-
-                    Color arrowColor;
-
-                    if (ModifierKeys == Keys.Shift)
-                    {
-                        arrowColor = _indicatorNegativeColor;
-                    }
-                    else if(ModifierKeys == Keys.Control)
-                    {
-                        arrowColor = _indicatorNeutralColor;
-                    }
-                    else
-                    {
-                        arrowColor = _indicatorPositiveColor;
-                    }
-
-                    var arrowPen = new Pen(Color.Black, _boardDimension * 0.025F);
-                    arrowPen.Brush = new SolidBrush(arrowColor);
-                    arrowPen.EndCap = LineCap.ArrowAnchor;
-                    arrowPen.StartCap = LineCap.Round;
-
-                    g.DrawLine(arrowPen, source, _movingPoint);
-                }
-                else if (Board[_movingIndex.Y][_movingIndex.X] != null && _moveTrigger)
-                {
-                    absX = _movingPoint.X - (float)(_fieldSize / 2.0);
-                    absY = _movingPoint.Y - (float)(_fieldSize / 2.0);
-
-                    absX += (float)((_fieldSize -
-                                      _scaledPieceImages[
-                                          GetPieceIndexFromFenChar(
-                                              Board[_movingIndex.Y][_movingIndex.X].GetFENLetter())].Width) / 2);
-                    absY += (float)((_fieldSize -
-                                      _scaledPieceImages[
-                                          GetPieceIndexFromFenChar(
-                                              Board[_movingIndex.Y][_movingIndex.X].GetFENLetter())].Height) / 2);
-
-                    g.DrawImage(
-                        _scaledPieceImages[
-                            GetPieceIndexFromFenChar(Board[_movingIndex.Y][_movingIndex.X].GetFENLetter())], absX,
-                        absY);
-                }
+                _scaledPieceImages[i] = GradientBitmap(_scaledPieceImages[i], i > 5);
             }
         }
 
-        private void DrawIndicatorSquares(Graphics g, int[] xLines, int[] yLines)
+        private void DrawCoordinates(Graphics g)
         {
-            DrawSquares(_indicatedPositiveSquares, xLines, yLines, _indicatorPositiveColor, g);
-            DrawSquares(_indicatedNegativeSquares, xLines, yLines, _indicatorNegativeColor, g);
-            DrawSquares(_indicatedNeutralSquares, xLines, yLines, _indicatorNeutralColor, g);
+            if (!DisplayCoordinates)
+            {
+                return;
+            }
+
+            var borderBrush = new SolidBrush(_borderColor);
+
+            g.FillRectangle(borderBrush, _squareLocation.X, _squareLocation.Y, _squareDimension + 1,
+                _squareDimension + 1);
+            g.DrawRectangle(Pens.Black, _squareLocation.X - 1, _squareLocation.Y - 1, _squareDimension + 2,
+                _squareDimension + 2);
+
+            var coordinateFontSize = (int)(_coordinateWidth * 0.5);
+
+            if (coordinateFontSize >= 1)
+            {
+                var coordinateFont = new Font("Arial", coordinateFontSize, FontStyle.Bold);
+
+                for (var i = 0; i < Board.Length; i++)
+                {
+                    string rank;
+                    string file;
+
+                    if (IsFlipped)
+                    {
+                        rank = (i + 1).ToString();
+                        file = ((char)(Invert(i, 7) + 65)).ToString();
+                    }
+                    else
+                    {
+                        rank = (Invert(i, 7) + 1).ToString();
+                        file = ((char)(i + 65)).ToString();
+                    }
+
+                    g.DrawString(rank, coordinateFont, Brushes.White,
+                        _squareLocation.X + Round(_coordinateWidth * 0.18),
+                        _squareLocation.Y + Round(_coordinateWidth + _fieldSize / 2.2 + _fieldSize * i));
+
+                    g.DrawString(file, coordinateFont, Brushes.White,
+                        _squareLocation.X + Round(_coordinateWidth + _fieldSize / 2.37 + _fieldSize * i),
+                        _squareLocation.Y + _squareDimension - Round(_coordinateWidth * 0.85));
+                }
+            }
+
+            g.DrawRectangle(Pens.Black, _boardLocation.X - 1, _boardLocation.Y - 1, _boardDimension + 2,
+                _boardDimension + 2);
         }
 
-        private void DrawSquares(List<int> indicatedPositiveSquares, int[] xLines, int[] yLines, Color color, Graphics g)
+        private void UpdateSquareAndBoardBounds()
         {
-            // Draw indicated squares
-            var indicatedGreenBrush = new SolidBrush(Color.FromArgb(100, color));
+            var squareBounds = GetSquareBounds();
+            _squareLocation = new Point(squareBounds[0], squareBounds[1]);
+            _squareDimension = squareBounds[2];
 
-            for (var i = 0; i < indicatedPositiveSquares.Count; i++)
+            if (DisplayCoordinates)
             {
-                var index = indicatedPositiveSquares[i];
-                var brush = indicatedGreenBrush;
+                _coordinateWidth = Round(_squareDimension * 0.025);
 
-                var x = index % Game.BoardHeight;
-                var y = index / Game.BoardHeight;
+                _boardLocation = new Point
+                {
+                    X = _squareLocation.X + _coordinateWidth,
+                    Y = _squareLocation.Y + _coordinateWidth
+                };
 
-                g.FillEllipse(brush, xLines[x] - 1, yLines[y] - 1,
-                    xLines[x + 1] - xLines[x] + 1, xLines[y + 1] - xLines[y] + 1);
+                _boardDimension = _squareDimension - 2 * _coordinateWidth;
             }
+            else
+            {
+                _boardLocation = _squareLocation;
+                _boardDimension = _squareDimension;
+            }
+        }
+
+        /// <summary>
+        ///     Gets square within playing area
+        /// </summary>
+        /// <returns>[0] x, [1] y, [2] dimension size</returns>
+        private int[] GetSquareBounds()
+        {
+            var bounds = new int[3];
+
+            if (Width > Height)
+            {
+                bounds[0] = Round((Width - Height) / 2.0);
+                bounds[1] = 0;
+                bounds[2] = Height - 1;
+            }
+            else
+            {
+                bounds[0] = 0;
+                bounds[1] = Round((Height - Width) / 2.0);
+                bounds[2] = Width - 1;
+            }
+
+            return bounds;
+        }
+
+        private void DrawIndicatorSquares(Graphics graphics)
+        {
+            void DrawIndicatorSquares(IEnumerable<int> indicatedPositiveSquares, Color color, Graphics g)
+            {
+                var indicatedGreenBrush = new SolidBrush(Color.FromArgb(100, color));
+
+                foreach (var index in indicatedPositiveSquares)
+                {
+                    var brush = indicatedGreenBrush;
+
+                    var x = index % Game.BoardHeight;
+                    var y = index / Game.BoardHeight;
+
+                    g.FillEllipse(brush, _columnWidths[x] - 1, _rowHeights[y] - 1,
+                        _columnWidths[x + 1] - _columnWidths[x] + 1, _columnWidths[y + 1] - _columnWidths[y] + 1);
+                }
+            }
+
+            DrawIndicatorSquares(_indicatedPositiveSquares, _indicatorPositiveColor, graphics);
+            DrawIndicatorSquares(_indicatedNegativeSquares, _indicatorNegativeColor, graphics);
+            DrawIndicatorSquares(_indicatedNeutralSquares, _indicatorNeutralColor, graphics);
         }
 
         private void DrawArrows(Graphics g, bool areAbovePieces)
         {
-            if (Arrows.Count > 0)
+            if (Arrows.Count <= 0)
             {
-                var drawInfos = new List<MoveArrowDrawInfo>();
+                return;
+            }
 
-                foreach (var arrow in Arrows)
+            var drawInfos = new List<MoveArrowDrawInfo>();
+
+            foreach (var arrow in Arrows)
+            {
+                if (arrow.IsAbovePieces != areAbovePieces)
                 {
-                    if (arrow.IsAbovePieces != areAbovePieces)
-                    {
-                        continue;
-                    }
-
-                    var arrowInfo = new MoveArrowDrawInfo
-                    {
-                        Arrow = arrow,
-                        Positions = GetAbsPositionsFromMoveString(arrow.Move)
-                    };
-
-                    drawInfos.Add(arrowInfo);
+                    continue;
                 }
 
-                drawInfos = drawInfos.OrderBy(c => c.Length).ToList();
-
-                for (var i = drawInfos.Count - 1; i >= 0; i--)
+                var arrowInfo = new MoveArrowDrawInfo
                 {
-                    var arrowThickness = (float)(drawInfos[i].Arrow.ThicknessPercent / 100.0 * _boardDimension);
+                    Arrow = arrow,
+                    Positions = GetAbsPositionsFromMoveString(arrow.Move)
+                };
 
-                    if (drawInfos[i].Length / _fieldSize > 1.45)
-                    {
-                        arrowThickness -= 0.85F;
-                    }
+                drawInfos.Add(arrowInfo);
+            }
 
-                    var arrowPen = new Pen(Color.Black, arrowThickness);
-                    arrowPen.Brush = new SolidBrush(drawInfos[i].Arrow.Color);
-                    arrowPen.EndCap = LineCap.ArrowAnchor;
+            drawInfos = drawInfos.OrderBy(c => c.Length).ToList();
 
-                    if (drawInfos[i].Arrow.HasStartCircle)
-                    {
-                        arrowPen.StartCap = LineCap.RoundAnchor;
-                    }
-                    else
-                    {
-                        arrowPen.StartCap = LineCap.Round;
-                    }
+            for (var i = drawInfos.Count - 1; i >= 0; i--)
+            {
+                var arrowThickness = (float)(drawInfos[i].Arrow.ThicknessPercent / 100.0 * _boardDimension);
 
-                    g.DrawLine(arrowPen, drawInfos[i].Positions[0], drawInfos[i].Positions[1]);
+                if (drawInfos[i].Length / _fieldSize > 1.45)
+                {
+                    arrowThickness -= 0.85F;
                 }
+
+                var arrowPen = new Pen(Color.Black, arrowThickness)
+                {
+                    Brush = new SolidBrush(drawInfos[i].Arrow.Color),
+                    EndCap = LineCap.ArrowAnchor,
+                    StartCap = drawInfos[i].Arrow.HasStartCircle ? LineCap.RoundAnchor : LineCap.Round
+                };
+
+                g.DrawLine(arrowPen, drawInfos[i].Positions[0], drawInfos[i].Positions[1]);
             }
         }
 
@@ -884,9 +944,7 @@ namespace BerldChess.View
             {
                 _indicatorMoveDrawing = true;
 
-                Point movingIndex;
-
-                movingIndex = new Point(relativeBoardX, relativeBoardY);
+                var movingIndex = new Point(relativeBoardX, relativeBoardY);
 
                 _movingPoint = new Point(e.X, e.Y);
                 _movingIndex = movingIndex;
@@ -968,7 +1026,8 @@ namespace BerldChess.View
                     }
                 }
 
-                _moveTrigger = false;
+                _pieceMoveTrigger = false;
+                _frameWatch.Reset();
             }
             else if (e.Button == MouseButtons.Right && _indicatorMoveDrawing)
             {
@@ -1060,20 +1119,35 @@ namespace BerldChess.View
         {
             base.OnMouseMove(e);
 
-            if (_movingIndex.X != -1)
+            if (_movingIndex.X == -1)
             {
-                _moveTrigger = !_indicatorMoveDrawing;
-                _movingPoint = new Point(e.X, e.Y);
-                Invalidate();
+                return;
             }
+
+            _pieceMoveTrigger = !_indicatorMoveDrawing;
+            _movingPoint = new Point(e.X, e.Y);
+
+            Invalidate();
+
+            //if (_frameWatch.IsRunning)
+            //{
+            //     Limit refresh rate to 1000/7 which roughly equals 143 FPS
+            //    if (_frameWatch.ElapsedMilliseconds >= 7)
+            //    {
+            //        Invalidate();
+            //        _frameWatch.Restart();
+            //    }
+            //}
+            //else
+            //{
+            //    _frameWatch.Start();
+            //}
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
-
-            _renderImages = true;
-            Invalidate();
+            InvalidateRender();
         }
 
         #endregion
@@ -1090,17 +1164,17 @@ namespace BerldChess.View
 
         public void InvalidateRender()
         {
-            _renderImages = true;
+            _sizeChanged = true;
             Invalidate();
         }
 
-        private void FloodFill(Bitmap image, int x, int y)
+        private static void FloodFill(Bitmap image, int x, int y)
         {
             var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite,
                 PixelFormat.Format32bppArgb);
             var check = new LinkedList<Point>();
 
-            var recordLength = 4;
+            const int recordLength = 4;
             var bits = new int[data.Stride / recordLength * data.Height];
 
             Marshal.Copy(data.Scan0, bits, 0, bits.Length);
@@ -1108,9 +1182,10 @@ namespace BerldChess.View
             var smoothPixelLocations = new List<int>();
             var smoothPixelColors = new List<int>();
 
-            var border = -16777216;
-            var alpha1 = 16777216;
-            var floodTo = 16777215;
+            const int border = -16777216;
+            const int alpha = 16777216;
+            const int floodTo = 16777215;
+
             var floodFrom = bits[x + y * data.Stride / recordLength];
 
             bits[x + y * data.Stride / recordLength] = floodTo;
@@ -1133,23 +1208,27 @@ namespace BerldChess.View
                     {
                         var next = new Point(current.X + offSet.X, current.Y + offSet.Y);
 
-                        if (next.X >= 0 && next.Y >= 0 && next.X < data.Width && next.Y < data.Height)
+                        if (next.X < 0 || next.Y < 0 || next.X >= data.Width || next.Y >= data.Height)
                         {
-                            if (bits[next.X + next.Y * data.Stride / recordLength] != border &&
-                                (bits[next.X + next.Y * data.Stride / recordLength] > alpha1 ||
-                                 bits[next.X + next.Y * data.Stride / recordLength] < 0))
-                            {
-                                check.AddLast(next);
-
-                                if (bits[next.X + next.Y * data.Stride / recordLength] != floodFrom)
-                                {
-                                    smoothPixelLocations.Add(next.X + next.Y * data.Stride / recordLength);
-                                    smoothPixelColors.Add(bits[next.X + next.Y * data.Stride / recordLength]);
-                                }
-
-                                bits[next.X + next.Y * data.Stride / recordLength] = floodTo;
-                            }
+                            continue;
                         }
+
+                        if (bits[next.X + next.Y * data.Stride / recordLength] == border ||
+                            bits[next.X + next.Y * data.Stride / recordLength] <= alpha &&
+                            bits[next.X + next.Y * data.Stride / recordLength] >= 0)
+                        {
+                            continue;
+                        }
+
+                        check.AddLast(next);
+
+                        if (bits[next.X + next.Y * data.Stride / recordLength] != floodFrom)
+                        {
+                            smoothPixelLocations.Add(next.X + next.Y * data.Stride / recordLength);
+                            smoothPixelColors.Add(bits[next.X + next.Y * data.Stride / recordLength]);
+                        }
+
+                        bits[next.X + next.Y * data.Stride / recordLength] = floodTo;
                     }
                 }
             }
@@ -1166,17 +1245,17 @@ namespace BerldChess.View
             image.UnlockBits(data);
         }
 
-        private int Round(double number)
+        private static int Round(double number)
         {
             return (int)Math.Round(number, 0);
         }
 
-        private int Invert(int max, int value)
+        private static int Invert(int max, int value)
         {
             return Math.Abs(value - max);
         }
 
-        private int GetPieceIndexFromFenChar(char fenCharacter)
+        private static int GetPieceIndexFromFenChar(char fenCharacter)
         {
             switch (fenCharacter)
             {
@@ -1209,24 +1288,14 @@ namespace BerldChess.View
             return -1;
         }
 
-        private Bitmap FillTransparentSectors(Bitmap image)
+        private Bitmap FillTransparentSectors(Image image)
         {
-            Bitmap filledImage;
-
-            if (IvoryMode)
-            {
-                filledImage = TransparentToColor(image, _ivory);
-            }
-            else
-            {
-                filledImage = TransparentToColor(image, Color.White);
-            }
-
+            var filledImage = TransparentToColor(image, IvoryMode ? _ivory : Color.White);
             FloodFill(filledImage, 0, 0);
             return filledImage;
         }
 
-        private Bitmap TransparentToColor(Bitmap image, Color color)
+        private static Bitmap TransparentToColor(Image image, Color color)
         {
             var filledImage = new Bitmap(image.Width, image.Height);
             var rectangle = new Rectangle(Point.Empty, image.Size);
@@ -1240,14 +1309,13 @@ namespace BerldChess.View
             return filledImage;
         }
 
-        private Bitmap GradientBitmap(Bitmap image, bool transformDark = false)
+        private static Bitmap GradientBitmap(Bitmap image, bool transformDark = false)
         {
             unsafe
             {
                 var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
                     ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-                var pointer = (byte*)data.Scan0;
-
+                byte* pointer;
                 var startingPoint = (int)(image.Width * 0.4);
 
                 for (var y = 0; y < image.Height; y++)
@@ -1258,46 +1326,53 @@ namespace BerldChess.View
 
                         pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
 
-                        if (pointer[3] == 255)
+                        Debug.Assert(pointer != null, nameof(pointer) + " != null");
+
+                        if (pointer[3] <= 255 - diffValue)
                         {
-                            for (var i = 0; i < 3; i++)
+                            continue;
+                        }
+
+                        for (var i = 0; i < 3; i++)
+                        {
+                            var value = pointer[i] - diffValue;
+
+                            if (value < 0)
                             {
-                                var value = pointer[i] - diffValue;
-
-                                if (value < 0)
-                                {
-                                    value = 0;
-                                }
-
-                                pointer[i] = (byte)value;
+                                value = 0;
                             }
+
+                            pointer[i] = (byte)value;
                         }
                     }
                 }
 
                 if (transformDark)
                 {
-                    for (int y = 0; y < image.Height; y++)
+                    for (var y = 0; y < image.Height; y++)
                     {
-                        for (int x = 0; x < image.Width; x++)
+                        for (var x = 0; x < image.Width; x++)
                         {
-                            int diffValue = Math.Max(43 - x / 2, 0);
-
+                            var diffValue = Math.Max(36 - x / 2, 0);
                             pointer = (byte*)(data.Scan0 + y * data.Stride + x * 4);
 
-                            if (pointer[1] < diffValue + 1)
+                            Debug.Assert(pointer != null, nameof(pointer) + " != null");
+
+                            if (pointer[1] >= diffValue + 1)
                             {
-                                for (int i = 0; i < 3; i++)
+                                continue;
+                            }
+
+                            for (var i = 0; i < 3; i++)
+                            {
+                                var value = pointer[i] + diffValue;
+
+                                if (value > 255)
                                 {
-                                    int value = pointer[i] + diffValue;
-
-                                    if (value > 255)
-                                    {
-                                        value = 255;
-                                    }
-
-                                    pointer[i] = (byte)value;
+                                    value = 255;
                                 }
+
+                                pointer[i] = (byte)value;
                             }
                         }
                     }
@@ -1309,12 +1384,12 @@ namespace BerldChess.View
             return image;
         }
 
-        private Bitmap CropTransparentBorders(Bitmap image)
+        private static Bitmap CropTransparentBorders(Bitmap image)
         {
             var width = image.Width;
             var height = image.Height;
 
-            Func<int, bool> allTransparentRow = row =>
+            bool AllTransparentRow(int row)
             {
                 for (var i = 0; i < width; ++i)
                 {
@@ -1325,9 +1400,9 @@ namespace BerldChess.View
                 }
 
                 return true;
-            };
+            }
 
-            Func<int, bool> allTransparentColumn = column =>
+            bool AllTransparentColumn(int column)
             {
                 for (var i = 0; i < height; ++i)
                 {
@@ -1338,12 +1413,12 @@ namespace BerldChess.View
                 }
 
                 return true;
-            };
+            }
 
             var topmost = 0;
             for (var row = 0; row < height; ++row)
             {
-                if (allTransparentRow(row))
+                if (AllTransparentRow(row))
                 {
                     topmost = row;
                 }
@@ -1356,7 +1431,7 @@ namespace BerldChess.View
             var bottommost = 0;
             for (var row = height - 1; row >= 0; --row)
             {
-                if (allTransparentRow(row))
+                if (AllTransparentRow(row))
                 {
                     bottommost = row;
                 }
@@ -1371,7 +1446,7 @@ namespace BerldChess.View
 
             for (var column = 0; column < width; ++column)
             {
-                if (allTransparentColumn(column))
+                if (AllTransparentColumn(column))
                 {
                     leftmost = column;
                 }
@@ -1383,7 +1458,7 @@ namespace BerldChess.View
 
             for (var column = width - 1; column >= 0; --column)
             {
-                if (allTransparentColumn(column))
+                if (AllTransparentColumn(column))
                 {
                     rightmost = column;
                 }
@@ -1415,7 +1490,7 @@ namespace BerldChess.View
             }
         }
 
-        private Bitmap GetCharacterImage(string fontFamily, int fontSize, char character)
+        private static Bitmap GetCharacterImage(string fontFamily, int fontSize, char character)
         {
             var font = new Font(fontFamily, fontSize);
             SizeF drawSize = TextRenderer.MeasureText(character.ToString(), font);
@@ -1427,7 +1502,7 @@ namespace BerldChess.View
             return charImage;
         }
 
-        private Bitmap ResizeImage(Image image, int width, int height)
+        private static Bitmap ResizeImage(Image image, int width, int height)
         {
             var result = new Bitmap(width, height);
             result.SetResolution(image.HorizontalResolution, image.VerticalResolution);
@@ -1455,8 +1530,7 @@ namespace BerldChess.View
         public PointF[] GetAbsPositionsFromMoveString(string move)
         {
             var index = new PointF[2];
-
-            var offSet = 0.5;
+            const double offSet = 0.5;
 
             if (!IsFlipped)
             {
@@ -1482,7 +1556,7 @@ namespace BerldChess.View
             return index;
         }
 
-        private string GetMoveStringFromRelPositions(Point[] position)
+        private string GetMoveStringFromRelPositions(IReadOnlyList<Point> position)
         {
             var moveString = "";
 
@@ -1497,15 +1571,15 @@ namespace BerldChess.View
 
         private Bitmap[] GetPiecesFromFontFamily(string fontFamily, double fieldSize)
         {
-            if (fieldSize == 0)
+            if (fieldSize <= 0.0)
             {
                 return null;
             }
 
             var pieceImages = new Bitmap[12];
 
-            var minFontSize = 125;
-            var whiteKing = 0x2654;
+            const int minFontSize = 125;
+            const int whiteKing = 0x2654;
 
             char[] characters;
 
@@ -1546,7 +1620,6 @@ namespace BerldChess.View
                 }
             }
 
-            var fontSize = -1;
             var currentDimension = new SizeF(-1, -1);
 
             var fontSizeCounter = 0;
@@ -1559,7 +1632,7 @@ namespace BerldChess.View
                 currentDimension = TextRenderer.MeasureText(((char)whiteKing).ToString(), font);
             }
 
-            fontSize = (int)(fontSizeCounter * (1 + _fontSizeFactor) * PieceSizeFactor);
+            var fontSize = (int)(fontSizeCounter * (1 + _fontSizeFactor) * PieceSizeFactor);
 
             if (fontSize > (int)_fieldSize + 1)
             {
@@ -1584,6 +1657,8 @@ namespace BerldChess.View
 
                 if (fontSize < minFontSize)
                 {
+                    Debug.Assert(originalImage != null, nameof(originalImage) + " != null");
+
                     pieceImages[i] = ResizeImage(pieceImages[i], originalImage.Width, originalImage.Height);
                 }
             }

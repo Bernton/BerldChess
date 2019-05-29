@@ -167,6 +167,9 @@
       <DependentUpon>FormPromotion.cs</DependentUpon>
     </Compile>
     <Compile Include="Source\View\ProgressDialog.cs" />
+    <Compile Include="Source\View\SmoothLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <EmbeddedResource Include="Source\View\ChessPanel.resx">
       <DependentUpon>ChessPanel.cs</DependentUpon>
     </EmbeddedResource>

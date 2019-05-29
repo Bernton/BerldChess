@@ -30,8 +30,6 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBoardSetting));
             this._checkBoxGridBorder = new System.Windows.Forms.CheckBox();
-            this._labelShowDarkSquareColor = new System.Windows.Forms.Label();
-            this._labelShowLightSquareColor = new System.Windows.Forms.Label();
             this._buttonDarkSquare = new System.Windows.Forms.Button();
             this._buttonLightSquare = new System.Windows.Forms.Button();
             this._buttonApply = new System.Windows.Forms.Button();
@@ -39,18 +37,20 @@
             this._checkBoxGradient = new System.Windows.Forms.CheckBox();
             this._checkBoxIvoryMode = new System.Windows.Forms.CheckBox();
             this._checkBoxUseImages = new System.Windows.Forms.CheckBox();
-            this._labelShowLightSquarePath = new System.Windows.Forms.Label();
-            this._labelShowDarkSquarePath = new System.Windows.Forms.Label();
             this._textBoxDarkSquarePath = new System.Windows.Forms.TextBox();
             this._textBoxLightSquarePath = new System.Windows.Forms.TextBox();
             this._buttonLightDialog = new System.Windows.Forms.Button();
             this._buttonDarkDialog = new System.Windows.Forms.Button();
             this._panelHighlightOption = new System.Windows.Forms.Panel();
-            this._labelShowLastMove = new System.Windows.Forms.Label();
+            this._radioButtonArrow = new System.Windows.Forms.RadioButton();
+            this._labelShowLastMove = new BerldChess.View.SmoothLabel();
             this._radioButtonBorderHighlight = new System.Windows.Forms.RadioButton();
             this._radioButtonYellowGlow = new System.Windows.Forms.RadioButton();
             this._radioButtonNoHighlight = new System.Windows.Forms.RadioButton();
-            this._radioButtonArrow = new System.Windows.Forms.RadioButton();
+            this._labelShowLightSquarePath = new BerldChess.View.SmoothLabel();
+            this._labelShowDarkSquarePath = new BerldChess.View.SmoothLabel();
+            this._labelShowLightSquareColor = new BerldChess.View.SmoothLabel();
+            this._labelShowDarkSquareColor = new BerldChess.View.SmoothLabel();
             this._panelHighlightOption.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -66,30 +66,10 @@
             this._checkBoxGridBorder.UseVisualStyleBackColor = true;
             this._checkBoxGridBorder.CheckedChanged += new System.EventHandler(this.OnCheckBoxGridBorderCheckedChanged);
             // 
-            // _labelShowDarkSquareColor
-            // 
-            this._labelShowDarkSquareColor.AutoSize = true;
-            this._labelShowDarkSquareColor.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowDarkSquareColor.Location = new System.Drawing.Point(391, 79);
-            this._labelShowDarkSquareColor.Name = "_labelShowDarkSquareColor";
-            this._labelShowDarkSquareColor.Size = new System.Drawing.Size(133, 20);
-            this._labelShowDarkSquareColor.TabIndex = 14;
-            this._labelShowDarkSquareColor.Text = "Dark Square Color:";
-            // 
-            // _labelShowLightSquareColor
-            // 
-            this._labelShowLightSquareColor.AutoSize = true;
-            this._labelShowLightSquareColor.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowLightSquareColor.Location = new System.Drawing.Point(391, 132);
-            this._labelShowLightSquareColor.Name = "_labelShowLightSquareColor";
-            this._labelShowLightSquareColor.Size = new System.Drawing.Size(135, 20);
-            this._labelShowLightSquareColor.TabIndex = 17;
-            this._labelShowLightSquareColor.Text = "Light Square Color:";
-            // 
             // _buttonDarkSquare
             // 
             this._buttonDarkSquare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this._buttonDarkSquare.Location = new System.Drawing.Point(550, 73);
+            this._buttonDarkSquare.Location = new System.Drawing.Point(535, 61);
             this._buttonDarkSquare.Name = "_buttonDarkSquare";
             this._buttonDarkSquare.Size = new System.Drawing.Size(35, 35);
             this._buttonDarkSquare.TabIndex = 18;
@@ -99,7 +79,7 @@
             // _buttonLightSquare
             // 
             this._buttonLightSquare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this._buttonLightSquare.Location = new System.Drawing.Point(550, 126);
+            this._buttonLightSquare.Location = new System.Drawing.Point(535, 109);
             this._buttonLightSquare.Name = "_buttonLightSquare";
             this._buttonLightSquare.Size = new System.Drawing.Size(35, 35);
             this._buttonLightSquare.TabIndex = 19;
@@ -157,7 +137,7 @@
             // 
             this._checkBoxUseImages.AutoSize = true;
             this._checkBoxUseImages.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._checkBoxUseImages.Location = new System.Drawing.Point(16, 31);
+            this._checkBoxUseImages.Location = new System.Drawing.Point(16, 19);
             this._checkBoxUseImages.Name = "_checkBoxUseImages";
             this._checkBoxUseImages.Size = new System.Drawing.Size(109, 24);
             this._checkBoxUseImages.TabIndex = 25;
@@ -165,48 +145,28 @@
             this._checkBoxUseImages.UseVisualStyleBackColor = true;
             this._checkBoxUseImages.CheckedChanged += new System.EventHandler(this.OnCheckBoxUseImagesCheckedChanged);
             // 
-            // _labelShowLightSquarePath
-            // 
-            this._labelShowLightSquarePath.AutoSize = true;
-            this._labelShowLightSquarePath.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowLightSquarePath.Location = new System.Drawing.Point(12, 132);
-            this._labelShowLightSquarePath.Name = "_labelShowLightSquarePath";
-            this._labelShowLightSquarePath.Size = new System.Drawing.Size(95, 20);
-            this._labelShowLightSquarePath.TabIndex = 27;
-            this._labelShowLightSquarePath.Text = "Light Square:";
-            // 
-            // _labelShowDarkSquarePath
-            // 
-            this._labelShowDarkSquarePath.AutoSize = true;
-            this._labelShowDarkSquarePath.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._labelShowDarkSquarePath.Location = new System.Drawing.Point(12, 79);
-            this._labelShowDarkSquarePath.Name = "_labelShowDarkSquarePath";
-            this._labelShowDarkSquarePath.Size = new System.Drawing.Size(93, 20);
-            this._labelShowDarkSquarePath.TabIndex = 26;
-            this._labelShowDarkSquarePath.Text = "Dark Square:";
-            // 
             // _textBoxDarkSquarePath
             // 
             this._textBoxDarkSquarePath.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._textBoxDarkSquarePath.Location = new System.Drawing.Point(113, 78);
+            this._textBoxDarkSquarePath.Location = new System.Drawing.Point(16, 84);
             this._textBoxDarkSquarePath.Name = "_textBoxDarkSquarePath";
-            this._textBoxDarkSquarePath.Size = new System.Drawing.Size(190, 25);
+            this._textBoxDarkSquarePath.Size = new System.Drawing.Size(287, 25);
             this._textBoxDarkSquarePath.TabIndex = 28;
             this._textBoxDarkSquarePath.TextChanged += new System.EventHandler(this.OnTextBoxDarkSquarePathTextChanged);
             // 
             // _textBoxLightSquarePath
             // 
             this._textBoxLightSquarePath.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._textBoxLightSquarePath.Location = new System.Drawing.Point(113, 131);
+            this._textBoxLightSquarePath.Location = new System.Drawing.Point(16, 137);
             this._textBoxLightSquarePath.Name = "_textBoxLightSquarePath";
-            this._textBoxLightSquarePath.Size = new System.Drawing.Size(190, 25);
+            this._textBoxLightSquarePath.Size = new System.Drawing.Size(287, 25);
             this._textBoxLightSquarePath.TabIndex = 29;
             this._textBoxLightSquarePath.TextChanged += new System.EventHandler(this.OnTextBoxLightSquarePathTextChanged);
             // 
             // _buttonLightDialog
             // 
             this._buttonLightDialog.Font = new System.Drawing.Font("Segoe UI", 11.25F);
-            this._buttonLightDialog.Location = new System.Drawing.Point(308, 132);
+            this._buttonLightDialog.Location = new System.Drawing.Point(308, 138);
             this._buttonLightDialog.Margin = new System.Windows.Forms.Padding(0);
             this._buttonLightDialog.Name = "_buttonLightDialog";
             this._buttonLightDialog.Size = new System.Drawing.Size(26, 24);
@@ -219,7 +179,7 @@
             // _buttonDarkDialog
             // 
             this._buttonDarkDialog.Font = new System.Drawing.Font("Segoe UI", 11.25F);
-            this._buttonDarkDialog.Location = new System.Drawing.Point(308, 79);
+            this._buttonDarkDialog.Location = new System.Drawing.Point(308, 85);
             this._buttonDarkDialog.Margin = new System.Windows.Forms.Padding(0);
             this._buttonDarkDialog.Name = "_buttonDarkDialog";
             this._buttonDarkDialog.Size = new System.Drawing.Size(26, 24);
@@ -240,6 +200,19 @@
             this._panelHighlightOption.Name = "_panelHighlightOption";
             this._panelHighlightOption.Size = new System.Drawing.Size(147, 124);
             this._panelHighlightOption.TabIndex = 33;
+            // 
+            // _radioButtonArrow
+            // 
+            this._radioButtonArrow.AutoSize = true;
+            this._radioButtonArrow.Font = new System.Drawing.Font("Segoe UI", 11.25F);
+            this._radioButtonArrow.Location = new System.Drawing.Point(14, 96);
+            this._radioButtonArrow.Name = "_radioButtonArrow";
+            this._radioButtonArrow.Size = new System.Drawing.Size(67, 24);
+            this._radioButtonArrow.TabIndex = 4;
+            this._radioButtonArrow.TabStop = true;
+            this._radioButtonArrow.Text = "Arrow";
+            this._radioButtonArrow.UseVisualStyleBackColor = true;
+            this._radioButtonArrow.CheckedChanged += new System.EventHandler(this.OnRadioButtonArrowCheckedChanged);
             // 
             // _labelShowLastMove
             // 
@@ -290,18 +263,44 @@
             this._radioButtonNoHighlight.UseVisualStyleBackColor = true;
             this._radioButtonNoHighlight.CheckedChanged += new System.EventHandler(this.OnRadioButtonNoHighlightCheckedChanged);
             // 
-            // _radioButtonArrow
+            // _labelShowLightSquarePath
             // 
-            this._radioButtonArrow.AutoSize = true;
-            this._radioButtonArrow.Font = new System.Drawing.Font("Segoe UI", 11.25F);
-            this._radioButtonArrow.Location = new System.Drawing.Point(14, 96);
-            this._radioButtonArrow.Name = "_radioButtonArrow";
-            this._radioButtonArrow.Size = new System.Drawing.Size(67, 24);
-            this._radioButtonArrow.TabIndex = 4;
-            this._radioButtonArrow.TabStop = true;
-            this._radioButtonArrow.Text = "Arrow";
-            this._radioButtonArrow.UseVisualStyleBackColor = true;
-            this._radioButtonArrow.CheckedChanged += new System.EventHandler(this.OnRadioButtonArrowCheckedChanged);
+            this._labelShowLightSquarePath.AutoSize = true;
+            this._labelShowLightSquarePath.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelShowLightSquarePath.Location = new System.Drawing.Point(12, 113);
+            this._labelShowLightSquarePath.Name = "_labelShowLightSquarePath";
+            this._labelShowLightSquarePath.Size = new System.Drawing.Size(349, 20);
+            this._labelShowLightSquarePath.TabIndex = 27;
+            this._labelShowLightSquarePath.Text = "Light Square (Leave empty for single board image):";
+            // 
+            // _labelShowDarkSquarePath
+            // 
+            this._labelShowDarkSquarePath.AutoSize = true;
+            this._labelShowDarkSquarePath.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelShowDarkSquarePath.Location = new System.Drawing.Point(12, 60);
+            this._labelShowDarkSquarePath.Name = "_labelShowDarkSquarePath";
+            this._labelShowDarkSquarePath.Size = new System.Drawing.Size(230, 20);
+            this._labelShowDarkSquarePath.TabIndex = 26;
+            this._labelShowDarkSquarePath.Text = "Dark Square/Single board image:";
+            // 
+            // _labelShowLightSquareColor
+            // 
+            this._labelShowLightSquareColor.AutoSize = true;
+            this._labelShowLightSquareColor.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelShowLightSquareColor.Location = new System.Drawing.Point(391, 109);
+            this._labelShowLightSquareColor.Name = "_labelShowLightSquareColor";
+            this._labelShowLightSquareColor.Size = new System.Drawing.Size(135, 20);
+            this._labelShowLightSquareColor.TabIndex = 17;
+            this._labelShowLightSquareColor.Text = "Light Square Color:";
+            // 
+            // _labelShowDarkSquareColor
+            // 
+            this._labelShowDarkSquareColor.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._labelShowDarkSquareColor.Location = new System.Drawing.Point(391, 58);
+            this._labelShowDarkSquareColor.Name = "_labelShowDarkSquareColor";
+            this._labelShowDarkSquareColor.Size = new System.Drawing.Size(194, 47);
+            this._labelShowDarkSquareColor.TabIndex = 14;
+            this._labelShowDarkSquareColor.Text = "Dark Square Color/\r\nCoordinate Border:";
             // 
             // FormBoardSetting
             // 
@@ -331,7 +330,7 @@
             this.MinimizeBox = false;
             this.Name = "FormBoardSetting";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Board Settings";
+            this.Text = "Appearance Settings";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnBoardSettingDialogFormClosing);
             this.Shown += new System.EventHandler(this.OnBoardSettingDialogShown);
             this._panelHighlightOption.ResumeLayout(false);
@@ -344,8 +343,8 @@
         #endregion
 
         private System.Windows.Forms.CheckBox _checkBoxGridBorder;
-        private System.Windows.Forms.Label _labelShowDarkSquareColor;
-        private System.Windows.Forms.Label _labelShowLightSquareColor;
+        private BerldChess.View.SmoothLabel _labelShowDarkSquareColor;
+        private BerldChess.View.SmoothLabel _labelShowLightSquareColor;
         private System.Windows.Forms.Button _buttonDarkSquare;
         private System.Windows.Forms.Button _buttonLightSquare;
         private System.Windows.Forms.Button _buttonApply;
@@ -353,14 +352,14 @@
         private System.Windows.Forms.CheckBox _checkBoxGradient;
         private System.Windows.Forms.CheckBox _checkBoxIvoryMode;
         private System.Windows.Forms.CheckBox _checkBoxUseImages;
-        private System.Windows.Forms.Label _labelShowLightSquarePath;
-        private System.Windows.Forms.Label _labelShowDarkSquarePath;
+        private BerldChess.View.SmoothLabel _labelShowLightSquarePath;
+        private BerldChess.View.SmoothLabel _labelShowDarkSquarePath;
         private System.Windows.Forms.TextBox _textBoxDarkSquarePath;
         private System.Windows.Forms.TextBox _textBoxLightSquarePath;
         private System.Windows.Forms.Button _buttonLightDialog;
         private System.Windows.Forms.Button _buttonDarkDialog;
         private System.Windows.Forms.Panel _panelHighlightOption;
-        private System.Windows.Forms.Label _labelShowLastMove;
+        private BerldChess.View.SmoothLabel _labelShowLastMove;
         private System.Windows.Forms.RadioButton _radioButtonBorderHighlight;
         private System.Windows.Forms.RadioButton _radioButtonYellowGlow;
         private System.Windows.Forms.RadioButton _radioButtonNoHighlight;

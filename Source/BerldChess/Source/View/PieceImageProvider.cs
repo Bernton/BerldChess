@@ -13,7 +13,7 @@ namespace BerldChess.View
 
         public static Bitmap[] PieceImages { get; set; }
 
-        public static void Inititalize(Bitmap sprite, int id)
+        public static void Initialize(Bitmap sprite, int id)
         {
             if (_id == id)
             {
@@ -49,7 +49,7 @@ namespace BerldChess.View
         {
             if (PieceImages == null || PieceImages[0] == null)
             {
-                Inititalize(Resources.ChessPiecesSprite1, 0);
+                Initialize(Resources.ChessPiecesSprite1, 0);
             }
 
             switch (FENCharacter)
