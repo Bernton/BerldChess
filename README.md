@@ -9,6 +9,3 @@ Piece set 2:
 
 Piece set 3:
 ![alt tag](https://raw.githubusercontent.com/Bernton/BerldChess/master/Images/Default3.PNG)
-
-Custom appearance:
-![alt tag](https://raw.githubusercontent.com/Bernton/BerldChess/master/Images/customAppearance.PNG)
