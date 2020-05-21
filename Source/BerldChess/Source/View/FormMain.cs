@@ -1585,79 +1585,77 @@ namespace BerldChess.View
                 return;
             }
 
-            using (var currentImage = Recognizer.GetBoardSnap())
-            {
-                var areSame = Recognizer.CompareBitmaps(currentImage, _comparisonSnap);
+            var currentImage = Recognizer.GetBoardSnap();
+            var areSame = Recognizer.CompareBitmaps(currentImage, _comparisonSnap);
 
-                if (_updateAfterAnimation && areSame)
+            if (_updateAfterAnimation && areSame)
+            {
+                _updateAfterAnimation = false;
+                Recognizer.UpdateBoardImage(currentImage);
+                return;
+            }
+
+            if (areSame)
+            {
+                var changedSquares = Recognizer.GetChangedSquares(currentImage);
+
+                if (changedSquares == null || changedSquares.Length == 0)
                 {
-                    _updateAfterAnimation = false;
-                    Recognizer.UpdateBoardImage(currentImage);
                     return;
                 }
 
-                if (areSame)
+                var source = Point.Empty;
+                var destination = Point.Empty;
+
+                if (changedSquares.Length == 4)
                 {
-                    var changedSquares = Recognizer.GetChangedSquares(currentImage);
-
-                    if (changedSquares == null || changedSquares.Length == 0)
+                    if (changedSquares[0].X == 4)
                     {
-                        return;
-                    }
-
-                    var source = Point.Empty;
-                    var destination = Point.Empty;
-
-                    if (changedSquares.Length == 4)
-                    {
-                        if (changedSquares[0].X == 4)
-                        {
-                            source = changedSquares[0];
-                            destination = changedSquares[2];
-                        }
-                        else
-                        {
-                            source = changedSquares[3];
-                            destination = changedSquares[1];
-                        }
-                    }
-                    else if (changedSquares.Length == 2)
-                    {
-                        var piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
-
-                        if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
-                        {
-                            source = changedSquares[0];
-                            destination = changedSquares[1];
-                        }
-                        else
-                        {
-                            source = changedSquares[1];
-                            destination = changedSquares[0];
-                        }
-                    }
-
-                    var args = new PieceMovedEventArgs(source, destination);
-
-
-                    if (_menuItemCheckAuto.Checked)
-                    {
-                        if (PlayMove(args, 'q', true))
-                        {
-                            _movePlayed = true;
-                            GetPlayingEngine().RequestStop();
-                        }
-
-                        Recognizer.UpdateBoardImage(currentImage);
+                        source = changedSquares[0];
+                        destination = changedSquares[2];
                     }
                     else
                     {
-                        _moveOnHold = args;
+                        source = changedSquares[3];
+                        destination = changedSquares[1];
+                    }
+                }
+                else if (changedSquares.Length == 2)
+                {
+                    var piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
+
+                    if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
+                    {
+                        source = changedSquares[0];
+                        destination = changedSquares[1];
+                    }
+                    else
+                    {
+                        source = changedSquares[1];
+                        destination = changedSquares[0];
                     }
                 }
 
-                _comparisonSnap = currentImage;
+                var args = new PieceMovedEventArgs(source, destination);
+
+
+                if (_menuItemCheckAuto.Checked)
+                {
+                    if (PlayMove(args, 'q', true))
+                    {
+                        _movePlayed = true;
+                        GetPlayingEngine().RequestStop();
+                    }
+
+                    Recognizer.UpdateBoardImage(currentImage);
+                }
+                else
+                {
+                    _moveOnHold = args;
+                }
             }
+
+            _comparisonSnap = currentImage;
         }
 
         private void ClearEngines()
@@ -1910,25 +1908,32 @@ namespace BerldChess.View
             {
                 if (Recognizer.BoardFound)
                 {
-                    double pW = Screen.PrimaryScreen.WorkingArea.Width;
-                    double pH = Screen.PrimaryScreen.WorkingArea.Height;
-                    var fW = Recognizer.BoardSize.Width / 8.0;
-                    var fH = Recognizer.BoardSize.Height / 8.0;
-                    double max = ushort.MaxValue;
-                    var currCurPos = Cursor.Position;
+                    Point initialCursorPosition = Cursor.Position;
 
-                    _inputSimulator.Mouse.MoveMouseTo(
-                        max + (int)(max * (Recognizer.BoardLocation.X + fW * (points[0].X + 0.45)) / pW),
-                        (int)(max * (Recognizer.BoardLocation.Y + fW * (points[0].Y + 0.45)) / pH));
+                    double screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
+                    double screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+                    double fieldWidth = Recognizer.BoardSize.Width / 8.0;
+                    double fieldHeight = Recognizer.BoardSize.Height / 8.0;
+                    double boardX = Recognizer.BoardLocation.X;
+                    double boardY = Recognizer.BoardLocation.Y;
+                    double max = ushort.MaxValue;
+
+                    double moveX = max * ((boardX + fieldWidth * (points[0].X + 0.45)) / screenWidth);
+                    double moveY = max * ((boardY + fieldHeight * (points[0].Y + 0.45)) / screenHeight);
+                    _inputSimulator.Mouse.MoveMouseTo(moveX, moveY);
                     _inputSimulator.Mouse.LeftButtonClick();
-                    Thread.Sleep(_random.Next((int)(SerializedInfo.Instance.ClickDelay / 2.5),
-                        SerializedInfo.Instance.ClickDelay));
-                    _inputSimulator.Mouse.MoveMouseTo(
-                        max + (int)(max * (Recognizer.BoardLocation.X + fH * (points[1].X + 0.45)) / pW),
-                        (int)(max * (Recognizer.BoardLocation.Y + fH * (points[1].Y + 0.45)) / pH));
+
+                    int clickDelay = SerializedInfo.Instance.ClickDelay;
+                    Thread.Sleep(_random.Next((int)(clickDelay / 2.5), clickDelay));
+
+                    moveX = max * ((boardX + fieldWidth * (points[1].X + 0.45)) / screenWidth);
+                    moveY = max * ((boardY + fieldHeight * (points[1].Y + 0.45)) / screenHeight);
+                    _inputSimulator.Mouse.MoveMouseTo(moveX, moveY);
                     _inputSimulator.Mouse.LeftButtonClick();
-                    _inputSimulator.Mouse.MoveMouseTo((int)(max * currCurPos.X / pW),
-                        (int)Math.Round(max * currCurPos.Y / pH * 0.97, 0));
+
+                    moveX = (int)(max * initialCursorPosition.X / screenWidth);
+                    moveY = (int)Math.Round(max * initialCursorPosition.Y / screenHeight * 0.97, 0);
+                    _inputSimulator.Mouse.MoveMouseTo(moveX, moveY);
                     _inputSimulator.Mouse.LeftButtonClick();
                     Thread.Sleep(20);
 

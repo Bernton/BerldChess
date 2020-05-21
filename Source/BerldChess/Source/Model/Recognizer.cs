@@ -79,6 +79,7 @@ namespace BerldChess.Model
             {
                 BitmapData snapData = LockBits(boardSnap);
                 BitmapData lastSnapData = LockBits(_lastBoardSnap);
+
                 var scan0 = (byte*)snapData.Scan0;
                 var lastScan0 = (byte*)lastSnapData.Scan0;
 
