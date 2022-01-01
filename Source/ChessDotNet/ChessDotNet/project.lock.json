@@ -1,14 +1,56 @@
 {
-  "locked": false,
-  "version": 1,
+  "version": 3,
   "targets": {
-    ".NETFramework,Version=v4.6": {},
-    ".NETFramework,Version=v4.6/any": {},
-    ".NETFramework,Version=v4.6/win": {}
+    ".NETFramework,Version=v4.8": {},
+    ".NETFramework,Version=v4.8/any": {},
+    ".NETFramework,Version=v4.8/win": {}
   },
   "libraries": {},
   "projectFileDependencyGroups": {
     "": [],
-    ".NETFramework,Version=v4.6": []
+    ".NETFramework,Version=v4.8": []
+  },
+  "packageFolders": {
+    "C:\\Users\\User\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "0.9.2",
+    "authors": [
+      "ProgramFOX"
+    ],
+    "restore": {
+      "projectUniqueName": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\ChessDotNet.csproj",
+      "projectName": "ChessDotNet",
+      "projectPath": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\ChessDotNet.csproj",
+      "projectJsonPath": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\project.json",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\obj\\",
+      "projectStyle": "ProjectJson",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\.nuget\\NuGet.Config",
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      }
+    },
+    "frameworks": {
+      "net48": {}
+    },
+    "runtimes": {
+      "any": {
+        "#import": []
+      },
+      "win": {
+        "#import": []
+      }
+    }
   }
 }

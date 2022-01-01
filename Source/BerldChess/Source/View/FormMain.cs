@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Reflection;
+using System.Speech.Synthesis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -1711,80 +1712,83 @@ namespace BerldChess.View
             _labelNodes.Text = FormatNumber(long.Parse(_evaluations[0][InfoType.Nodes]));
 
             _labelTime.Text = GetFormattedEngineInfo(InfoType.Time, _evaluations[0][InfoType.Time]);
-            _labelNPS.Text = ToKiloFormat(int.Parse(_evaluations[0][InfoType.NPS]));
-            SetExtendedInfoEnabled(true);
-
-            double whitePawnEvaluation;
-
-            if (isMate)
+            double whitePawnEvaluation=0.0;
+            if (_evaluations[0][InfoType.NPS] != null)
             {
-                var mateValue = centipawn;
+                _labelNPS.Text = ToKiloFormat(int.Parse(_evaluations[0][InfoType.NPS]));
+                SetExtendedInfoEnabled(true);
 
-                if (mateValue > 0)
+
+
+                if (isMate)
                 {
-                    _labelEvaluation.Text = $@"Mate in {mateValue}";
-                    _labelEvaluation.ForeColor = Color.Green;
+                    var mateValue = centipawn;
+
+                    if (mateValue > 0)
+                    {
+                        _labelEvaluation.Text = $@"Mate in {mateValue}";
+                        _labelEvaluation.ForeColor = Color.Green;
+                    }
+                    else
+                    {
+                        _labelEvaluation.Text = $@"Mated in {Math.Abs(mateValue)}";
+                        _labelEvaluation.ForeColor = Color.Red;
+                    }
+
+                    if (_vm.Game.WhoseTurn == ChessPlayer.Black && mateValue > 0 ||
+                        _vm.Game.WhoseTurn == ChessPlayer.White && mateValue < 0)
+                    {
+                        whitePawnEvaluation = -200;
+                    }
+                    else
+                    {
+                        whitePawnEvaluation = 200;
+                    }
                 }
                 else
                 {
-                    _labelEvaluation.Text = $@"Mated in {Math.Abs(mateValue)}";
-                    _labelEvaluation.ForeColor = Color.Red;
+                    if (_vm.Game.WhoseTurn == ChessPlayer.Black)
+                    {
+                        whitePawnEvaluation = -(centipawn / 100.0);
+                    }
+                    else
+                    {
+                        whitePawnEvaluation = centipawn / 100.0;
+                    }
+
+                    _labelEvaluation.Text = Math.Abs(whitePawnEvaluation) < 0.01
+                        ? " 0.00"
+                        : whitePawnEvaluation.ToString("+0.00;-0.00");
+                    _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
                 }
 
-                if (_vm.Game.WhoseTurn == ChessPlayer.Black && mateValue > 0 ||
-                    _vm.Game.WhoseTurn == ChessPlayer.White && mateValue < 0)
+                if (!_vm.GameFinished)
                 {
-                    whitePawnEvaluation = -200;
+                    if (FillPlyList(depth, whitePawnEvaluation, isMate))
+                    {
+                        UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
+                    }
                 }
-                else
+
+                for (var iPv = 0; iPv < _evaluations.Length; iPv++)
                 {
-                    whitePawnEvaluation = 200;
+                    if (_evaluations[iPv] == null)
+                    {
+                        continue;
+                    }
+
+                    for (var iColumn = 0; iColumn < _columnOrder.Length; iColumn++)
+                    {
+                        _dataGridViewEvaluation.Rows[iPv].Cells[iColumn].Value =
+                            GetFormattedEngineInfo(_columnOrder[iColumn], _evaluations[iPv][_columnOrder[iColumn]]);
+                    }
+                }
+
+                if (_menuItemHideArrows.Checked)
+                {
+                    return;
                 }
             }
-            else
-            {
-                if (_vm.Game.WhoseTurn == ChessPlayer.Black)
-                {
-                    whitePawnEvaluation = -(centipawn / 100.0);
-                }
-                else
-                {
-                    whitePawnEvaluation = centipawn / 100.0;
-                }
-
-                _labelEvaluation.Text = Math.Abs(whitePawnEvaluation) < 0.01
-                    ? " 0.00"
-                    : whitePawnEvaluation.ToString("+0.00;-0.00");
-                _labelEvaluation.ForeColor = CalculateEvaluationColor(-(centipawn / 100.0));
-            }
-
-            if (!_vm.GameFinished)
-            {
-                if (FillPlyList(depth, whitePawnEvaluation, isMate))
-                {
-                    UpdateMoveGridCell(isMate, whitePawnEvaluation, depth);
-                }
-            }
-
-            for (var iPv = 0; iPv < _evaluations.Length; iPv++)
-            {
-                if (_evaluations[iPv] == null)
-                {
-                    continue;
-                }
-
-                for (var iColumn = 0; iColumn < _columnOrder.Length; iColumn++)
-                {
-                    _dataGridViewEvaluation.Rows[iPv].Cells[iColumn].Value =
-                        GetFormattedEngineInfo(_columnOrder[iColumn], _evaluations[iPv][_columnOrder[iColumn]]);
-                }
-            }
-
-            if (_menuItemHideArrows.Checked)
-            {
-                return;
-            }
-
             UpdateEngineArrows();
         }
 
@@ -1894,6 +1898,8 @@ namespace BerldChess.View
 
         private void PlayMove(string move)
         {
+ 
+
             var points = _chessPanel.GetRelPositionsFromMoveString(move);
             var moveArgs = new PieceMovedEventArgs(points[0], points[1]);
 
@@ -2585,13 +2591,42 @@ namespace BerldChess.View
             return false;
         }
 
+        String[] figures = { "pawn", "rook", "bishop", "night", "queen", "king" };
+
         private bool PlayMove(PieceMovedEventArgs args, char? promotion = null, bool cheatMove = false,
             bool silent = false)
         {
+//!!!
             var sourcePosition = new BoardPosition((ChessFile)args.Position.X, Invert(args.Position.Y - 1, 7));
             var destinationPosition =
                 new BoardPosition((ChessFile)args.NewPosition.X, Invert(args.NewPosition.Y - 1, 7));
             var movingPiece = _vm.Game.GetPieceAt(sourcePosition);
+
+            using (SpeechSynthesizer synth =
+          new SpeechSynthesizer())
+            {
+                var piece = "";
+                if (movingPiece.Owner == 0)
+                    piece = "White";
+                else
+                    piece = "Black";
+
+                foreach (String figure in figures)
+                    if (movingPiece.GetFENLetter().ToString().ToLower() == figure[0].ToString())
+                        piece += " "+figure;
+                //if (movingPiece.GetFENLetter().ToString() == "P" || movingPiece.GetFENLetter().ToString()=="p")
+                  //  piece += " Pawn";
+
+                var str = "moving " + piece; 
+                synth.Speak(str);
+
+                synth.Speak("from");
+                synth.Speak(sourcePosition.File + sourcePosition.Rank.ToString());
+                synth.Speak("to");
+                synth.Speak(destinationPosition.File + destinationPosition.Rank.ToString());
+
+            };
+
 
             if (movingPiece == null)
             {
@@ -2991,5 +3026,11 @@ namespace BerldChess.View
         }
 
         #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (!PlayMove(new PieceMovedEventArgs(new Point(1, 1), new Point(1, 2))))
+                new SpeechSynthesizer().Speak("Invalid move");
+        }
     }
 }
