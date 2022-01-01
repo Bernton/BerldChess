@@ -15,7 +15,7 @@ namespace ChessDotNet
         /// <param name="owner"></param>
         public Rook(ChessPlayer owner)
         {
-            Owner = owner;
+            Player = owner;
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace ChessDotNet
         /// <returns>FEN letter</returns>
         public override char GetFENLetter()
         {
-            return Owner == ChessPlayer.White ? 'R' : 'r';
+            return Player == ChessPlayer.White ? 'R' : 'r';
         }
 
         public override bool IsLegalMove(Move move, ChessGame game)
@@ -81,7 +81,7 @@ namespace ChessDotNet
                     continue;
                 if (from.Rank + i > 0 && from.Rank + i <= l0)
                 {
-                    Move move = new Move(from, new BoardPosition(from.File, from.Rank + i), piece.Owner);
+                    Move move = new Move(from, new BoardPosition(from.File, from.Rank + i), piece.Player);
                     if (gameMoveValidator(move))
                     {
                         validMoves.Add(move);
@@ -91,7 +91,7 @@ namespace ChessDotNet
                 }
                 if ((int)from.File + i > -1 && (int)from.File + i < l1)
                 {
-                    Move move = new Move(from, new BoardPosition(from.File + i, from.Rank), piece.Owner);
+                    Move move = new Move(from, new BoardPosition(from.File + i, from.Rank), piece.Player);
                     if (gameMoveValidator(move))
                     {
                         validMoves.Add(move);

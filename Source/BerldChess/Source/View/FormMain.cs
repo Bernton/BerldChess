@@ -1628,7 +1628,7 @@ namespace BerldChess.View
                 {
                     var piece = _chessPanel.Board[changedSquares[0].Y][changedSquares[0].X];
 
-                    if (piece != null && piece.Owner == _vm.Game.WhoseTurn)
+                    if (piece != null && piece.Player == _vm.Game.WhoseTurn)
                     {
                         source = changedSquares[0];
                         destination = changedSquares[1];
@@ -2679,7 +2679,7 @@ namespace BerldChess.View
 
                 synth.SelectVoiceByHints(VoiceGender.Neutral, VoiceAge.NotSet, 0, CultureInfo.GetCultureInfo("en-US"));
                 var piece = "";
-                if (movingPiece.Owner == 0)
+                if (movingPiece.Player == 0)
                     piece = "White ";
                 else
                     piece = "Black ";
@@ -2707,7 +2707,7 @@ namespace BerldChess.View
                 promotion = CheckPromotion(sourcePosition, destinationPosition, movingPiece);
             }
 
-            var move = new ChessDotNet.Move(sourcePosition, destinationPosition, movingPiece.Owner, promotion);
+            var move = new ChessDotNet.Move(sourcePosition, destinationPosition, movingPiece.Player, promotion);
 
             if (!_vm.Game.IsValidMove(move))
             {
@@ -2836,10 +2836,10 @@ namespace BerldChess.View
             if (_vm.Game.WhoseTurn != _computerPlayer)
             {
                 if (movingPiece is Pawn &&
-                    source.Rank == (movingPiece.Owner == ChessPlayer.White ? 7 : 2) &&
-                    destination.Rank == (movingPiece.Owner == ChessPlayer.White ? 8 : 1))
+                    source.Rank == (movingPiece.Player == ChessPlayer.White ? 7 : 2) &&
+                    destination.Rank == (movingPiece.Player == ChessPlayer.White ? 8 : 1))
                 {
-                    var dialog = new FormPromotion(movingPiece.Owner);
+                    var dialog = new FormPromotion(movingPiece.Player);
                     dialog.ShowDialog();
 
                     return dialog.PromotionCharacter;

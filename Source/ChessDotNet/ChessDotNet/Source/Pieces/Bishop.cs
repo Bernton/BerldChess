@@ -8,12 +8,12 @@ namespace ChessDotNet.Pieces
     {
         public Bishop(ChessPlayer owner)
         {
-            Owner = owner;
+            Player = owner;
         }
 
         public override char GetFENLetter()
         {
-            return Owner == ChessPlayer.White ? 'B' : 'b';
+            return Player == ChessPlayer.White ? 'B' : 'b';
         }
 
         public override bool IsLegalMove(Move move, ChessGame game)
@@ -53,7 +53,7 @@ namespace ChessDotNet.Pieces
                 if (from.Rank + i > 0 && from.Rank + i <= l0
                     && (int)from.File + i > -1 && (int)from.File + i < l1)
                 {
-                    Move move = new Move(from, new BoardPosition(from.File + i, from.Rank + i), piece.Owner);
+                    Move move = new Move(from, new BoardPosition(from.File + i, from.Rank + i), piece.Player);
                     if (gameMoveValidator(move))
                     {
                         validMoves.Add(move);
@@ -64,7 +64,7 @@ namespace ChessDotNet.Pieces
                 if (from.Rank - i > 0 && from.Rank - i <= l0
                     && (int)from.File + i > -1 && (int)from.File + i < l1)
                 {
-                    Move move = new Move(from, new BoardPosition(from.File + i, from.Rank - i), piece.Owner);
+                    Move move = new Move(from, new BoardPosition(from.File + i, from.Rank - i), piece.Player);
                     if (gameMoveValidator(move))
                     {
                         validMoves.Add(move);

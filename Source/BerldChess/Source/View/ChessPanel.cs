@@ -1002,7 +1002,7 @@ namespace BerldChess.View
                     if (_selectedIndex.X == -1)
                     {
                         if (Board[currentIndex.Y][currentIndex.X] != null &&
-                            Board[currentIndex.Y][currentIndex.X].Owner == Game.WhoseTurn)
+                            Board[currentIndex.Y][currentIndex.X].Player == Game.WhoseTurn)
                         {
                             _selectedIndex = currentIndex;
                         }
@@ -1011,8 +1011,8 @@ namespace BerldChess.View
                     {
                         if (Board[currentIndex.Y][currentIndex.X] != null &&
                             Board[_selectedIndex.Y][_selectedIndex.X] != null &&
-                            Board[currentIndex.Y][currentIndex.X].Owner ==
-                            Board[_selectedIndex.Y][_selectedIndex.X].Owner)
+                            Board[currentIndex.Y][currentIndex.X].Player ==
+                            Board[_selectedIndex.Y][_selectedIndex.X].Player)
                         {
                             _selectedIndex = currentIndex;
                         }

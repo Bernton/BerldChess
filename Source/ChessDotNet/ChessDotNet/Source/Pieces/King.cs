@@ -16,13 +16,13 @@ namespace ChessDotNet.Pieces
 
         public King(ChessPlayer owner, bool hasCastlingAbility)
         {
-            Owner = owner;
+            Player = owner;
             HasCastlingAbility = hasCastlingAbility;
         }
 
         public override char GetFENLetter()
         {
-            return Owner == ChessPlayer.White ? 'K' : 'k';
+            return Player == ChessPlayer.White ? 'K' : 'k';
         }
 
         public override bool IsLegalMove(Move move, ChessGame game)
@@ -44,7 +44,7 @@ namespace ChessDotNet.Pieces
         protected virtual bool CanCastle(BoardPosition origin, BoardPosition destination, ChessGame game)
         {
             if (!HasCastlingAbility) return false;
-            if (Owner == ChessPlayer.White)
+            if (Player == ChessPlayer.White)
             {
                 if (origin.File != ChessFile.E || origin.Rank != 1)
                     return false;
@@ -109,7 +109,7 @@ namespace ChessDotNet.Pieces
                 if ((int)from.File + dir[0] < 0 || (int)from.File + dir[0] >= l1
                     || from.Rank + dir[1] < 1 || from.Rank + dir[1] > l0)
                     continue;
-                Move move = new Move(from, new BoardPosition(from.File + dir[0], from.Rank + dir[1]), piece.Owner);
+                Move move = new Move(from, new BoardPosition(from.File + dir[0], from.Rank + dir[1]), piece.Player);
                 if (gameMoveValidator(move))
                 {
                     validMoves.Add(move);

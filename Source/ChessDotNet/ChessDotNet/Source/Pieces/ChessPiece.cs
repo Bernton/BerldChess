@@ -11,7 +11,7 @@ namespace ChessDotNet
         /// <summary>
         /// Chess player who owns the piece
         /// </summary>
-        public ChessPlayer Owner { get; protected set; }
+        public ChessPlayer Player { get; protected set; }
 
 
         public abstract char GetFENLetter();
@@ -33,12 +33,12 @@ namespace ChessDotNet
             }
 
             ChessPiece piece = (ChessPiece)obj;
-            return Owner == piece.Owner;
+            return Player == piece.Player;
         }
 
         public override int GetHashCode()
         {
-            return new { Piece = GetFENLetter(), Owner }.GetHashCode();
+            return new { Piece = GetFENLetter(), Player }.GetHashCode();
         }
 
         public static bool operator ==(ChessPiece piece1, ChessPiece piece2)

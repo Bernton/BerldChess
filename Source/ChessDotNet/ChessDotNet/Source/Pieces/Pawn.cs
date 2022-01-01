@@ -9,12 +9,12 @@ namespace ChessDotNet.Pieces
     {
         public Pawn(ChessPlayer owner)
         {
-            Owner = owner;
+            Player = owner;
         }
 
         public override char GetFENLetter()
         {
-            return Owner == ChessPlayer.White ? 'P' : 'p';
+            return Player == ChessPlayer.White ? 'P' : 'p';
         }
 
         protected virtual char[] ValidPromotionPieces
@@ -41,7 +41,7 @@ namespace ChessDotNet.Pieces
             if ((posDelta.X != 0 || posDelta.Y != 1) && (posDelta.X != 1 || posDelta.Y != 1)
                         && (posDelta.X != 0 || posDelta.Y != 2))
                 return false;
-            if (Owner == ChessPlayer.White)
+            if (Player == ChessPlayer.White)
             {
                 if (origin.Rank > destination.Rank)
                     return false;
@@ -49,13 +49,13 @@ namespace ChessDotNet.Pieces
                 {
                     if (promotion == null)
                         return false;
-                    if (promotion.Owner != ChessPlayer.White)
+                    if (promotion.Player != ChessPlayer.White)
                         return false;
                     if (!ValidPromotionPieces.Contains(promotion.GetFENLetter()))
                         return false;
                 }
             }
-            if (Owner == ChessPlayer.Black)
+            if (Player == ChessPlayer.Black)
             {
                 if (origin.Rank < destination.Rank)
                     return false;
@@ -63,7 +63,7 @@ namespace ChessDotNet.Pieces
                 {
                     if (promotion == null)
                         return false;
-                    if (promotion.Owner != ChessPlayer.Black)
+                    if (promotion.Player != ChessPlayer.Black)
                         return false;
                     if (!ValidPromotionPieces.Contains(promotion.GetFENLetter()))
                         return false;
@@ -72,8 +72,8 @@ namespace ChessDotNet.Pieces
             bool checkEnPassant = false;
             if (posDelta.Y == 2)
             {
-                if ((origin.Rank != 2 && Owner == ChessPlayer.White)
-                    || (origin.Rank != 7 && Owner == ChessPlayer.Black))
+                if ((origin.Rank != 2 && Player == ChessPlayer.White)
+                    || (origin.Rank != 7 && Player == ChessPlayer.Black))
                     return false;
                 if (origin.Rank == 2 && game.GetPieceAt(origin.File, 3) != null)
                     return false;
@@ -90,7 +90,7 @@ namespace ChessDotNet.Pieces
             {
                 if (pieceAtDestination == null)
                     checkEnPassant = true;
-                else if (pieceAtDestination.Owner == Owner)
+                else if (pieceAtDestination.Player == Player)
                     return false;
             }
             if (checkEnPassant)
@@ -100,17 +100,17 @@ namespace ChessDotNet.Pieces
                 {
                     return false;
                 }
-                if ((origin.Rank != 5 && Owner == ChessPlayer.White)
-                    || (origin.Rank != 4 && Owner == ChessPlayer.Black))
+                if ((origin.Rank != 5 && Player == ChessPlayer.White)
+                    || (origin.Rank != 4 && Player == ChessPlayer.Black))
                     return false;
                 Move latestMove = _moves[_moves.Count - 1];
-                if (latestMove.Player != ChessUtility.GetOpponentOf(Owner))
+                if (latestMove.Player != ChessUtility.GetOpponentOf(Player))
                     return false;
                 if (!(game.GetPieceAt(latestMove.NewPosition) is Pawn))
                     return false;
-                if (game.GetPieceAt(latestMove.NewPosition).Owner == Owner)
+                if (game.GetPieceAt(latestMove.NewPosition).Player == Player)
                     return false;
-                if (Owner == ChessPlayer.White)
+                if (Player == ChessPlayer.White)
                 {
                     if (latestMove.OriginalPosition.Rank != 7 || latestMove.NewPosition.Rank != 5)
                         return false;
@@ -134,7 +134,7 @@ namespace ChessDotNet.Pieces
             int l0 = game.BoardHeight;
             int l1 = game.BoardWidth;
             int[][] directions;
-            if (piece.Owner == ChessPlayer.White)
+            if (piece.Player == ChessPlayer.White)
             {
                 directions = new int[][] { new int[] { 0, 1 }, new int[] { 0, 2 }, new int[] { 1, 1 }, new int[] { -1, 1 } };
             }
@@ -147,7 +147,7 @@ namespace ChessDotNet.Pieces
                 if ((int)from.File + dir[0] < 0 || (int)from.File + dir[0] >= l1
                     || from.Rank + dir[1] < 1 || from.Rank + dir[1] > l0)
                     continue;
-                Move move = new Move(from, new BoardPosition(from.File + dir[0], from.Rank + dir[1]), piece.Owner);
+                Move move = new Move(from, new BoardPosition(from.File + dir[0], from.Rank + dir[1]), piece.Player);
                 List<Move> moves = new List<Move>();
                 if ((move.NewPosition.Rank == 8 && move.Player == ChessPlayer.White) || (move.NewPosition.Rank == 1 && move.Player == ChessPlayer.Black))
                 {

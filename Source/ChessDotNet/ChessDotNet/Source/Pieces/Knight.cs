@@ -8,12 +8,12 @@ namespace ChessDotNet.Pieces
     {
         public Knight(ChessPlayer owner)
         {
-            Owner = owner;
+            Player = owner;
         }
 
         public override char GetFENLetter()
         {
-            return Owner == ChessPlayer.White ? 'N' : 'n';
+            return Player == ChessPlayer.White ? 'N' : 'n';
         }
 
         public override bool IsLegalMove(Move move, ChessGame game)
@@ -42,7 +42,7 @@ namespace ChessDotNet.Pieces
                 if ((int)from.File + dir[0] < 0 || (int)from.File + dir[0] >= l1
                     || from.Rank + dir[1] < 1 || from.Rank + dir[1] > l0)
                     continue;
-                Move move = new Move(from, new BoardPosition(from.File + dir[0], from.Rank + dir[1]), piece.Owner);
+                Move move = new Move(from, new BoardPosition(from.File + dir[0], from.Rank + dir[1]), piece.Player);
                 if (gameMoveValidator(move))
                 {
                     validMoves.Add(move);

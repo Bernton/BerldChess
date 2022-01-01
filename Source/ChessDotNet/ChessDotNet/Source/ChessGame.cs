@@ -120,7 +120,7 @@ namespace ChessDotNet
             {
                 for (int x = 0; x < Board.Length; x++)
                 {
-                    if (Board[x][y] == null || Board[x][y].Owner == ChessPlayer.None || Board[x][y].GetFENLetter() == 'k' || Board[x][y].GetFENLetter() == 'K')
+                    if (Board[x][y] == null || Board[x][y].Player == ChessPlayer.None || Board[x][y].GetFENLetter() == 'k' || Board[x][y].GetFENLetter() == 'K')
                     {
                         continue;
                     }
@@ -351,17 +351,17 @@ namespace ChessDotNet
             CanBlackCastleKingSide = CanBlackCastleQueenSide = CanWhiteCastleKingSide = CanWhiteCastleQueenSide = CastlingCanBeLegal;
             if (CastlingCanBeLegal)
             {
-                if (!(e1 is King) || e1.Owner != ChessPlayer.White)
+                if (!(e1 is King) || e1.Player != ChessPlayer.White)
                     CanWhiteCastleKingSide = CanWhiteCastleQueenSide = false;
-                if (!(e8 is King) || e8.Owner != ChessPlayer.Black)
+                if (!(e8 is King) || e8.Player != ChessPlayer.Black)
                     CanBlackCastleKingSide = CanBlackCastleQueenSide = false;
-                if (!(a1 is Rook) || a1.Owner != ChessPlayer.White)
+                if (!(a1 is Rook) || a1.Player != ChessPlayer.White)
                     CanWhiteCastleQueenSide = false;
-                if (!(h1 is Rook) || h1.Owner != ChessPlayer.White)
+                if (!(h1 is Rook) || h1.Player != ChessPlayer.White)
                     CanWhiteCastleKingSide = false;
-                if (!(a8 is Rook) || a8.Owner != ChessPlayer.Black)
+                if (!(a8 is Rook) || a8.Player != ChessPlayer.Black)
                     CanBlackCastleQueenSide = false;
-                if (!(h8 is Rook) || h8.Owner != ChessPlayer.Black)
+                if (!(h8 is Rook) || h8.Player != ChessPlayer.Black)
                     CanBlackCastleKingSide = false;
             }
         }
@@ -379,17 +379,17 @@ namespace ChessDotNet
             CanBlackCastleKingSide = CanBlackCastleQueenSide = CanWhiteCastleKingSide = CanWhiteCastleQueenSide = CastlingCanBeLegal;
             if (CastlingCanBeLegal)
             {
-                if (!(e1 is King) || e1.Owner != ChessPlayer.White)
+                if (!(e1 is King) || e1.Player != ChessPlayer.White)
                     CanWhiteCastleKingSide = CanWhiteCastleQueenSide = false;
-                if (!(e8 is King) || e8.Owner != ChessPlayer.Black)
+                if (!(e8 is King) || e8.Player != ChessPlayer.Black)
                     CanBlackCastleKingSide = CanBlackCastleQueenSide = false;
-                if (!(a1 is Rook) || a1.Owner != ChessPlayer.White || !data.CanWhiteCastleQueenSide)
+                if (!(a1 is Rook) || a1.Player != ChessPlayer.White || !data.CanWhiteCastleQueenSide)
                     CanWhiteCastleQueenSide = false;
-                if (!(h1 is Rook) || h1.Owner != ChessPlayer.White || !data.CanWhiteCastleKingSide)
+                if (!(h1 is Rook) || h1.Player != ChessPlayer.White || !data.CanWhiteCastleKingSide)
                     CanWhiteCastleKingSide = false;
-                if (!(a8 is Rook) || a8.Owner != ChessPlayer.Black || !data.CanBlackCastleQueenSide)
+                if (!(a8 is Rook) || a8.Player != ChessPlayer.Black || !data.CanBlackCastleQueenSide)
                     CanBlackCastleQueenSide = false;
-                if (!(h8 is Rook) || h8.Owner != ChessPlayer.Black || !data.CanBlackCastleKingSide)
+                if (!(h8 is Rook) || h8.Player != ChessPlayer.Black || !data.CanBlackCastleKingSide)
                     CanBlackCastleKingSide = false;
             }
 
@@ -744,9 +744,9 @@ namespace ChessDotNet
                 return false;
             ChessPiece piece = GetPieceAt(move.OriginalPosition.File, move.OriginalPosition.Rank);
             if (careAboutWhoseTurnItIs && move.Player != WhoseTurn) return false;
-            if (piece == null || piece.Owner != move.Player) return false;
+            if (piece == null || piece.Player != move.Player) return false;
             ChessPiece pieceAtDestination = GetPieceAt(move.NewPosition);
-            if (pieceAtDestination != null && pieceAtDestination.Owner == move.Player)
+            if (pieceAtDestination != null && pieceAtDestination.Player == move.Player)
             {
                 return false;
             }
@@ -813,7 +813,7 @@ namespace ChessDotNet
             }
             else if (movingPiece is King)
             {
-                if (movingPiece.Owner == ChessPlayer.White)
+                if (movingPiece.Player == ChessPlayer.White)
                     CanWhiteCastleKingSide = CanWhiteCastleQueenSide = false;
                 else
                     CanBlackCastleKingSide = CanBlackCastleQueenSide = false;
@@ -888,7 +888,7 @@ namespace ChessDotNet
         {
             ChessUtility.ThrowIfNull(from, "from");
             ChessPiece piece = GetPieceAt(from);
-            if (piece == null || piece.Owner != WhoseTurn) return new ReadOnlyCollection<Move>(new List<Move>());
+            if (piece == null || piece.Player != WhoseTurn) return new ReadOnlyCollection<Move>(new List<Move>());
             return piece.GetLegalMoves(from, returnIfAny, this, IsValidMove);
         }
 
@@ -906,7 +906,7 @@ namespace ChessDotNet
                 for (int f = 0; f < Board[8 - r].Length; f++)
                 {
                     ChessPiece p = GetPieceAt((ChessFile)f, r);
-                    if (p != null && p.Owner == player)
+                    if (p != null && p.Player == player)
                     {
                         validMoves.AddRange(GetValidMoves(new BoardPosition((ChessFile)f, r), returnIfAny));
                         if (returnIfAny && validMoves.Count > 0)
@@ -953,7 +953,7 @@ namespace ChessDotNet
                 for (int f = 0; f < Board[8 - r].Length; f++)
                 {
                     ChessPiece curr = GetPieceAt((ChessFile)f, r);
-                    if (curr is King && curr.Owner == player)
+                    if (curr is King && curr.Player == player)
                     {
                         kingPos = new BoardPosition((ChessFile)f, r);
                         break;
@@ -974,7 +974,7 @@ namespace ChessDotNet
                 {
                     ChessPiece curr = GetPieceAt((ChessFile)f, r);
                     if (curr == null) continue;
-                    ChessPlayer p = curr.Owner;
+                    ChessPlayer p = curr.Player;
                     Move move = new Move(new BoardPosition((ChessFile)f, r), kingPos, p);
                     List<Move> moves = new List<Move>();
                     if (curr is Pawn && ((move.NewPosition.Rank == 8 && move.Player == ChessPlayer.White) || (move.NewPosition.Rank == 1 && move.Player == ChessPlayer.Black)))
