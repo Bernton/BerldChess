@@ -574,15 +574,7 @@ namespace BerldChess.View
 
         private void OnPieceMoved(object sender, PieceMovedEventArgs e)
         {
-
-            new Thread(() => PlayMove(e)).Start();
-            
-//            new System.Threading.Thread(new ParameterizedThreadStart(PlayMove)).Start(e);
-//!!!!
-  //          if (PlayMove(e))
-    //        {
-      //          playingEngine?.RequestStop();
-        //    }
+            new Thread(() => PlayMove(e)).Start();           
         }
 
         private void OnFormMainLoad(object sender, EventArgs e)
@@ -2668,35 +2660,26 @@ namespace BerldChess.View
         private bool PlayMove(PieceMovedEventArgs args, char? promotion = null, bool cheatMove = false,
             bool silent = false)
         {
-//!!!
+            //this is where the actual movement of the piece happens
             var sourcePosition = new BoardPosition((ChessFile)args.Position.X, Invert(args.Position.Y - 1, 7));
             var destinationPosition =
                 new BoardPosition((ChessFile)args.NewPosition.X, Invert(args.NewPosition.Y - 1, 7));
             var movingPiece = _vm.Game.GetPieceAt(sourcePosition);
 
             SpeechSynthesizer synth = new SpeechSynthesizer();
-            
+            synth.SelectVoiceByHints(VoiceGender.Neutral, VoiceAge.NotSet, 0, CultureInfo.GetCultureInfo("en-US"));
+            var piece = "";
 
-                synth.SelectVoiceByHints(VoiceGender.Neutral, VoiceAge.NotSet, 0, CultureInfo.GetCultureInfo("en-US"));
-                var piece = "";
-                if (movingPiece.Player == 0)
-                    piece = "White ";
-                else
-                    piece = "Black ";
+            if (movingPiece.Player == 0)
+               piece = "white ";
+            else
+               piece = "black ";
 
-                piece += new SpeechPieces().pieces[movingPiece.GetFENLetter().ToString().ToLower()];
+            piece += new SpeechPieces().pieces[movingPiece.GetFENLetter().ToString().ToLower()];
 
-                var str = "moving " + piece + " from " + sourcePosition.File + " " +sourcePosition.Rank.ToString() + " to " + destinationPosition.File + " "+destinationPosition.Rank.ToString();
-                synth.Speak(str);
-/*                synth.Speak(str);
-                synth.Speak("from");
-                synth.Speak(sourcePosition.File + sourcePosition.Rank.ToString());
-                synth.Speak("to")
-                synth.Speak(destinationPosition.File + destinationPosition.Rank.ToString());
-*/
-            
-
-
+            var str = "moving " + piece + " from " + sourcePosition.File + " " +sourcePosition.Rank.ToString() + " to " + destinationPosition.File + " "+destinationPosition.Rank.ToString();
+            synth.Speak(str);
+         
             if (movingPiece == null)
             {
                 return false;
