@@ -172,6 +172,8 @@
     <Compile Include="Source\View\SmoothLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Speech.cs" />
+    <Compile Include="SpeechPieces.cs" />
     <EmbeddedResource Include="Source\View\ChessPanel.resx">
       <DependentUpon>ChessPanel.cs</DependentUpon>
     </EmbeddedResource>

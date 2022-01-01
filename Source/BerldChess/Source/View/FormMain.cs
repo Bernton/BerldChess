@@ -263,7 +263,7 @@ namespace BerldChess.View
         private void InitializeFormAndControls()
         {
             Icon = Resources.PawnRush;
-            Text = $@"BerldChess Version {Assembly.GetEntryAssembly().GetName().Version.ToString(2)}";
+            Text = $@"Voice Chess v0.1 by Bernton and Dennis M. Heine";
 
             _movePlayer.Load();
             _capturePlayer.Load();
@@ -574,12 +574,15 @@ namespace BerldChess.View
 
         private void OnPieceMoved(object sender, PieceMovedEventArgs e)
         {
-            var playingEngine = GetPlayingEngine();
 
-            if (PlayMove(e))
-            {
-                playingEngine?.RequestStop();
-            }
+            new Thread(() => PlayMove(e)).Start();
+            
+//            new System.Threading.Thread(new ParameterizedThreadStart(PlayMove)).Start(e);
+//!!!!
+  //          if (PlayMove(e))
+    //        {
+      //          playingEngine?.RequestStop();
+        //    }
         }
 
         private void OnFormMainLoad(object sender, EventArgs e)
@@ -1848,7 +1851,7 @@ namespace BerldChess.View
 
         private void UpdateWindowText()
         {
-            var text = $"BerldChess Version {Assembly.GetEntryAssembly().GetName().Version.ToString(2)}";
+            var text = $"Voice Chess v0.1 by Bernton and Dennis M. Heine ";
 
             if (_pgnImportNames == null)
             {
@@ -2407,6 +2410,75 @@ namespace BerldChess.View
             }
         }
 
+        public delegate void AddRowDelegate(DataGridView control, DataGridViewRow row); 
+        public void AddRow(DataGridView control, DataGridViewRow row)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new AddRowDelegate(AddRow), new object[] { control, row });  
+            }
+            else
+            {
+                control.Rows.Add(row);     
+            }
+        }
+
+
+        public delegate void SetRowDelegate(DataGridView control, Object data, int rowCount, int cellCount); 
+        public void SetRow(DataGridView control, Object data, int rowCount, int cellCount)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetRowDelegate(SetRow), new object[] { control, data, rowCount, cellCount }); 
+            }
+            else
+            {
+                control.Rows[rowCount].Cells[cellCount].Value = data;     
+            }
+        }
+
+        public delegate void SetCurrentCellDelegate(DataGridView control,DataGridViewCell cell);  
+        public void SetCurrentCell(DataGridView control, DataGridViewCell cell)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetCurrentCellDelegate(SetCurrentCell), new object[] { control, cell }); 
+            }
+            else
+            {
+                control.CurrentCell = cell;     
+            }
+        }
+
+        public delegate void SetCellSelectedDelegate(DataGridView control, bool selected, int cellCount);
+        public void SetCellSelected(DataGridView control, bool selected, int cellCount)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetCellSelectedDelegate(SetCellSelected), new object[] { control, selected, cellCount });
+            }
+            else
+            {
+                control.SelectedCells[cellCount].Selected = selected;
+            }
+        }
+
+        public delegate void SetRowCellSelectedDelegate(DataGridView control, bool selected, int cellCount, int rowCount);
+        public void SetRowCellSelected(DataGridView control, bool selected, int cellCount, int rowCount)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetRowCellSelectedDelegate(SetRowCellSelected), new object[] { control, selected, cellCount, rowCount });
+            }
+            else
+            {
+                control.Rows[rowCount].Cells[cellCount].Selected = selected;
+            }
+        }
+
+        
+
+
         private void Navigate(int navigation, bool validate = true)
         {
             if (validate)
@@ -2484,7 +2556,7 @@ namespace BerldChess.View
         {
             for (var i = 0; i < _dataGridViewMoves.SelectedCells.Count; i++)
             {
-                _dataGridViewMoves.SelectedCells[i].Selected = false;
+                SetCellSelected(_dataGridViewMoves,false, i);                
             }
 
             navIndex--;
@@ -2493,9 +2565,9 @@ namespace BerldChess.View
             {
                 if (_dataGridViewMoves.Rows.Count > 0 && _dataGridViewMoves.Rows[0].Cells.Count > 0)
                 {
-                    _dataGridViewMoves.CurrentCell = _dataGridViewMoves.Rows[0].Cells[0];
+                    SetCurrentCell(_dataGridViewMoves,_dataGridViewMoves.Rows[0].Cells[0]);
                 }
-
+                    
                 return;
             }
 
@@ -2504,8 +2576,8 @@ namespace BerldChess.View
                 navIndex = _vm.PlyList.Count - 2;
             }
 
-            _dataGridViewMoves.Rows[navIndex / 2].Cells[navIndex % 2].Selected = true;
-            _dataGridViewMoves.CurrentCell = _dataGridViewMoves.Rows[navIndex / 2].Cells[navIndex % 2];
+            SetRowCellSelected(_dataGridViewMoves, true, navIndex % 2, navIndex / 2);
+            SetCurrentCell(_dataGridViewMoves, _dataGridViewMoves.Rows[navIndex / 2].Cells[navIndex % 2]);            
         }
 
         private void UpdateMoveGrid(string formattedMove)
@@ -2542,15 +2614,15 @@ namespace BerldChess.View
                 row.Cells.Add(blackMove);
 
                 row.Height = 40;
-                _dataGridViewMoves.Rows.Add(row);
+                AddRow(_dataGridViewMoves, row);                
             }
             else
             {
-                _dataGridViewMoves.Rows[plyCount / 2 - 1].Cells[1].Value = formattedMove;
+                SetRow(_dataGridViewMoves, formattedMove, plyCount / 2 - 1, 1);                
 
                 if (GetPlayingEngine() != null)
                 {
-                    _dataGridViewMoves.Rows[plyCount / 2 - 1].Cells[1].Value += "\n[D0]";
+                    SetRow(_dataGridViewMoves, _dataGridViewMoves.Rows[plyCount / 2 - 1].Cells[1].Value+ "\n[D0]", plyCount / 2 - 1, 1);                    
                 }
             }
 
@@ -2602,30 +2674,27 @@ namespace BerldChess.View
                 new BoardPosition((ChessFile)args.NewPosition.X, Invert(args.NewPosition.Y - 1, 7));
             var movingPiece = _vm.Game.GetPieceAt(sourcePosition);
 
-            using (SpeechSynthesizer synth =
-          new SpeechSynthesizer())
-            {
+            SpeechSynthesizer synth = new SpeechSynthesizer();
+            
+
+                synth.SelectVoiceByHints(VoiceGender.Neutral, VoiceAge.NotSet, 0, CultureInfo.GetCultureInfo("en-US"));
                 var piece = "";
                 if (movingPiece.Owner == 0)
-                    piece = "White";
+                    piece = "White ";
                 else
-                    piece = "Black";
+                    piece = "Black ";
 
-                foreach (String figure in figures)
-                    if (movingPiece.GetFENLetter().ToString().ToLower() == figure[0].ToString())
-                        piece += " "+figure;
-                //if (movingPiece.GetFENLetter().ToString() == "P" || movingPiece.GetFENLetter().ToString()=="p")
-                  //  piece += " Pawn";
+                piece += new SpeechPieces().pieces[movingPiece.GetFENLetter().ToString().ToLower()];
 
-                var str = "moving " + piece; 
+                var str = "moving " + piece + " from " + sourcePosition.File + " " +sourcePosition.Rank.ToString() + " to " + destinationPosition.File + " "+destinationPosition.Rank.ToString();
                 synth.Speak(str);
-
+/*                synth.Speak(str);
                 synth.Speak("from");
                 synth.Speak(sourcePosition.File + sourcePosition.Rank.ToString());
-                synth.Speak("to");
+                synth.Speak("to")
                 synth.Speak(destinationPosition.File + destinationPosition.Rank.ToString());
-
-            };
+*/
+            
 
 
             if (movingPiece == null)
@@ -2716,7 +2785,11 @@ namespace BerldChess.View
 
             _chessPanel.Invalidate();
             _movePlayed = true;
-
+            if (_movePlayed)
+            {
+                var playingEngine = GetPlayingEngine();
+                playingEngine?.RequestStop();
+            }
             return true;
         }
 
@@ -3031,6 +3104,16 @@ namespace BerldChess.View
         {
             if (!PlayMove(new PieceMovedEventArgs(new Point(1, 1), new Point(1, 2))))
                 new SpeechSynthesizer().Speak("Invalid move");
+        }
+
+        private void _labelShowNodes_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void _menuStripMain_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
     }
 }

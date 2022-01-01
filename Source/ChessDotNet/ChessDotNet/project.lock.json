@@ -20,18 +20,18 @@
       "ProgramFOX"
     ],
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\ChessDotNet.csproj",
+      "projectUniqueName": "G:\\Github\\BerldChess\\Source\\ChessDotNet\\ChessDotNet\\ChessDotNet.csproj",
       "projectName": "ChessDotNet",
-      "projectPath": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\ChessDotNet.csproj",
-      "projectJsonPath": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\project.json",
+      "projectPath": "G:\\Github\\BerldChess\\Source\\ChessDotNet\\ChessDotNet\\ChessDotNet.csproj",
+      "projectJsonPath": "G:\\Github\\BerldChess\\Source\\ChessDotNet\\ChessDotNet\\project.json",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\ChessDotNet\\ChessDotNet\\obj\\",
+      "outputPath": "G:\\Github\\BerldChess\\Source\\ChessDotNet\\ChessDotNet\\obj\\",
       "projectStyle": "ProjectJson",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\User\\Desktop\\BerldChess-master\\Source\\.nuget\\NuGet.Config",
+        "G:\\Github\\BerldChess\\Source\\.nuget\\NuGet.Config",
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
