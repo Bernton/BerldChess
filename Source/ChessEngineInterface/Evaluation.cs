@@ -6,7 +6,7 @@ namespace ChessEngineInterface
     {
         public InfoType[] Types { get; private set; }
 
-        private string[] _values;
+        private readonly string[] _values;
 
         public string this[InfoType type]
         {

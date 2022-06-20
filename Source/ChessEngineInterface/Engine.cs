@@ -10,11 +10,11 @@ namespace ChessEngineInterface
     {
         #region Fields
 
+        private readonly string[] _infoTypeNames;
         private Process _engine;
         private StreamWriter _writer;
-        private AutoResetEvent _autoResetEvent;
-        private string[] _infoTypeNames;
-        private List<string> _options = new List<string>();
+        private readonly AutoResetEvent _autoResetEvent;
+        private readonly List<string> _options = new List<string>();
 
         #endregion
 

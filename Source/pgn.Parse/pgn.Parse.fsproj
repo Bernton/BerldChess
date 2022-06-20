@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>pgn.Parse</RootNamespace>
     <AssemblyName>pgn.Parse</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <Name>pgn.Parse</Name>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

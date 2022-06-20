@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BerldChess.View;
+using ChessDotNet;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,6 +26,8 @@ namespace BerldChess.Model
         public static Point BoardLocation { get; private set; }
         public static Size BoardSize { get; private set; }
         public static SizeF FieldSize { get; set; }
+
+        private static Bitmap[] PieceImages { get; set; } = new Bitmap[12];
 
         #endregion
 
@@ -59,11 +63,117 @@ namespace BerldChess.Model
                     BoardFound = true;
                     ScreenIndex = i;
                     _lastBoardSnap = GetBoardSnap();
+
+
+                    DetectPieces(_lastBoardSnap, lightSquareColor, darkSquareColor);
+
+                    FormSquareColor form = new FormSquareColor(new Bitmap[] { PieceImages[7] });
+                    form.Show();
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public static void DetectPieces(Bitmap image, Color lightSquareColor, Color darkSquareColor)
+        {
+            unsafe
+            {
+                BitmapData imageData = LockBits(image);
+                var scan0 = (byte*)imageData.Scan0;
+                var width = imageData.Stride / 3;
+
+                for (int y = 0; y < imageData.Height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        var pointer = scan0 + imageData.Stride * y + 3 * x;
+
+                        if (Match(pointer, lightSquareColor) || Match(pointer, darkSquareColor))
+                        {
+                            pointer[0] = 255;
+                            pointer[1] = 0;
+                            pointer[2] = 255;
+                        }
+                    }
+                }
+
+                image.UnlockBits(imageData);
+
+                Point[] piecePositions = new Point[]
+                {
+                    new Point(4, 7), new Point(3, 7), new Point(0, 7), new Point(2, 7), new Point(1, 7),
+                    new Point(4, 0), new Point(3, 0), new Point(0, 0), new Point(2, 0), new Point(1, 0)
+                };
+
+                for (int i = 0; i < piecePositions.Length; i++)
+                {
+                    Rectangle rect = new Rectangle(
+                        (int)(piecePositions[i].X * FieldSize.Width),
+                        (int)(piecePositions[i].Y * FieldSize.Height),
+                        (int)(FieldSize.Width * 0.98),
+                        (int)(FieldSize.Height * 0.98));
+
+                    Bitmap pieceImage = image.Clone(rect, image.PixelFormat);
+                    PieceImages[i] = pieceImage;
+                }
+            }
+        }
+
+        private static unsafe bool Match(byte* pointer, Color color)
+        {
+            return pointer[0] == color.B &&
+                pointer[1] == color.G &&
+                pointer[2] == color.R;
+        }
+
+        public static GameCreationData GetCurrentState()
+        {
+            _lastBoardSnap = GetBoardSnap();
+
+            GameCreationData data = new GameCreationData();
+
+            ChessPiece[][] chessPieces = new ChessPiece[8][];
+
+            BitmapData[] pieceData = new BitmapData[12];
+
+            for (int i = 0; i < pieceData.Length; i++)
+            {
+                pieceData[i] = LockBits(PieceImages[i]);
+            }
+
+            for (int y = 0; y < 8; y++)
+            {
+                chessPieces[y] = new ChessPiece[8];
+
+                for (int x = 0; x < 8; x++)
+                {
+                    int yOffset = (int)(y * FieldSize.Height) + 1;
+                    int xOffset = (int)(x * FieldSize.Width) + 1;
+
+                    for (int pieceI = 0; pieceI < PieceImages.Length; pieceI++)
+                    {
+
+                        for (int aY = 0; aY < FieldSize.Height; aY++)
+                        {
+                            for (int aX = 0; aX < FieldSize.Width; aX++)
+                            {
+
+
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            for (int i = 0; i < pieceData.Length; i++)
+            {
+                PieceImages[i].UnlockBits(pieceData[i]);
+            }
+
+            return data;
         }
 
         public static Point[] GetChangedSquares(Bitmap boardSnap)
