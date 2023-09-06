@@ -57,18 +57,14 @@ namespace BerldChess.Model
                 {
                     if (BoardSize.Width < MinimumSize || BoardSize.Height < MinimumSize)
                     {
-                        return false;
+                        continue;
                     }
 
                     BoardFound = true;
                     ScreenIndex = i;
                     _lastBoardSnap = GetBoardSnap();
 
-
                     DetectPieces(_lastBoardSnap, lightSquareColor, darkSquareColor);
-
-                    FormSquareColor form = new FormSquareColor(new Bitmap[] { PieceImages[7] });
-                    form.Show();
                     return true;
                 }
             }

@@ -1909,13 +1909,14 @@ namespace BerldChess.View
                 if (Recognizer.BoardFound)
                 {
                     Point initialCursorPosition = Cursor.Position;
+                    Screen screen = Screen.AllScreens[Recognizer.ScreenIndex];
 
-                    double screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-                    double screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+                    double screenWidth = screen.WorkingArea.Width;
+                    double screenHeight = screen.WorkingArea.Height;
                     double fieldWidth = Recognizer.BoardSize.Width / 8.0;
                     double fieldHeight = Recognizer.BoardSize.Height / 8.0;
-                    double boardX = Recognizer.BoardLocation.X;
-                    double boardY = Recognizer.BoardLocation.Y;
+                    double boardX = screen.Bounds.Left + Recognizer.BoardLocation.X;
+                    double boardY = screen.Bounds.Top + Recognizer.BoardLocation.Y;
                     double max = ushort.MaxValue;
 
                     double moveX = max * ((boardX + fieldWidth * (points[0].X + 0.45)) / screenWidth);
