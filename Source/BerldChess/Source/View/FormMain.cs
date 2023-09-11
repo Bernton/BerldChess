@@ -135,10 +135,7 @@ namespace BerldChess.View
         private Bitmap _comparisonSnap;
         private ChessPanel _chessPanel;
         private readonly Stopwatch[] _playerTimes = { new Stopwatch(), new Stopwatch() };
-        private readonly SoundPlayer _movePlayer = new SoundPlayer(Resources.Move);
-        private readonly SoundPlayer _castlingPlayer = new SoundPlayer(Resources.Castling);
-        private readonly SoundPlayer _capturePlayer = new SoundPlayer(Resources.Capture);
-        private readonly SoundPlayer _illegalPlayer = new SoundPlayer(Resources.Ilegal);
+        private SoundEngine _soundEngine;
         private readonly InputSimulator _inputSimulator = new InputSimulator();
         private PieceMovedEventArgs _moveOnHold;
         private CancellationTokenSource _analysisTaskTokenSource;
@@ -264,10 +261,8 @@ namespace BerldChess.View
             Icon = Resources.PawnRush;
             Text = $@"BerldChess Version {Assembly.GetEntryAssembly().GetName().Version.ToString(2)}";
 
-            _movePlayer.Load();
-            _capturePlayer.Load();
-            _castlingPlayer.Load();
-            _illegalPlayer.Load();
+            _soundEngine = new SoundEngine();
+            _soundEngine.Load();
 
             Tag = BackColor;
 
@@ -1879,15 +1874,15 @@ namespace BerldChess.View
             {
                 if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].IsCapture)
                 {
-                    _capturePlayer.Play();
+                    _soundEngine.PlayCapture();
                 }
                 else if (_vm.Game.Moves[_vm.Game.Moves.Count - 1].Castling != CastlingType.None)
                 {
-                    _castlingPlayer.Play();
+                    _soundEngine.PlayCastling();
                 }
                 else
                 {
-                    _movePlayer.Play();
+                    _soundEngine.PlayMove();
                 }
             }
         }
@@ -2610,7 +2605,7 @@ namespace BerldChess.View
             {
                 if (_menuItemIllegalSound.Checked && !cheatMove && !silent && _menuIllegalSound.Checked)
                 {
-                    _illegalPlayer.Play();
+                    _soundEngine.PlayIllegal();
                 }
 
                 return false;

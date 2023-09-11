@@ -166,6 +166,7 @@
     <Compile Include="Source\View\SmoothLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Source\View\SoundEngine.cs" />
     <EmbeddedResource Include="Source\View\ChessPanel.resx">
       <DependentUpon>ChessPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -303,7 +304,6 @@
     <None Include="Resources\Images\Pieces\ChessPiecesSprite4.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FodyWeavers.xml" />
     <Content Include="Resources\Sounds\MP3\Capture.mp3" />
     <Content Include="Resources\Sounds\MP3\Ilegal.mp3" />
     <Content Include="Resources\Sounds\MP3\Move.mp3" />
