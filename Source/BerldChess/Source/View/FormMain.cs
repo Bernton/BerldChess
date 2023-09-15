@@ -120,7 +120,6 @@ namespace BerldChess.View
         private volatile bool _updateAfterAnimation;
         private volatile bool _analyzingMode = true;
         private volatile bool _movePlayed = true;
-        private int _mainPvReference;
         private int _animationTime = 300;
         private int _draws;
         private const int CentipawnTolerance = 100;
@@ -1785,43 +1784,102 @@ namespace BerldChess.View
 
         private void UpdateEngineArrows()
         {
+            if (_evaluations is null || _evaluations.Length == 0)
+            {
+                return;
+            }
+
             _engineEvalArrows.Clear();
+
+            int mainPvValue = default;
+            bool mainPvIsMate = default;
 
             for (var iPv = 0; iPv < _evaluations.Length; iPv++)
             {
-                if (_evaluations[iPv] == null)
+                Evaluation pvEvaluation = _evaluations[iPv];
+
+                if (pvEvaluation == null)
                 {
                     continue;
                 }
 
-                var pawnValue = _evaluations[iPv][InfoType.Score];
+                bool isMainPv = iPv == 0;
+                string pawnValue = _evaluations[iPv][InfoType.Score];
+                ProcessPawnValue(pawnValue, out var value, out var isMate);
 
-                ProcessPawnValue(pawnValue, out var centipawn, out var isMate);
-
-                if (isMate)
+                if (isMainPv)
                 {
-                    centipawn = centipawn * 20 + 12000;
+                    mainPvValue = value;
+                    mainPvIsMate = isMate;
                 }
 
-                if (iPv != 0 && (isMate || _mainPvReference - centipawn >= CentipawnTolerance) &&
-                    _engineEvalArrows.Count >= 3 && _menuItemFilterArrows.Checked)
+                double distanceFromReference = GetDistanceFromReference(value, isMate, mainPvValue, mainPvIsMate);
+
+                if (_menuItemFilterArrows.Checked &&
+                    distanceFromReference > 2.0)
                 {
                     continue;
                 }
 
-                if (iPv == 0)
+                string move = _evaluations[iPv][InfoType.PV].Substring(0, 4);
+                Color color = isMainPv ? Color.DarkBlue : GetGreenRedGradient(1 - distanceFromReference);
+                _engineEvalArrows.Add(new MoveArrow(move, 0.9, color));
+            }
+        }
+
+        private static double GetDistanceFromReference(int value, bool isMate, int referenceValue, bool referenceIsMate)
+        {
+            double distanceFromReference;
+
+            if (referenceIsMate && referenceValue >= 0)
+            {
+                if (isMate && value >= 0)
                 {
-                    _mainPvReference = centipawn;
+                    distanceFromReference = 0.4 * (value - referenceValue);
                 }
-
-                _engineEvalArrows.Add(new MoveArrow(_evaluations[iPv][InfoType.PV].Substring(0, 4), 0.9,
-                    GetReferenceColor(centipawn, _mainPvReference)));
-
-                if (iPv == 0)
+                else
                 {
-                    _engineEvalArrows[iPv].Color = Color.DarkBlue;
+                    distanceFromReference = int.MaxValue;
                 }
             }
+            else if (referenceIsMate && referenceValue < 0)
+            {
+                distanceFromReference = 0.4 * (value - referenceValue);
+            }
+            else if (isMate)
+            {
+                distanceFromReference = int.MaxValue;
+            }
+            else
+            {
+                distanceFromReference = (referenceValue - value) / 50.0;
+            }
+
+            return distanceFromReference;
+        }
+
+        private static Color GetGreenRedGradient(double value)
+        {
+            if (Math.Abs(value) > 1)
+            {
+                value = Math.Sign(value);
+            }
+
+            int red;
+            int green;
+
+            if (value >= 0)
+            {
+                red = Round(255 * (1 - value));
+                green = 255;
+            }
+            else
+            {
+                red = 255;
+                green = Round(255 * (1 + value));
+            }
+
+            return Color.FromArgb(red, green, 0);
         }
 
         private long GetRemainingTime(int index)
@@ -2737,7 +2795,7 @@ namespace BerldChess.View
             return 'q';
         }
 
-        private int Round(double number)
+        private static int Round(double number)
         {
             return (int)Math.Round(number, 0);
         }
@@ -2896,37 +2954,6 @@ namespace BerldChess.View
             }
 
             return number.ToString("#,0");
-        }
-
-        private static Color GetReferenceColor(int centipawn, int reference)
-        {
-            if (centipawn > reference)
-            {
-                centipawn = reference;
-            }
-
-            var difference = reference - centipawn;
-            var relativeDiff = difference / 50.0;
-
-            if (relativeDiff > 2)
-            {
-                relativeDiff = 2;
-            }
-
-            var red = 0;
-            var green = 255;
-
-            if (relativeDiff - 1 < 0)
-            {
-                red += (int)(relativeDiff * 255.0);
-            }
-            else
-            {
-                red = 255;
-                green -= (int)((relativeDiff - 1) * 255.0);
-            }
-
-            return Color.FromArgb(red, green, 0);
         }
 
         private static Color CalculateEvaluationColor(double evaluation)
