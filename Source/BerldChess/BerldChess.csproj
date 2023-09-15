@@ -277,18 +277,6 @@
     <None Include="Resources\Sounds\WAV\Castling.wav" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Images\Back.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\FastBack.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\FastForward.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Forward.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Images\Pieces\ChessPiecesSprite1.png" />
   </ItemGroup>
   <ItemGroup>
@@ -296,9 +284,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Images\Pieces\ChessPiecesSprite3.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Images\Pieces\ChessPiecesSprite4.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Images\Pieces\ChessPiecesSprite4.png" />
