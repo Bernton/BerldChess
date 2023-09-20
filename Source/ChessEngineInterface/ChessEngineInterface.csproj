@@ -43,12 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BestMoveFound.cs" />
+    <Compile Include="Events\BestMoveFound.cs" />
     <Compile Include="Evaluation.cs" />
-    <Compile Include="EvaluationReceived.cs" />
+    <Compile Include="Events\EvaluationReceived.cs" />
     <Compile Include="InfoType.cs" />
-    <Compile Include="OutputInfoReceived.cs" />
-    <Compile Include="OutputReceived.cs" />
+    <Compile Include="Events\OutputInfoReceived.cs" />
+    <Compile Include="Events\OutputReceived.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="OutputType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

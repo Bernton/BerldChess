@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessEngineInterface.Events;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
