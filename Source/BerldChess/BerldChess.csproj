@@ -95,6 +95,7 @@
     <Compile Include="Source\Extensions.cs" />
     <Compile Include="Source\Model\ChessFont.cs" />
     <Compile Include="Source\Model\ChessPly.cs" />
+    <Compile Include="Source\Model\EngineInfo.cs" />
     <Compile Include="Source\Model\EngineList.cs" />
     <Compile Include="Source\Model\EngineMode.cs" />
     <Compile Include="Source\Model\EngineSetting.cs" />

@@ -200,8 +200,8 @@ namespace BerldChess.View
 
                     if (isValidEngine)
                     {
-                        _vm.Engines[(int)_vm.Game.WhoseTurn].Query($"position fen {_vm.Game.GetFen()}");
-                        _vm.Engines[(int)_vm.Game.WhoseTurn].Query("go infinite");
+                        _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine.Query($"position fen {_vm.Game.GetFen()}");
+                        _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine.Query("go infinite");
                     }
 
                     SetEngineViewElementsVisible(isValidEngine);
@@ -395,37 +395,37 @@ namespace BerldChess.View
                     engineIndex = (int)onTurn;
                 }
 
-                _vm.Engines[engineIndex].Query($"position fen {_vm.Game.GetFen()}");
+                _vm.EngineInfos[engineIndex].Engine.Query($"position fen {_vm.Game.GetFen()}");
 
                 if (_analyzingMode && (_computerPlayer == ChessPlayer.None || _computerPlayer != _vm.Game.WhoseTurn))
                 {
-                    _vm.Engines[engineIndex].Query("go infinite");
+                    _vm.EngineInfos[engineIndex].Engine.Query("go infinite");
                 }
                 else
                 {
                     switch (SerializedInfo.Instance.Level.SelectedLevelType)
                     {
                         case LevelType.FixedDepth:
-                            _vm.Engines[engineIndex].Query($"go depth {SerializedInfo.Instance.Level.Plies}");
+                            _vm.EngineInfos[engineIndex].Engine.Query($"go depth {SerializedInfo.Instance.Level.Plies}");
                             break;
 
                         case LevelType.TimePerMove:
-                            _vm.Engines[engineIndex].Query($"go movetime {SerializedInfo.Instance.Level.TimePerMove}");
+                            _vm.EngineInfos[engineIndex].Engine.Query($"go movetime {SerializedInfo.Instance.Level.TimePerMove}");
                             break;
 
                         case LevelType.TotalTime:
                             var increment = SerializedInfo.Instance.Level.Increment;
-                            _vm.Engines[engineIndex]
-                                .Query(
+                            _vm.EngineInfos[engineIndex]
+                                .Engine.Query(
                                     $"go wtime {GetRemainingTime(0)} btime {GetRemainingTime(1)} winc {increment} binc {increment}");
                             break;
 
                         case LevelType.Infinite:
-                            _vm.Engines[engineIndex].Query("go infinite");
+                            _vm.EngineInfos[engineIndex].Engine.Query("go infinite");
                             break;
 
                         case LevelType.Nodes:
-                            _vm.Engines[engineIndex].Query($"go nodes {SerializedInfo.Instance.Level.Nodes}");
+                            _vm.EngineInfos[engineIndex].Engine.Query($"go nodes {SerializedInfo.Instance.Level.Nodes}");
                             break;
                     }
                 }
@@ -867,9 +867,9 @@ namespace BerldChess.View
         {
             var input = Interaction.InputBox("Enter MultiPv:", "BerldChess - MultiPv");
 
-            foreach (var engine in _vm.Engines)
+            foreach (var engineInfo in _vm.EngineInfos)
             {
-                if (engine == null)
+                if (engineInfo == null)
                 {
                     continue;
                 }
@@ -889,8 +889,8 @@ namespace BerldChess.View
 
                 SerializedInfo.Instance.MultiPv = multiPv;
                 _menuItemMultiPv.Text = $@"MultiPv [{SerializedInfo.Instance.MultiPv}]";
-                engine.Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
-                engine.RequestStop();
+                engineInfo.Engine.Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
+                engineInfo.Engine.RequestStop();
                 _chessPanel.Invalidate();
 
                 ResetEvaluationData(multiPv);
@@ -1046,7 +1046,7 @@ namespace BerldChess.View
 
         private void OnMenuItemClickDelayClick(object sender, EventArgs e)
         {
-            var input = Interaction.InputBox("Enter Click Delay:", "BerldChess -Click Delay");
+            var input = Interaction.InputBox("Enter Click Delay:", "BerldChess - Click Delay");
 
             if (!int.TryParse(input, out var clickDelay))
             {
@@ -1331,13 +1331,42 @@ namespace BerldChess.View
             _labelEvaluation.FitFont(0.9, 0.98);
         }
 
+        private string GetFormattedEngineScore()
+        {
+            EngineList engineList = SerializedInfo.Instance.EngineList;
+
+            string playerName = engineList.SelectedSetting.Name;
+            string opponentName = engineList.SelectedOpponentSetting.Name;
+
+            int playerWins = _engineWins[0];
+            int opponentWins = _engineWins[1];
+
+            int draws = _draws;
+            int games = playerWins + opponentWins + draws;
+
+            return
+                $"{playerName}: {playerWins} ({ToFormattedPercentage(playerWins, games)})\n\n" +
+                $"{opponentName}: {opponentWins} ({ToFormattedPercentage(opponentWins, games)})\n\n" +
+                $"Draws: {draws} ({ToFormattedPercentage(draws, games)})";
+        }
+
+        private string ToFormattedPercentage(int value, int divisor)
+        {
+            if (divisor == 0)
+            {
+                return "0%";
+            }
+
+            return $"{Math.Round(value / (double)divisor * 100, 1)}%";
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.KeyCode == Keys.V)
             {
-                MessageBox.Show(
-                    $@"{SerializedInfo.Instance.EngineList.SelectedSetting.Name}: {_engineWins[0].ToString()}\n\n{SerializedInfo.Instance.EngineList.SelectedOpponentSetting.Name}: {_engineWins[1].ToString()}\n\nDraws: {_draws.ToString()}",
-                    @"BerldChess - Score");
+                string formattedEngineWinDrawLoss = GetFormattedEngineScore();
+
+                MessageBox.Show(formattedEngineWinDrawLoss, "BerldChess - Score");
                 e.Handled = true;
                 e.SuppressKeyPress = true;
                 return;
@@ -1653,12 +1682,12 @@ namespace BerldChess.View
 
         private void ClearEngines()
         {
-            for (var i = 0; i < _vm.Engines.Length; i++)
+            for (var i = 0; i < _vm.EngineInfos.Length; i++)
             {
-                if (_vm.Engines[i] != null)
+                if (_vm.EngineInfos[i] != null)
                 {
-                    _vm.Engines[i].Dispose();
-                    _vm.Engines[i] = null;
+                    _vm.EngineInfos[i].Engine.Dispose();
+                    _vm.EngineInfos[i] = null;
                 }
             }
         }
@@ -1900,21 +1929,14 @@ namespace BerldChess.View
 
             if (_pgnImportNames == null)
             {
-                foreach (var engine in _vm.Engines)
+                foreach (var engineInfo in _vm.EngineInfos)
                 {
-                    if (engine == null)
+                    if (engineInfo == null)
                     {
                         continue;
                     }
 
-                    if (engine.Name != null)
-                    {
-                        text += $" | {engine.Name}";
-                    }
-                    else
-                    {
-                        text += $" | {engine.ExecutablePath}";
-                    }
+                    text += $" | {engineInfo.Setting.Name}";
                 }
             }
             else
@@ -2304,27 +2326,27 @@ namespace BerldChess.View
 
             if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
             {
-                var temp = _vm.Engines[0];
+                var temp = _vm.EngineInfos[0];
 
-                _vm.Engines[0] = _vm.Engines[1];
-                _vm.Engines[1] = temp;
+                _vm.EngineInfos[0] = _vm.EngineInfos[1];
+                _vm.EngineInfos[1] = temp;
 
                 _switched = !_switched;
             }
 
-            foreach (var engine in _vm.Engines)
+            foreach (var engineInfo in _vm.EngineInfos)
             {
-                if (engine == null)
+                if (engineInfo == null)
                 {
                     continue;
                 }
 
                 if (!wasFinished)
                 {
-                    engine.RequestStop();
+                    engineInfo.Engine.RequestStop();
                 }
 
-                engine.Query("ucinewgame");
+                engineInfo.Engine.Query("ucinewgame");
             }
 
             if (wasFinished)
@@ -2509,9 +2531,9 @@ namespace BerldChess.View
 
             _movePlayed = true;
 
-            foreach (var engine in _vm.Engines)
+            foreach (var engineInfo in _vm.EngineInfos)
             {
-                if (engine == null)
+                if (engineInfo == null)
                 {
                     continue;
                 }
@@ -2522,7 +2544,7 @@ namespace BerldChess.View
                 }
                 else
                 {
-                    engine.RequestStop();
+                    engineInfo.Engine.RequestStop();
                 }
             }
         }
@@ -2768,7 +2790,11 @@ namespace BerldChess.View
                     engine.Query("go infinite");
                 }
 
-                _vm.Engines[index] = engine;
+                _vm.EngineInfos[index] = new Source.Model.EngineInfo()
+                {
+                    Engine = engine,
+                    Setting = engineSetting
+                };
 
                 return true;
             }
@@ -2984,10 +3010,10 @@ namespace BerldChess.View
         {
             if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
             {
-                return _vm.Engines[(int)_vm.Game.WhoseTurn];
+                return _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine;
             }
 
-            return _vm.Engines[0];
+            return _vm.EngineInfos[0].Engine;
         }
 
         private static IEnumerable<Control> GetAllChildControls(Control control)
