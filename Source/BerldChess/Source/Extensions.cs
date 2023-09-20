@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ilf.pgn.Data;
+using System;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
-using ilf.pgn.Data;
 using Color = System.Drawing.Color;
 
 namespace BerldChess

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ChessEngineInterface
+﻿namespace ChessEngineInterface
 {
     public class Evaluation
     {
@@ -14,7 +12,7 @@ namespace ChessEngineInterface
             {
                 for (int i = 0; i < Types.Length; i++)
                 {
-                    if(Types[i] == type)
+                    if (Types[i] == type)
                     {
                         return _values[i];
                     }

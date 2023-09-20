@@ -106,19 +106,19 @@ namespace BerldChess.View
                 Level.Plies = plies;
             }
 
-            if(double.TryParse(_textBoxTimePerMove.Text, out timePerMove))
+            if (double.TryParse(_textBoxTimePerMove.Text, out timePerMove))
             {
                 Level.TimePerMove = (int)TimeSpan.FromSeconds(timePerMove).TotalMilliseconds;
             }
 
-            if(int.TryParse(_textBoxTotalTimeMinutes.Text, out totalMinutes) &&
+            if (int.TryParse(_textBoxTotalTimeMinutes.Text, out totalMinutes) &&
                 int.TryParse(_textBoxTotalTimeSeconds.Text, out totalSeconds))
             {
                 TimeSpan totalTime = new TimeSpan(0, totalMinutes, totalSeconds);
                 Level.TotalTime = (int)totalTime.TotalMilliseconds;
             }
 
-            if(double.TryParse(_textBoxIncrement.Text, out increment))
+            if (double.TryParse(_textBoxIncrement.Text, out increment))
             {
                 Level.Increment = (int)TimeSpan.FromSeconds(increment).TotalMilliseconds;
             }

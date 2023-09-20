@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using ilf.pgn.Data.Format;
+﻿using ilf.pgn.Data.Format;
 using ilf.pgn.Data.MoveText;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace ilf.pgn.Data
 {

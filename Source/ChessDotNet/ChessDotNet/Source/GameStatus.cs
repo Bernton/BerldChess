@@ -1,7 +1,7 @@
 ﻿namespace ChessDotNet
 {
     public class GameStatus
-    {   
+    {
         public GameEvent Event
         {
             get;

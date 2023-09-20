@@ -161,7 +161,7 @@ namespace ilf.pgn.Data
         {
             if (p == null) return "   ";
 
-            var str="";
+            var str = "";
             switch (p.PieceType)
             {
                 case PieceType.Pawn:

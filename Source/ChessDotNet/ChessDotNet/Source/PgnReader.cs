@@ -64,7 +64,7 @@ namespace ChessDotNet
                     int r = player == ChessPlayer.White ? 1 : 8;
                     origin = new BoardPosition(ChessFile.E, r);
                     destination = new BoardPosition(ChessFile.C, r);
-                    piece = new King(player);                
+                    piece = new King(player);
                 }
 
                 if (piece == null)

@@ -13,7 +13,7 @@ namespace BerldChess.View
 
         public MoveArrow(string move, double thickness, Color color, bool abovePieces = true, bool hasStartCircle = true)
         {
-            if(move.Length != 4)
+            if (move.Length != 4)
             {
                 throw new ArgumentException("Move must have length of 4.");
             }

@@ -1,5 +1,4 @@
-﻿using BerldChess.View;
-using ChessDotNet;
+﻿using ChessDotNet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using ilf.pgn.Data;
+﻿using ilf.pgn.Data;
 using ilf.pgn.PgnParsers;
+using System.Collections.Generic;
+using System.IO;
 using Game = ilf.pgn.Data.Game;
 
 namespace ilf.pgn

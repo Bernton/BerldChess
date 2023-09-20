@@ -37,7 +37,7 @@ namespace ilf.pgn.Data.Format
             FormatTag("Black", game.BlackPlayer, writer);
             FormatTag("Result", GetResultString(game.Result), writer);
 
-            foreach(var info in game.AdditionalInfo)
+            foreach (var info in game.AdditionalInfo)
                 FormatTag(info.Name, info.Value, writer);
 
             writer.WriteLine();

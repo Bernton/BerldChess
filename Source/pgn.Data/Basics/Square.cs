@@ -56,7 +56,7 @@
         /// </returns>
         public override int GetHashCode()
         {
-            return ((int) this.File)*this.Rank;
+            return ((int)this.File) * this.Rank;
         }
 
         /// <summary>

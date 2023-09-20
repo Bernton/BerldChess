@@ -1,6 +1,6 @@
-﻿using System.IO;
-using ilf.pgn.Data;
+﻿using ilf.pgn.Data;
 using ilf.pgn.Data.Format;
+using System.IO;
 
 namespace ilf.pgn
 {
@@ -25,7 +25,7 @@ namespace ilf.pgn
         /// <param name="fileName">Name of the file to write to.</param>
         public PgnWriter(string fileName)
         {
-            _stream=new FileStream(fileName, FileMode.OpenOrCreate);
+            _stream = new FileStream(fileName, FileMode.OpenOrCreate);
         }
 
         /// <summary>

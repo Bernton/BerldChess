@@ -45,7 +45,7 @@ namespace BerldChess.View
             EngineSetting setting = _engineList.Settings[_listBoxSettings.SelectedIndex];
             string name = _textBoxName.Text;
 
-            if(string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 return;
             }
@@ -277,7 +277,7 @@ namespace BerldChess.View
 
             if (initialSelect != -1 && _listBoxSettings.Items.Count > 0)
             {
-                if(initialSelect >= _listBoxSettings.Items.Count)
+                if (initialSelect >= _listBoxSettings.Items.Count)
                 {
                     initialSelect = _listBoxSettings.Items.Count - 1;
                 }

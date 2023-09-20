@@ -20,7 +20,7 @@
             private set;
         }
 
-        public DetailedMove(BoardPosition originalPosition, BoardPosition newPosition, ChessPlayer player, char? promotion, ChessPiece piece, bool isCapture, CastlingType castling) : 
+        public DetailedMove(BoardPosition originalPosition, BoardPosition newPosition, ChessPlayer player, char? promotion, ChessPiece piece, bool isCapture, CastlingType castling) :
             base(originalPosition, newPosition, player, promotion)
         {
             Piece = piece;
