@@ -121,7 +121,6 @@ namespace BerldChess.View
         private volatile bool _movePlayed = true;
         private int _animationTime = 300;
         private int _draws;
-        private const int CentipawnTolerance = 100;
         private const int ChartShownPlies = 25;
         private const double DefaultSizeFactor = 0.91;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
@@ -1733,7 +1732,12 @@ namespace BerldChess.View
             _labelNodes.Text = FormatNumber(long.Parse(_evaluations[0][InfoType.Nodes]));
 
             _labelTime.Text = GetFormattedEngineInfo(InfoType.Time, _evaluations[0][InfoType.Time]);
-            _labelNPS.Text = ToKiloFormat(int.Parse(_evaluations[0][InfoType.NPS]));
+
+            if (int.TryParse(_evaluations[0][InfoType.NPS], out int nps))
+            {
+                _labelNPS.Text = ToKiloFormat(nps);
+            }
+
             SetExtendedInfoEnabled(true);
 
             double whitePawnEvaluation;
@@ -1797,8 +1801,12 @@ namespace BerldChess.View
 
                 for (var iColumn = 0; iColumn < _columnOrder.Length; iColumn++)
                 {
-                    _dataGridViewEvaluation.Rows[iPv].Cells[iColumn].Value =
-                        GetFormattedEngineInfo(_columnOrder[iColumn], _evaluations[iPv][_columnOrder[iColumn]]);
+                    string data = _evaluations[iPv][_columnOrder[iColumn]];
+
+                    if (data != null)
+                    {
+                        _dataGridViewEvaluation.Rows[iPv].Cells[iColumn].Value = GetFormattedEngineInfo(_columnOrder[iColumn], data);
+                    }
                 }
             }
 
@@ -2326,11 +2334,7 @@ namespace BerldChess.View
 
             if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
             {
-                var temp = _vm.EngineInfos[0];
-
-                _vm.EngineInfos[0] = _vm.EngineInfos[1];
-                _vm.EngineInfos[1] = temp;
-
+                (_vm.EngineInfos[1], _vm.EngineInfos[0]) = (_vm.EngineInfos[0], _vm.EngineInfos[1]);
                 _switched = !_switched;
             }
 
