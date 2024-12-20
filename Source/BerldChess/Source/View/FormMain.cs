@@ -1665,7 +1665,7 @@ namespace BerldChess.View
                     if (PlayMove(args, 'q', true))
                     {
                         _movePlayed = true;
-                        GetPlayingEngine().RequestStop();
+                        GetPlayingEngine()?.RequestStop();
                     }
 
                     Recognizer.UpdateBoardImage(currentImage);
@@ -3014,10 +3014,10 @@ namespace BerldChess.View
         {
             if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
             {
-                return _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine;
+                return _vm.EngineInfos[(int)_vm.Game.WhoseTurn]?.Engine;
             }
 
-            return _vm.EngineInfos[0].Engine;
+            return _vm.EngineInfos[0]?.Engine;
         }
 
         private static IEnumerable<Control> GetAllChildControls(Control control)

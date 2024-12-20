@@ -8,18 +8,21 @@ type PgnTag(name: string, value: string) =
     member val Name = name with get, set
     member val Value = value with get, set
 
-let formatDate (year : int option, month : int option, day : int option) = 
-    let yearStr = match year with 
+let formatDate(year : int option, month : int option, day : int option) = 
+    let yearStr =
+        match year with 
         | None -> "????"
-        | _ -> year.Value.ToString("D4")
+        | Some y -> y.ToString("D4")
 
-    let monthStr = match month with
+    let monthStr =
+        match month with
         | None -> "??"
-        | _ -> month.Value.ToString("D2");
+        | Some m -> m.ToString("D2");
 
-    let dayStr = match day with
+    let dayStr =
+        match day with
         | None -> "??"
-        | _ -> day.Value.ToString("D2");
+        | Some d -> d.ToString("D2");
 
     String.Format("{0}-{1}-{2}", yearStr, monthStr, dayStr)
 

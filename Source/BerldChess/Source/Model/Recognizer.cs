@@ -312,7 +312,7 @@ namespace BerldChess.Model
 
             using (Graphics g = Graphics.FromImage(screenshot))
             {
-                g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screen.Bounds.Size, CopyPixelOperation.SourceCopy);
+                g.CopyFromScreen(screen.Bounds.Left, screen.Bounds.Top, 0, 0, screen.Bounds.Size, CopyPixelOperation.SourceCopy);
             }
 
             return screenshot;
