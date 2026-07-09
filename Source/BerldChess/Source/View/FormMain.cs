@@ -1571,9 +1571,25 @@ namespace BerldChess.View
                 }
 
                 var serializer = new XmlSerializer(typeof(SerializedInfo));
-                var fileStream = new FileStream(FormMainViewModel.ConfigurationFileName, FileMode.Create);
-                serializer.Serialize(fileStream, SerializedInfo.Instance);
-                fileStream.Dispose();
+                var configFile = FormMainViewModel.ConfigurationFileName;
+                var tempFile = configFile + ".tmp";
+
+                // Write to a temp file and swap it in atomically, so an interrupted or crashing
+                // save can never truncate/corrupt the existing config (which would otherwise
+                // silently reset all settings on the next launch).
+                using (var fileStream = new FileStream(tempFile, FileMode.Create))
+                {
+                    serializer.Serialize(fileStream, SerializedInfo.Instance);
+                }
+
+                if (File.Exists(configFile))
+                {
+                    File.Replace(tempFile, configFile, null);
+                }
+                else
+                {
+                    File.Move(tempFile, configFile);
+                }
 
                 SerializedInfo.Instance.Bounds = WindowState == FormWindowState.Maximized ? RestoreBounds : Bounds;
             }
