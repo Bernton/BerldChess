@@ -12,9 +12,7 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <Name>pgn.Parse</Name>
     <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,8 +49,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(SolutionDir)\FSharpCompiler\Microsoft.FSharp.Targets" Condition="Exists('$(SolutionDir)\FSharpCompiler\Microsoft.FSharp.Targets')" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Bootstrap.fs" />
@@ -67,31 +63,21 @@
     <Compile Include="GameParsers.fs" />
     <Compile Include="Parser.fs" />
     <Content Include="app.config" />
-    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FParsec">
-      <HintPath>..\packages\FParsec-Big-Data-Edition.1.1.1\lib\net45\FParsec.dll</HintPath>
-    </Reference>
-    <Reference Include="FParsecCS">
-      <HintPath>..\packages\FParsec-Big-Data-Edition.1.1.1\lib\net45\FParsecCS.dll</HintPath>
-    </Reference>
-    <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.6.0.5\lib\netstandard2.0\FSharp.Core.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <ProjectReference Include="..\pgn.Data\pgn.Data.csproj">
       <Name>pgn.Data</Name>
       <Project>{29143ecd-e5d3-41d4-9c62-81d82597d895}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="System.ValueTuple">
-      <Private>True</Private>
-    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FParsec-Big-Data-Edition" Version="1.1.1" />
+    <PackageReference Include="FSharp.Core" Version="6.0.5" />
+    <PackageReference Include="NLog" Version="4.4.12" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
