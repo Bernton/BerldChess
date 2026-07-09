@@ -123,54 +123,6 @@ namespace BerldChess.Model
                 pointer[2] == color.R;
         }
 
-        public static GameCreationData GetCurrentState()
-        {
-            _lastBoardSnap = GetBoardSnap();
-
-            GameCreationData data = new GameCreationData();
-
-            ChessPiece[][] chessPieces = new ChessPiece[8][];
-
-            BitmapData[] pieceData = new BitmapData[12];
-
-            for (int i = 0; i < pieceData.Length; i++)
-            {
-                pieceData[i] = LockBits(PieceImages[i]);
-            }
-
-            for (int y = 0; y < 8; y++)
-            {
-                chessPieces[y] = new ChessPiece[8];
-
-                for (int x = 0; x < 8; x++)
-                {
-                    int yOffset = (int)(y * FieldSize.Height) + 1;
-                    int xOffset = (int)(x * FieldSize.Width) + 1;
-
-                    for (int pieceI = 0; pieceI < PieceImages.Length; pieceI++)
-                    {
-
-                        for (int aY = 0; aY < FieldSize.Height; aY++)
-                        {
-                            for (int aX = 0; aX < FieldSize.Width; aX++)
-                            {
-
-
-                            }
-                        }
-
-                    }
-                }
-            }
-
-            for (int i = 0; i < pieceData.Length; i++)
-            {
-                PieceImages[i].UnlockBits(pieceData[i]);
-            }
-
-            return data;
-        }
-
         public static Point[] GetChangedSquares(Bitmap boardSnap)
         {
             if (!BoardFound)
@@ -287,7 +239,8 @@ namespace BerldChess.Model
         {
             var pointer = scan0;
             pointer += location.Y * stride + location.X * 3;
-            return pointer[0] * 255 * 255 + pointer[1] * 255 + pointer[2];
+            // Pack the three bytes into a distinct 24-bit key (radix 256, not 255, to avoid collisions).
+            return (pointer[0] << 16) | (pointer[1] << 8) | pointer[2];
         }
 
         public static Bitmap GetBoardSnap()

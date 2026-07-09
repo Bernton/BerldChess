@@ -400,7 +400,16 @@ namespace BerldChess.View
                     engineIndex = (int)onTurn;
                 }
 
-                var engine = _vm.EngineInfos[engineIndex].Engine;
+                var engineInfo = _vm.EngineInfos[engineIndex];
+
+                // The engine can be gone by now (e.g. a late bestmove arriving while the engines
+                // are being torn down on close), or an unconfigured competitive slot.
+                if (engineInfo == null)
+                {
+                    return;
+                }
+
+                var engine = engineInfo.Engine;
                 engine.SetPosition(_vm.Game.GetFen());
 
                 if (_analyzingMode && (_computerPlayer == ChessPlayer.None || _computerPlayer != _vm.Game.WhoseTurn))
@@ -1712,18 +1721,23 @@ namespace BerldChess.View
 
         private void ClearEngines()
         {
+            // Unsubscribe every engine first, then dispose. Disposing blocks on quit/WaitForExit,
+            // and in competitive mode the still-subscribed second engine could otherwise fire a
+            // late bestmove that marshals OnEngineStopped onto the closing form.
+            foreach (var engineInfo in _vm.EngineInfos)
+            {
+                if (engineInfo != null)
+                {
+                    engineInfo.Engine.EvaluationReceived -= OnEvaluationReceived;
+                    engineInfo.Engine.BestMoveFound -= OnBestMoveFound;
+                }
+            }
+
             for (var i = 0; i < _vm.EngineInfos.Length; i++)
             {
                 if (_vm.EngineInfos[i] != null)
                 {
-                    var engine = _vm.EngineInfos[i].Engine;
-
-                    // Stop listening before disposing so a late bestmove/evaluation from the
-                    // engine's reader thread can't marshal onto a closing/disposed form.
-                    engine.EvaluationReceived -= OnEvaluationReceived;
-                    engine.BestMoveFound -= OnBestMoveFound;
-                    engine.Dispose();
-
+                    _vm.EngineInfos[i].Engine.Dispose();
                     _vm.EngineInfos[i] = null;
                 }
             }
@@ -2709,7 +2723,6 @@ namespace BerldChess.View
                 if (_vm.Game.WhoseTurn == ChessPlayer.White)
                 {
                     _playerTimes[0].Start();
-                    _playerTimes[1].Stop();
                     _playerTimes[1].Stop();
                 }
                 else

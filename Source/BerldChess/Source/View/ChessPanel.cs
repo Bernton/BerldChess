@@ -221,6 +221,9 @@ namespace BerldChess.View
             DrawIndicatorArrows(g);
             DrawArrows(g, true);
             DrawMovingIndex(g);
+
+            // Cleared after all size-dependent drawing (DrawSquares still needs it set above).
+            _sizeChanged = false;
         }
 
         private void DrawMovingIndex(Graphics g)
@@ -414,8 +417,6 @@ namespace BerldChess.View
 
                     g.DrawImageUnscaled(_scaledPieceImages[GetPieceIndexFromFenChar(Board[y][x].GetFENLetter())],
                         Round(absX), Round(absY));
-
-                    _sizeChanged = false;
                 }
             }
         }

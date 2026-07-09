@@ -40,6 +40,7 @@ let formatResult(result: GameResult) =
     | GameResult.Black -> "0 - 1"
     | GameResult.Draw  -> "1/2 - 1/2"
     | GameResult.Open  -> "*"
+    | _                -> "*"
 
 type PgnResultTag(name: string, result: GameResult) = 
     inherit PgnTag(name, formatResult(result))
