@@ -124,7 +124,7 @@ namespace BerldChess.View
         private const int ChartShownPlies = 25;
         private const double DefaultSizeFactor = 0.91;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
-        private InfoType[] _columnOrder;
+        private static readonly string[] EvalColumnHeaders = { "MultiPV", "Depth", "Score", "Time", "Nodes", "NPS", "TBHits", "PV" };
         private readonly Random _random = new Random();
         private readonly Color _lastMoveArrowColor = Color.FromArgb(100, 30, 10, 200);
         private readonly Color _darkModeColor = Color.FromArgb(49, 46, 43);
@@ -199,8 +199,8 @@ namespace BerldChess.View
 
                     if (isValidEngine)
                     {
-                        _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine.Query($"position fen {_vm.Game.GetFen()}");
-                        _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine.Query("go infinite");
+                        _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine.SetPosition(_vm.Game.GetFen());
+                        _vm.EngineInfos[(int)_vm.Game.WhoseTurn].Engine.GoInfinite();
                     }
 
                     SetEngineViewElementsVisible(isValidEngine);
@@ -236,19 +236,7 @@ namespace BerldChess.View
 
         private void InitializeEvaluationGrid()
         {
-            _columnOrder = new[]
-            {
-                InfoType.MultiPV,
-                InfoType.Depth,
-                InfoType.Score,
-                InfoType.Time,
-                InfoType.Nodes,
-                InfoType.NPS,
-                InfoType.TBHits,
-                InfoType.PV
-            };
-
-            ResetEvaluationGridColumns(_columnOrder);
+            ResetEvaluationGridColumns();
             ResetEvaluationData(SerializedInfo.Instance.MultiPv);
             ResetEvaluationGridRows(SerializedInfo.Instance.MultiPv);
         }
@@ -294,7 +282,8 @@ namespace BerldChess.View
 
         private void OnBestMoveFound(string move)
         {
-            if (!_movePlayed)
+            // The library reports a null move (terminal position) as null - nothing to play.
+            if (!_movePlayed && move != null)
             {
                 try
                 {
@@ -313,7 +302,24 @@ namespace BerldChess.View
         {
             if (InvokeRequired)
             {
-                Invoke((Action)OnEngineStopped);
+                // A late bestmove can arrive on the engine's reader thread while the form is
+                // closing; don't marshal onto a disposed form.
+                if (IsDisposed || Disposing || !IsHandleCreated)
+                {
+                    return;
+                }
+
+                try
+                {
+                    Invoke((Action)OnEngineStopped);
+                }
+                catch (ObjectDisposedException)
+                {
+                }
+                catch (InvalidOperationException)
+                {
+                }
+
                 return;
             }
 
@@ -394,37 +400,37 @@ namespace BerldChess.View
                     engineIndex = (int)onTurn;
                 }
 
-                _vm.EngineInfos[engineIndex].Engine.Query($"position fen {_vm.Game.GetFen()}");
+                var engine = _vm.EngineInfos[engineIndex].Engine;
+                engine.SetPosition(_vm.Game.GetFen());
 
                 if (_analyzingMode && (_computerPlayer == ChessPlayer.None || _computerPlayer != _vm.Game.WhoseTurn))
                 {
-                    _vm.EngineInfos[engineIndex].Engine.Query("go infinite");
+                    engine.GoInfinite();
                 }
                 else
                 {
-                    switch (SerializedInfo.Instance.Level.SelectedLevelType)
+                    var level = SerializedInfo.Instance.Level;
+
+                    switch (level.SelectedLevelType)
                     {
                         case LevelType.FixedDepth:
-                            _vm.EngineInfos[engineIndex].Engine.Query($"go depth {SerializedInfo.Instance.Level.Plies}");
+                            engine.GoDepth(level.Plies);
                             break;
 
                         case LevelType.TimePerMove:
-                            _vm.EngineInfos[engineIndex].Engine.Query($"go movetime {SerializedInfo.Instance.Level.TimePerMove}");
+                            engine.GoMoveTime(level.TimePerMove);
                             break;
 
                         case LevelType.TotalTime:
-                            var increment = SerializedInfo.Instance.Level.Increment;
-                            _vm.EngineInfos[engineIndex]
-                                .Engine.Query(
-                                    $"go wtime {GetRemainingTime(0)} btime {GetRemainingTime(1)} winc {increment} binc {increment}");
+                            engine.GoTimeControl(GetRemainingTime(0), GetRemainingTime(1), level.Increment, level.Increment);
                             break;
 
                         case LevelType.Infinite:
-                            _vm.EngineInfos[engineIndex].Engine.Query("go infinite");
+                            engine.GoInfinite();
                             break;
 
                         case LevelType.Nodes:
-                            _vm.EngineInfos[engineIndex].Engine.Query($"go nodes {SerializedInfo.Instance.Level.Nodes}");
+                            engine.GoNodes(level.Nodes);
                             break;
                     }
                 }
@@ -888,8 +894,8 @@ namespace BerldChess.View
 
                 SerializedInfo.Instance.MultiPv = multiPv;
                 _menuItemMultiPv.Text = $@"MultiPv [{SerializedInfo.Instance.MultiPv}]";
-                engineInfo.Engine.Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
                 engineInfo.Engine.RequestStop();
+                engineInfo.Engine.SetOption("MultiPV", SerializedInfo.Instance.MultiPv);
                 _chessPanel.Invalidate();
 
                 ResetEvaluationData(multiPv);
@@ -1685,7 +1691,14 @@ namespace BerldChess.View
             {
                 if (_vm.EngineInfos[i] != null)
                 {
-                    _vm.EngineInfos[i].Engine.Dispose();
+                    var engine = _vm.EngineInfos[i].Engine;
+
+                    // Stop listening before disposing so a late bestmove/evaluation from the
+                    // engine's reader thread can't marshal onto a closing/disposed form.
+                    engine.EvaluationReceived -= OnEvaluationReceived;
+                    engine.BestMoveFound -= OnBestMoveFound;
+                    engine.Dispose();
+
                     _vm.EngineInfos[i] = null;
                 }
             }
@@ -1711,32 +1724,20 @@ namespace BerldChess.View
                 return;
             }
 
-            var pawnValue = _evaluations[0][InfoType.Score];
-            var depth = int.Parse(_evaluations[0][InfoType.Depth]);
-
-            ProcessPawnValue(pawnValue, out var centipawn, out var isMate);
+            Evaluation evaluation = _evaluations[0];
+            var depth = evaluation.Depth;
+            var centipawn = evaluation.Score.Value;
+            var isMate = evaluation.Score.IsMate;
 
             _labelDepth.Text = depth.ToString();
 
-            var tbHits = long.Parse(_evaluations[0][InfoType.TBHits]);
+            _labelShowEvaluation.Text = evaluation.TbHits > 0
+                ? @"Score [" + FormatNumber(evaluation.TbHits) + @" TBHits]"
+                : @"Score";
 
-            if (tbHits > 0)
-            {
-                _labelShowEvaluation.Text = @"Score [" + FormatNumber(tbHits) + @" TBHits]";
-            }
-            else
-            {
-                _labelShowEvaluation.Text = @"Score";
-            }
-
-            _labelNodes.Text = FormatNumber(long.Parse(_evaluations[0][InfoType.Nodes]));
-
-            _labelTime.Text = GetFormattedEngineInfo(InfoType.Time, _evaluations[0][InfoType.Time]);
-
-            if (int.TryParse(_evaluations[0][InfoType.NPS], out int nps))
-            {
-                _labelNPS.Text = ToKiloFormat(nps);
-            }
+            _labelNodes.Text = FormatNumber(evaluation.Nodes);
+            _labelTime.Text = FormatSearchTime(evaluation.Time);
+            _labelNPS.Text = ToKiloFormat(evaluation.Nps);
 
             SetExtendedInfoEnabled(true);
 
@@ -1799,14 +1800,9 @@ namespace BerldChess.View
                     continue;
                 }
 
-                for (var iColumn = 0; iColumn < _columnOrder.Length; iColumn++)
+                for (var iColumn = 0; iColumn < EvalColumnHeaders.Length; iColumn++)
                 {
-                    string data = _evaluations[iPv][_columnOrder[iColumn]];
-
-                    if (data != null)
-                    {
-                        _dataGridViewEvaluation.Rows[iPv].Cells[iColumn].Value = GetFormattedEngineInfo(_columnOrder[iColumn], data);
-                    }
+                    _dataGridViewEvaluation.Rows[iPv].Cells[iColumn].Value = GetEvalCell(iColumn, _evaluations[iPv]);
                 }
             }
 
@@ -1840,8 +1836,8 @@ namespace BerldChess.View
                 }
 
                 bool isMainPv = iPv == 0;
-                string pawnValue = _evaluations[iPv][InfoType.Score];
-                ProcessPawnValue(pawnValue, out var value, out var isMate);
+                var value = pvEvaluation.Score.Value;
+                var isMate = pvEvaluation.Score.IsMate;
 
                 if (isMainPv)
                 {
@@ -1857,7 +1853,12 @@ namespace BerldChess.View
                     continue;
                 }
 
-                string move = _evaluations[iPv][InfoType.PV].Substring(0, 4);
+                if (pvEvaluation.PrincipalVariation.Count == 0)
+                {
+                    continue;
+                }
+
+                string move = pvEvaluation.PrincipalVariation[0];
                 Color color = isMainPv ? Color.DarkBlue : GetGreenRedGradient(1 - distanceFromReference);
                 _engineEvalArrows.Add(new MoveArrow(move, 0.9, color));
             }
@@ -2150,9 +2151,10 @@ namespace BerldChess.View
             if (_evaluations != null && _evaluations.Length > 0 && _evaluations[0] != null)
             {
                 double whitePawnEvaluation;
-                var depth = int.Parse(_evaluations[0][InfoType.Depth]);
-
-                ProcessPawnValue(_evaluations[0][InfoType.Score], out var centipawn, out var isMate);
+                var evaluation = _evaluations[0];
+                var depth = evaluation.Depth;
+                var centipawn = evaluation.Score.Value;
+                var isMate = evaluation.Score.IsMate;
 
                 if (isMate)
                 {
@@ -2225,19 +2227,16 @@ namespace BerldChess.View
 
         private void ProcessEvaluation(Evaluation evaluation)
         {
-            var multiPv = evaluation.Types.Contains(InfoType.MultiPV) ? int.Parse(evaluation[InfoType.MultiPV]) : 1;
+            var multiPv = evaluation.MultiPv;
 
             if (multiPv > SerializedInfo.Instance.MultiPv)
             {
                 return;
             }
 
-            for (var i = 0; i < _columnOrder.Length; i++)
+            if (multiPv - 1 >= 0 && multiPv - 1 < _evaluations.Length)
             {
-                if (multiPv - 1 >= 0 && multiPv - 1 < _evaluations.Length)
-                {
-                    _evaluations[multiPv - 1] = evaluation;
-                }
+                _evaluations[multiPv - 1] = evaluation;
             }
         }
 
@@ -2274,30 +2273,6 @@ namespace BerldChess.View
             {
                 _dataGridViewMoves.Rows[rowIndex].Cells[columnIndex].Value =
                     $"{currentValue.Substring(0, currentValue.IndexOf('[') + 1)}{formatEvaluation} D{depth}]";
-            }
-        }
-
-        private static void ProcessPawnValue(string pawnValue, out int centipawn, out bool isMate)
-        {
-            isMate = false;
-
-            if (int.TryParse(pawnValue.Substring(3), out centipawn))
-            {
-                return;
-            }
-
-            if (int.TryParse(pawnValue.Substring(3, pawnValue.IndexOf(' ', 3) - 3), out centipawn))
-            {
-                return;
-            }
-
-            if (int.TryParse(pawnValue.Substring(5, pawnValue.IndexOf(' ', 5) - 5), out centipawn))
-            {
-                isMate = true;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid pawn value format.");
             }
         }
 
@@ -2350,7 +2325,7 @@ namespace BerldChess.View
                     engineInfo.Engine.RequestStop();
                 }
 
-                engineInfo.Engine.Query("ucinewgame");
+                engineInfo.Engine.NewGame();
             }
 
             if (wasFinished)
@@ -2452,21 +2427,20 @@ namespace BerldChess.View
             }
         }
 
-        private void ResetEvaluationGridColumns(InfoType[] infoTypes)
+        private void ResetEvaluationGridColumns()
         {
             _dataGridViewEvaluation.Rows.Clear();
             _dataGridViewEvaluation.Columns.Clear();
 
-            foreach (var infoType in infoTypes)
+            foreach (var header in EvalColumnHeaders)
             {
                 var column = new DataGridViewTextBoxColumn
                 {
-                    AutoSizeMode = infoType == InfoType.PV
+                    AutoSizeMode = header == "PV"
                         ? DataGridViewAutoSizeColumnMode.Fill
                         : DataGridViewAutoSizeColumnMode.NotSet,
-                    HeaderText = infoType.ToString()
+                    HeaderText = header
                 };
-
 
                 _dataGridViewEvaluation.Columns.Add(column);
             }
@@ -2776,7 +2750,7 @@ namespace BerldChess.View
 
                     foreach (var argument in engineSetting.Arguments)
                     {
-                        engine.Query(argument);
+                        engine.SendCommand(argument);
                     }
                 }
             }
@@ -2785,13 +2759,13 @@ namespace BerldChess.View
             {
                 engine.EvaluationReceived += OnEvaluationReceived;
                 engine.BestMoveFound += OnBestMoveFound;
-                engine.Query($"setoption name MultiPv value {SerializedInfo.Instance.MultiPv}");
-                engine.Query("ucinewgame");
+                engine.SetOption("MultiPV", SerializedInfo.Instance.MultiPv);
+                engine.NewGame();
 
                 if (startAnalysis)
                 {
-                    engine.Query($"position fen {_vm.Game.GetFen()}");
-                    engine.Query("go infinite");
+                    engine.SetPosition(_vm.Game.GetFen());
+                    engine.GoInfinite();
                 }
 
                 _vm.EngineInfos[index] = new Source.Model.EngineInfo()
@@ -2917,20 +2891,31 @@ namespace BerldChess.View
             return number.ToString("#");
         }
 
-        private static string GetFormattedEngineInfo(InfoType type, string data)
+        private static string FormatSearchTime(int milliseconds)
         {
-            switch (type)
+            return TimeSpan.FromMilliseconds(milliseconds).ToString(@"m\:ss");
+        }
+
+        private static string FormatScore(Score score)
+        {
+            return score.IsMate ? "mate " + score.Value : "cp " + score.Value;
+        }
+
+        // Columns match EvalColumnHeaders: MultiPV, Depth, Score, Time, Nodes, NPS, TBHits, PV.
+        private static string GetEvalCell(int column, Evaluation evaluation)
+        {
+            switch (column)
             {
-                case InfoType.Time:
-                    return TimeSpan.FromMilliseconds(int.Parse(data)).ToString(@"m\:ss");
-
-                case InfoType.Nodes:
-                case InfoType.NPS:
-                case InfoType.TBHits:
-                    return ToKiloFormat(long.Parse(data));
+                case 0: return evaluation.MultiPv.ToString();
+                case 1: return evaluation.Depth.ToString();
+                case 2: return FormatScore(evaluation.Score);
+                case 3: return FormatSearchTime(evaluation.Time);
+                case 4: return ToKiloFormat(evaluation.Nodes);
+                case 5: return ToKiloFormat(evaluation.Nps);
+                case 6: return ToKiloFormat(evaluation.TbHits);
+                case 7: return string.Join(" ", evaluation.PrincipalVariation);
+                default: return "";
             }
-
-            return data;
         }
 
         private static string GetFormattedDrawReason(DrawReason drawReason)

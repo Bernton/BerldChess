@@ -43,14 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Events\BestMoveFound.cs" />
-    <Compile Include="Evaluation.cs" />
-    <Compile Include="Events\EvaluationReceived.cs" />
-    <Compile Include="InfoType.cs" />
-    <Compile Include="Events\OutputInfoReceived.cs" />
-    <Compile Include="Events\OutputReceived.cs" />
     <Compile Include="Engine.cs" />
-    <Compile Include="OutputType.cs" />
+    <Compile Include="Evaluation.cs" />
+    <Compile Include="Score.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
