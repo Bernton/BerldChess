@@ -1270,6 +1270,15 @@ namespace BerldChess.View
                     }
                 }
             }
+
+            gridPen.Dispose();
+            middleLinePen.Dispose();
+            chartBorderPen.Dispose();
+            labelFont.Dispose();
+            fontBrush.Dispose();
+            chartLightBrush.Dispose();
+            chartDarkBrush.Dispose();
+            selectionBrush.Dispose();
         }
 
         private void OnPanelEvaluationChartMouseClick(object sender, MouseEventArgs e)
