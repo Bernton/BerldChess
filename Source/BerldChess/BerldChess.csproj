@@ -99,9 +99,13 @@
     <Compile Include="Source\Model\EngineList.cs" />
     <Compile Include="Source\Model\EngineMode.cs" />
     <Compile Include="Source\Model\EngineSetting.cs" />
+    <Compile Include="Source\Model\MatchStatistics.cs" />
     <Compile Include="Source\Model\Recognizer.cs" />
     <Compile Include="Source\Model\SerializedInfo.cs" />
     <Compile Include="Source\ViewModel\FormMainViewModel.cs" />
+    <Compile Include="Source\View\CompetitiveScoreboard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Source\View\MoveArrow.cs" />
     <Compile Include="Source\View\MoveArrowDrawInfo.cs" />
     <Compile Include="Source\View\ChessPanel.cs">

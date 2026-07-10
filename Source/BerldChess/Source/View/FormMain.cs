@@ -120,7 +120,10 @@ namespace BerldChess.View
         private volatile bool _analyzingMode = true;
         private volatile bool _movePlayed = true;
         private int _animationTime = 300;
-        private int _draws;
+        private readonly MatchStatistics _matchStats = new MatchStatistics();
+        private CompetitiveScoreboard _scoreboard;
+        private ToolStripMenuItem _menuItemMatchLength;
+        private int? _matchTarget;
         private const int ChartShownPlies = 25;
         private const double DefaultSizeFactor = 0.91;
         private ChessPlayer _computerPlayer = ChessPlayer.None;
@@ -140,7 +143,6 @@ namespace BerldChess.View
         private FormPieceSettings _pieceDialog;
         private FormBoardSetting _boardDialog;
         private FormEngineSettings _engineDialog;
-        private int[] _engineWins = new int[2];
         private string[] _pgnImportNames;
         private readonly string[] _enginePaths = new string[2];
         private volatile Evaluation[] _evaluations;
@@ -156,6 +158,12 @@ namespace BerldChess.View
         private void InitializeEngine()
         {
             ClearEngines();
+
+            if (_scoreboard != null)
+            {
+                _scoreboard.Visible = SerializedInfo.Instance.EngineMode == EngineMode.Competitive;
+                _splitContainerMain.Panel2.PerformLayout();
+            }
 
             switch (SerializedInfo.Instance.EngineMode)
             {
@@ -177,8 +185,8 @@ namespace BerldChess.View
                 case EngineMode.Competitive:
 
                     _switched = false;
-                    _engineWins = new int[2];
-                    _draws = 0;
+                    _matchStats.Reset();
+                    UpdateScoreboard();
 
                     var isValidEngine = SetupEngine(SerializedInfo.Instance.EngineList.SelectedSetting, 0, false);
 
@@ -248,6 +256,18 @@ namespace BerldChess.View
 
             _soundEngine = new SoundEngine();
             _soundEngine.Load();
+
+            _scoreboard = new CompetitiveScoreboard { Dock = DockStyle.Top, Visible = false };
+            _splitContainerMain.Panel2.Controls.Add(_scoreboard);
+            // Docked children lay out in reverse z-order, so the Dock=Fill _panelRight must be laid
+            // out last (front of the z-order). Keep the scoreboard behind it, otherwise the Fill
+            // panel grabs the whole area and the scoreboard overlaps the eval stats.
+            _scoreboard.SendToBack();
+
+            _menuItemMatchLength = new ToolStripMenuItem();
+            _menuItemMatchLength.Click += OnMenuItemMatchLengthClick;
+            UpdateMatchLengthText();
+            _menuItemEngine.DropDownItems.Add(_menuItemMatchLength);
 
             Tag = BackColor;
 
@@ -336,15 +356,12 @@ namespace BerldChess.View
             {
                 if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
                 {
-                    if (!_switched && _vm.Game.WhoseTurn == ChessPlayer.White ||
-                        _switched && _vm.Game.WhoseTurn == ChessPlayer.Black)
-                    {
-                        _engineWins[1]++;
-                    }
-                    else
-                    {
-                        _engineWins[0]++;
-                    }
+                    // The side to move was mated. Attribute the result to engine 1 based on
+                    // the colour it is playing this game (colours swap via _switched).
+                    var engine2Won = !_switched && _vm.Game.WhoseTurn == ChessPlayer.White ||
+                                     _switched && _vm.Game.WhoseTurn == ChessPlayer.Black;
+
+                    _matchStats.AddResult(engine2Won ? MatchOutcome.Loss : MatchOutcome.Win);
                 }
 
                 evaluationText = "Checkmate";
@@ -354,7 +371,7 @@ namespace BerldChess.View
             {
                 if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
                 {
-                    _draws++;
+                    _matchStats.AddResult(MatchOutcome.Draw);
                 }
 
                 evaluationText = "Stalemate";
@@ -364,7 +381,7 @@ namespace BerldChess.View
             {
                 if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
                 {
-                    _draws++;
+                    _matchStats.AddResult(MatchOutcome.Draw);
                 }
 
                 evaluationText = GetFormattedDrawReason(drawReason);
@@ -383,6 +400,14 @@ namespace BerldChess.View
                 _labelEvaluation.ForeColor = _menuItemNew.ForeColor;
 
                 if (SerializedInfo.Instance.EngineMode != EngineMode.Competitive)
+                {
+                    return;
+                }
+
+                UpdateScoreboard();
+
+                // Stop the match once the optional target game count is reached.
+                if (_matchTarget.HasValue && _matchStats.Games >= _matchTarget.Value)
                 {
                     return;
                 }
@@ -1354,47 +1379,43 @@ namespace BerldChess.View
             _labelEvaluation.FitFont(0.9, 0.98);
         }
 
-        private string GetFormattedEngineScore()
+        private void UpdateScoreboard()
         {
-            EngineList engineList = SerializedInfo.Instance.EngineList;
-
-            string playerName = engineList.SelectedSetting.Name;
-            string opponentName = engineList.SelectedOpponentSetting.Name;
-
-            int playerWins = _engineWins[0];
-            int opponentWins = _engineWins[1];
-
-            int draws = _draws;
-            int games = playerWins + opponentWins + draws;
-
-            return
-                $"{playerName}: {playerWins} ({ToFormattedPercentage(playerWins, games)})\n\n" +
-                $"{opponentName}: {opponentWins} ({ToFormattedPercentage(opponentWins, games)})\n\n" +
-                $"Draws: {draws} ({ToFormattedPercentage(draws, games)})";
-        }
-
-        private string ToFormattedPercentage(int value, int divisor)
-        {
-            if (divisor == 0)
+            if (_scoreboard == null)
             {
-                return "0%";
+                return;
             }
 
-            return $"{Math.Round(value / (double)divisor * 100, 1)}%";
+            var engineList = SerializedInfo.Instance.EngineList;
+            string name1 = engineList.SelectedSetting?.Name ?? "Engine 1";
+            string name2 = engineList.SelectedOpponentSetting?.Name ?? "Engine 2";
+
+            _scoreboard.Update(name1, name2, _matchStats, _matchTarget);
+        }
+
+        private void OnMenuItemMatchLengthClick(object sender, EventArgs e)
+        {
+            var input = Interaction.InputBox("Games per match (blank = endless):", "BerldChess - Match Length");
+
+            _matchTarget = int.TryParse(input, out var count) && count > 0 ? count : (int?)null;
+
+            UpdateMatchLengthText();
+
+            if (SerializedInfo.Instance.EngineMode == EngineMode.Competitive)
+            {
+                UpdateScoreboard();
+            }
+        }
+
+        private void UpdateMatchLengthText()
+        {
+            _menuItemMatchLength.Text = _matchTarget.HasValue
+                ? $"Match Length [{_matchTarget.Value}]"
+                : "Match Length [∞]";
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.V)
-            {
-                string formattedEngineWinDrawLoss = GetFormattedEngineScore();
-
-                MessageBox.Show(formattedEngineWinDrawLoss, "BerldChess - Score");
-                e.Handled = true;
-                e.SuppressKeyPress = true;
-                return;
-            }
-
             if (e.KeyCode == Keys.T)
             {
                 var plies = "";

@@ -13,12 +13,13 @@ namespace BerldChess.View
 
         public MoveArrow(string move, double thickness, Color color, bool abovePieces = true, bool hasStartCircle = true)
         {
-            if (move.Length != 4)
+            if (move == null || move.Length < 4)
             {
-                throw new ArgumentException("Move must have length of 4.");
+                throw new ArgumentException("Move must have a length of at least 4.", nameof(move));
             }
 
-            Move = move;
+            // An arrow is defined by its from/to squares; ignore any promotion suffix (e.g. "a7a8q").
+            Move = move.Substring(0, 4);
             ThicknessPercent = thickness;
             Color = color;
             IsAbovePieces = abovePieces;
